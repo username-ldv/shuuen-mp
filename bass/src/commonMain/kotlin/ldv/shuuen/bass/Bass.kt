@@ -1,21 +1,36 @@
 package ldv.shuuen.bass
 
 object Bass {
-  const val BASS_OK: Int = 0
-  const val BASS_ERROR_INIT: Int = 8
-  const val BASS_CONFIG_BUFFER: Int = 0
-  const val BASS_CONFIG_UPDATEPERIOD: Int = 1
-  const val BASS_CONFIG_DEV_BUFFER: Int = 27
-  const val BASS_CONFIG_DEV_PERIOD: Int = 53
-  const val BASS_ATTRIB_BUFFER: Int = 13
-  const val BASS_STREAM_DECODE: Int = 0x200000
-  const val BASS_MIDI_DECAYEND: Int = 0x1000
-  const val BASS_CONFIG_MIDI_VOICES: Int = 0x10401
-  const val MIDI_EVENT_NOTE: Int = 1
-  const val MIDI_EVENT_PROGRAM: Int = 2
-  const val MIDI_EVENT_BANK: Int = 10
-  const val MIDI_EVENT_VOLUME: Int = 12
-  const val MIDI_EVENT_NOTESOFF: Int = 18
+  val BASS_OK: Int
+    get() = BassConstants.BASS_OK
+  val BASS_ERROR_INIT: Int
+    get() = BassConstants.BASS_ERROR_INIT
+  val BASS_CONFIG_BUFFER: Int
+    get() = BassConstants.BASS_CONFIG_BUFFER
+  val BASS_CONFIG_UPDATEPERIOD: Int
+    get() = BassConstants.BASS_CONFIG_UPDATEPERIOD
+  val BASS_CONFIG_DEV_BUFFER: Int
+    get() = BassConstants.BASS_CONFIG_DEV_BUFFER
+  val BASS_CONFIG_DEV_PERIOD: Int
+    get() = BassConstants.BASS_CONFIG_DEV_PERIOD
+  val BASS_ATTRIB_BUFFER: Int
+    get() = BassConstants.BASS_ATTRIB_BUFFER
+  val BASS_STREAM_DECODE: Int
+    get() = BassConstants.BASS_STREAM_DECODE
+  val BASS_MIDI_DECAYEND: Int
+    get() = BassConstants.BASS_MIDI_DECAYEND
+  val BASS_CONFIG_MIDI_VOICES: Int
+    get() = BassConstants.BASS_CONFIG_MIDI_VOICES
+  val MIDI_EVENT_NOTE: Int
+    get() = BassConstants.MIDI_EVENT_NOTE
+  val MIDI_EVENT_PROGRAM: Int
+    get() = BassConstants.MIDI_EVENT_PROGRAM
+  val MIDI_EVENT_BANK: Int
+    get() = BassConstants.MIDI_EVENT_BANK
+  val MIDI_EVENT_VOLUME: Int
+    get() = BassConstants.MIDI_EVENT_VOLUME
+  val MIDI_EVENT_NOTESOFF: Int
+    get() = BassConstants.MIDI_EVENT_NOTESOFF
 
   fun load() = BassPlatform.load()
 
