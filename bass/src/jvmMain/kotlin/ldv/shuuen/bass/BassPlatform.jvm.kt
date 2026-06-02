@@ -2,6 +2,7 @@ package ldv.shuuen.bass
 
 import com.sun.jna.Function
 import com.sun.jna.Library
+import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
@@ -24,9 +25,17 @@ internal actual object BassPlatform {
     actual fun init(device: Int, frequency: Int, flags: Int): Boolean =
         libraries.bass.BASS_Init(device, frequency, flags, null, null)
 
+    actual fun setConfig(option: Int, value: Int): Boolean =
+        libraries.bass.BASS_SetConfig(option, value)
+
     actual fun free(): Boolean = libraries.bass.BASS_Free()
 
+    actual fun freePlugins(handle: Int): Boolean = libraries.bass.BASS_PluginFree(handle)
+
     actual fun errorCode(): Int = libraries.bass.BASS_ErrorGetCode()
+
+    actual fun createLiveMidiStream(channels: Int, flags: Int, frequency: Int): Int =
+        libraries.midi.BASS_MIDI_StreamCreate(channels, flags, frequency)
 
     actual fun createMidiStream(filePath: String, flags: Int, frequency: Int): Int =
         libraries.midi.BASS_MIDI_StreamCreateFile(0, filePath, 0, 0, flags, frequency)
@@ -40,17 +49,38 @@ internal actual object BassPlatform {
         preset: Int,
         bank: Int,
     ): Boolean {
-        val font = BassMidiFont().apply {
-            this.font = soundFontHandle
-            this.preset = preset
-            this.bank = bank
-            write()
+        val font = Memory(12).apply {
+            setInt(0, soundFontHandle)
+            setInt(4, preset)
+            setInt(8, bank)
         }
-        return libraries.midi.BASS_MIDI_StreamSetFonts(streamHandle, font.pointer, 1)
+        return libraries.midi.BASS_MIDI_StreamSetFonts(streamHandle, font, 1)
     }
 
     actual fun play(channelHandle: Int, restart: Boolean): Boolean =
         libraries.bass.BASS_ChannelPlay(channelHandle, restart)
+
+    actual fun start(channelHandle: Int): Boolean =
+        libraries.bass.BASS_ChannelStart(channelHandle)
+
+    actual fun setChannelAttribute(channelHandle: Int, attribute: Int, value: Float): Boolean =
+        libraries.bass.BASS_ChannelSetAttribute(channelHandle, attribute, value)
+
+    actual fun streamEvent(streamHandle: Int, channel: Int, event: Int, parameter: Int): Boolean =
+        libraries.midi.BASS_MIDI_StreamEvent(streamHandle, channel, event, parameter)
+
+    actual fun getSoundFontPresets(soundFontHandle: Int): List<Int> {
+        val info = BassMidiFontInfo()
+        if (!libraries.midi.BASS_MIDI_FontGetInfo(soundFontHandle, info)) return emptyList()
+        info.read()
+
+        val packedPresets = IntArray(info.presets)
+        if (!libraries.midi.BASS_MIDI_FontGetPresets(soundFontHandle, packedPresets)) return emptyList()
+        return packedPresets.toList()
+    }
+
+    actual fun getSoundFontPresetName(soundFontHandle: Int, preset: Int, bank: Int): String? =
+        libraries.midi.BASS_MIDI_FontGetPreset(soundFontHandle, preset, bank)
 
     actual fun freeStream(streamHandle: Int): Boolean =
         libraries.bass.BASS_StreamFree(streamHandle)
@@ -88,14 +118,19 @@ private data class NativeLibraries(
 private interface BassNative : Library {
     fun BASS_GetVersion(): Int
     fun BASS_ErrorGetCode(): Int
+    fun BASS_SetConfig(option: Int, value: Int): Boolean
     fun BASS_Init(device: Int, frequency: Int, flags: Int, win: Pointer?, dsguid: Pointer?): Boolean
     fun BASS_Free(): Boolean
+    fun BASS_PluginFree(handle: Int): Boolean
     fun BASS_ChannelPlay(handle: Int, restart: Boolean): Boolean
+    fun BASS_ChannelStart(handle: Int): Boolean
+    fun BASS_ChannelSetAttribute(handle: Int, attrib: Int, value: Float): Boolean
     fun BASS_StreamFree(handle: Int): Boolean
 }
 
 private interface BassMidiNative : Library {
     fun BASS_MIDI_GetVersion(): Int
+    fun BASS_MIDI_StreamCreate(channels: Int, flags: Int, frequency: Int): Int
     fun BASS_MIDI_StreamCreateFile(
         filetype: Int,
         file: String,
@@ -108,19 +143,36 @@ private interface BassMidiNative : Library {
     fun BASS_MIDI_FontInit(file: String, flags: Int): Int
     fun BASS_MIDI_FontFree(handle: Int): Boolean
     fun BASS_MIDI_StreamSetFonts(handle: Int, fonts: Pointer, count: Int): Boolean
+    fun BASS_MIDI_StreamEvent(handle: Int, chan: Int, event: Int, param: Int): Boolean
+    fun BASS_MIDI_FontGetInfo(handle: Int, info: BassMidiFontInfo): Boolean
+    fun BASS_MIDI_FontGetPresets(handle: Int, presets: IntArray): Boolean
+    fun BASS_MIDI_FontGetPreset(handle: Int, preset: Int, bank: Int): String?
 }
 
-private class BassMidiFont : Structure() {
+class BassMidiFontInfo : Structure() {
     @JvmField
-    var font: Int = 0
+    var name: Pointer? = null
 
     @JvmField
-    var preset: Int = -1
+    var copyright: Pointer? = null
 
     @JvmField
-    var bank: Int = 0
+    var comment: Pointer? = null
 
-    override fun getFieldOrder(): List<String> = listOf("font", "preset", "bank")
+    @JvmField
+    var presets: Int = 0
+
+    @JvmField
+    var samsize: Int = 0
+
+    @JvmField
+    var samload: Int = 0
+
+    @JvmField
+    var samtype: Int = 0
+
+    override fun getFieldOrder(): List<String> =
+        listOf("name", "copyright", "comment", "presets", "samsize", "samload", "samtype")
 }
 
 private fun extractLibrary(resourcePath: String): Path {
