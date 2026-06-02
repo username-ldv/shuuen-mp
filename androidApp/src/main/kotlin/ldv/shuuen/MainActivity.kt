@@ -9,19 +9,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import ldv.shuuen.di.initShuuenKoin
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
-        initShuuenKoin(androidPlatformModules(this))
+  override fun onCreate(savedInstanceState: Bundle?) {
+    enableEdgeToEdge()
+    super.onCreate(savedInstanceState)
+    initShuuenKoin(androidPlatformModules(this))
 
-        setContent {
-            App()
-        }
+    setContent {
+      App()
     }
+  }
 }
 
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App()
+  App()
 }

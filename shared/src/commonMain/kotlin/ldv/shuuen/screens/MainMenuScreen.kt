@@ -20,46 +20,46 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun MainMenuScreen(
-    onOpenSingles: () -> Unit,
-    onOpenSettings: () -> Unit,
+  onOpenSingles: () -> Unit,
+  onOpenSettings: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(24.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center,
+  ) {
+    Text(
+      text = "Shuuen",
+      style = MaterialTheme.typography.displayLarge,
+      textAlign = TextAlign.Center,
+    )
+    Text(
+      text = "The last ear trainer app you need.",
+      style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      textAlign = TextAlign.Center,
+    )
+
+    Spacer(Modifier.height(32.dp))
+
+    Button(
+      onClick = onOpenSingles,
+      modifier = Modifier
+        .fillMaxWidth()
+        .widthIn(max = 420.dp),
     ) {
-        Text(
-            text = "Shuuen",
-            style = MaterialTheme.typography.displayLarge,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = "The last ear trainer app you need.",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-
-        Spacer(Modifier.height(32.dp))
-
-        Button(
-            onClick = onOpenSingles,
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 420.dp),
-        ) {
-            Text("Singles")
-        }
-
-        OutlinedButton(
-            onClick = onOpenSettings,
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 420.dp),
-        ) {
-            Text("Settings")
-        }
+      Text("Singles")
     }
+
+    OutlinedButton(
+      onClick = onOpenSettings,
+      modifier = Modifier
+        .fillMaxWidth()
+        .widthIn(max = 420.dp),
+    ) {
+      Text("Settings")
+    }
+  }
 }

@@ -5,12 +5,12 @@ import androidx.compose.ui.window.application
 import ldv.shuuen.di.initShuuenKoin
 
 fun main() = application {
-    initShuuenKoin(desktopPlatformModules())
+  initShuuenKoin(desktopPlatformModules())
 
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "Shuuen",
-    ) {
-        App()
-    }
+  Window(
+    onCloseRequest = ::exitApplication,
+    title = "Shuuen",
+  ) {
+    App()
+  }
 }

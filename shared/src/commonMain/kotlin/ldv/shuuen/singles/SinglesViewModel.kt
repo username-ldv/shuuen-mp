@@ -13,81 +13,81 @@ import ldv.shuuen.music.Note
 import ldv.shuuen.music.Pitch
 
 class SinglesViewModel(
-    private val midiEngine: MidiEngine,
-    initialTonic: Pitch = Pitch.random(),
+  private val midiEngine: MidiEngine,
+  initialTonic: Pitch = Pitch.random(),
 ) : ViewModel() {
-    private val mutableState = MutableStateFlow(SinglesState.initial(initialTonic))
-    val state: StateFlow<SinglesState> = mutableState
+  private val mutableState = MutableStateFlow(SinglesState.initial(initialTonic))
+  val state: StateFlow<SinglesState> = mutableState
 
-    private val droneOctave = 2
+  private val droneOctave = 2
 
-    init {
-        viewModelScope.launch {
-            when (val status = midiEngine.initialize()) {
-                MidiEngineStatus.Ready -> {
-                    mutableState.update {
-                        it.copy(audioReady = true, initializingAudio = false, errorMessage = null)
-                    }
-                }
-
-                is MidiEngineStatus.Failed -> {
-                    mutableState.update {
-                        it.copy(audioReady = false, initializingAudio = false, errorMessage = status.message)
-                    }
-                }
-            }
+  init {
+    viewModelScope.launch {
+      when (val status = midiEngine.initialize()) {
+        MidiEngineStatus.Ready -> {
+          mutableState.update {
+            it.copy(audioReady = true, initializingAudio = false, errorMessage = null)
+          }
         }
-    }
 
-    fun onAction(action: SinglesAction) {
-        when (action) {
-            SinglesAction.DismissError -> mutableState.update { it.copy(errorMessage = null) }
-            is SinglesAction.PressPitch -> pressPitch(action.pitchIndex)
-            is SinglesAction.ReleasePitch -> releasePitch(action.pitchIndex)
-            SinglesAction.StopAll -> stopAll()
-            is SinglesAction.ToggleDrone -> toggleDrone(action.fifthsIndex)
+        is MidiEngineStatus.Failed -> {
+          mutableState.update {
+            it.copy(audioReady = false, initializingAudio = false, errorMessage = status.message)
+          }
         }
+      }
     }
+  }
 
-    private fun pressPitch(pitchIndex: Int) {
-        val current = mutableState.value
-        if (!current.audioReady || pitchIndex !in current.enabledKeyboardKeys.indices) return
-        if (!current.enabledKeyboardKeys[pitchIndex]) return
-
-        midiEngine.playNote(Note(Pitch.fromOrdinal(pitchIndex)), MidiChannel.Notes)
-        mutableState.update { it.copy(activeKeyboardKeys = it.activeKeyboardKeys + pitchIndex) }
+  fun onAction(action: SinglesAction) {
+    when (action) {
+      SinglesAction.DismissError -> mutableState.update { it.copy(errorMessage = null) }
+      is SinglesAction.PressPitch -> pressPitch(action.pitchIndex)
+      is SinglesAction.ReleasePitch -> releasePitch(action.pitchIndex)
+      SinglesAction.StopAll -> stopAll()
+      is SinglesAction.ToggleDrone -> toggleDrone(action.fifthsIndex)
     }
+  }
 
-    private fun releasePitch(pitchIndex: Int) {
-        val current = mutableState.value
-        if (pitchIndex !in current.enabledKeyboardKeys.indices) return
+  private fun pressPitch(pitchIndex: Int) {
+    val current = mutableState.value
+    if (!current.audioReady || pitchIndex !in current.enabledKeyboardKeys.indices) return
+    if (!current.enabledKeyboardKeys[pitchIndex]) return
 
-        midiEngine.stopNote(Note(Pitch.fromOrdinal(pitchIndex)), MidiChannel.Notes)
-        mutableState.update { it.copy(activeKeyboardKeys = it.activeKeyboardKeys - pitchIndex) }
+    midiEngine.playNote(Note(Pitch.fromOrdinal(pitchIndex)), MidiChannel.Notes)
+    mutableState.update { it.copy(activeKeyboardKeys = it.activeKeyboardKeys + pitchIndex) }
+  }
+
+  private fun releasePitch(pitchIndex: Int) {
+    val current = mutableState.value
+    if (pitchIndex !in current.enabledKeyboardKeys.indices) return
+
+    midiEngine.stopNote(Note(Pitch.fromOrdinal(pitchIndex)), MidiChannel.Notes)
+    mutableState.update { it.copy(activeKeyboardKeys = it.activeKeyboardKeys - pitchIndex) }
+  }
+
+  private fun toggleDrone(fifthsIndex: Int) {
+    val current = mutableState.value
+    if (!current.audioReady || fifthsIndex !in 0..11) return
+
+    val pitch = current.tonic + fifthsIndex
+    val note = Note(pitch, droneOctave)
+    if (fifthsIndex in current.activeFifthsItems) {
+      midiEngine.stopNote(note, MidiChannel.Drone)
+      mutableState.update { it.copy(activeFifthsItems = it.activeFifthsItems - fifthsIndex) }
+    } else {
+      midiEngine.playNote(note, MidiChannel.Drone)
+      mutableState.update { it.copy(activeFifthsItems = it.activeFifthsItems + fifthsIndex) }
     }
+  }
 
-    private fun toggleDrone(fifthsIndex: Int) {
-        val current = mutableState.value
-        if (!current.audioReady || fifthsIndex !in 0..11) return
+  private fun stopAll() {
+    midiEngine.stopAll()
+    mutableState.update { it.copy(activeKeyboardKeys = emptySet(), activeFifthsItems = emptySet()) }
+  }
 
-        val pitch = current.tonic + fifthsIndex
-        val note = Note(pitch, droneOctave)
-        if (fifthsIndex in current.activeFifthsItems) {
-            midiEngine.stopNote(note, MidiChannel.Drone)
-            mutableState.update { it.copy(activeFifthsItems = it.activeFifthsItems - fifthsIndex) }
-        } else {
-            midiEngine.playNote(note, MidiChannel.Drone)
-            mutableState.update { it.copy(activeFifthsItems = it.activeFifthsItems + fifthsIndex) }
-        }
-    }
-
-    private fun stopAll() {
-        midiEngine.stopAll()
-        mutableState.update { it.copy(activeKeyboardKeys = emptySet(), activeFifthsItems = emptySet()) }
-    }
-
-    override fun onCleared() {
-        stopAll()
-        midiEngine.close()
-    }
+  override fun onCleared() {
+    stopAll()
+    midiEngine.close()
+  }
 }

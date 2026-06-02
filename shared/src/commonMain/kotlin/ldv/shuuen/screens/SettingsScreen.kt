@@ -13,16 +13,16 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SettingsScreen(onNavigateBack: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text("Settings")
-        TextButton(onClick = onNavigateBack) {
-            Text("Back")
-        }
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(24.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center,
+  ) {
+    Text("Settings")
+    TextButton(onClick = onNavigateBack) {
+      Text("Back")
     }
+  }
 }

@@ -7,18 +7,18 @@ import ldv.shuuen.audio.MidiChannel
 import ldv.shuuen.audio.Preset
 
 data class AppSettings(
-    val soundFontPath: String? = null,
-    val presets: ChannelPresets = ChannelPresets(
-        notes = DefaultPreset.Notes.preset,
-        drone = DefaultPreset.Drone.preset,
-        cadence = DefaultPreset.Cadence.preset,
-    ),
+  val soundFontPath: String? = null,
+  val presets: ChannelPresets = ChannelPresets(
+    notes = DefaultPreset.Notes.preset,
+    drone = DefaultPreset.Drone.preset,
+    cadence = DefaultPreset.Cadence.preset,
+  ),
 )
 
 interface SettingsRepository {
-    val settings: Flow<AppSettings>
+  val settings: Flow<AppSettings>
 
-    suspend fun setSoundFontPath(path: String?)
+  suspend fun setSoundFontPath(path: String?)
 
-    suspend fun setPreset(channel: MidiChannel, preset: Preset)
+  suspend fun setPreset(channel: MidiChannel, preset: Preset)
 }

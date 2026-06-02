@@ -14,42 +14,42 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
-import org.koin.dsl.navigation3.navigation
 import org.koin.dsl.module
+import org.koin.dsl.navigation3.navigation
 
 @OptIn(KoinExperimentalAPI::class)
 val commonModule: Module = module {
-    single { AppNavigator() }
-    single<SettingsRepository> { InMemorySettingsRepository() }
-    single<MidiEngine> { BassMidiEngine(get(), get()) }
-    single { SinglesViewModel(get()) }
+  single { AppNavigator() }
+  single<SettingsRepository> { InMemorySettingsRepository() }
+  single<MidiEngine> { BassMidiEngine(get(), get()) }
+  single { SinglesViewModel(get()) }
 
-    navigation<AppRoute.MainMenu> {
-        val navigator = get<AppNavigator>()
-        MainMenuScreen(
-            onOpenSingles = { navigator.navigateTo(AppRoute.Singles) },
-            onOpenSettings = { navigator.navigateTo(AppRoute.Settings) },
-        )
-    }
+  navigation<AppRoute.MainMenu> {
+    val navigator = get<AppNavigator>()
+    MainMenuScreen(
+      onOpenSingles = { navigator.navigateTo(AppRoute.Singles) },
+      onOpenSettings = { navigator.navigateTo(AppRoute.Settings) },
+    )
+  }
 
-    navigation<AppRoute.Singles> {
-        val navigator = get<AppNavigator>()
-        SinglesScreen(
-            viewModel = get(),
-            onNavigateBack = { navigator.navigateBack() },
-        )
-    }
+  navigation<AppRoute.Singles> {
+    val navigator = get<AppNavigator>()
+    SinglesScreen(
+      viewModel = get(),
+      onNavigateBack = { navigator.navigateBack() },
+    )
+  }
 
-    navigation<AppRoute.Settings> {
-        val navigator = get<AppNavigator>()
-        SettingsScreen(onNavigateBack = { navigator.navigateBack() })
-    }
+  navigation<AppRoute.Settings> {
+    val navigator = get<AppNavigator>()
+    SettingsScreen(onNavigateBack = { navigator.navigateBack() })
+  }
 }
 
 fun initShuuenKoin(platformModules: List<Module>) {
-    if (GlobalContext.getOrNull() != null) return
+  if (GlobalContext.getOrNull() != null) return
 
-    startKoin {
-        modules(listOf(commonModule) + platformModules)
-    }
+  startKoin {
+    modules(listOf(commonModule) + platformModules)
+  }
 }

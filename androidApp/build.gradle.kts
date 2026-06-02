@@ -1,51 +1,51 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+  alias(libs.plugins.androidApplication)
+  alias(libs.plugins.composeMultiplatform)
+  alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_11
-    }
+  compilerOptions {
+    jvmTarget = JvmTarget.JVM_11
+  }
 }
 dependencies {
-    implementation(projects.bass)
-    implementation(projects.shared)
+  implementation(projects.bass)
+  implementation(projects.shared)
 
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.koin.android)
-    implementation(libs.koin.core)
+  implementation(libs.androidx.activity.compose)
+  implementation(libs.koin.android)
+  implementation(libs.koin.core)
 
-    implementation(libs.compose.uiToolingPreview)
-    debugImplementation(libs.compose.uiTooling)
+  implementation(libs.compose.uiToolingPreview)
+  debugImplementation(libs.compose.uiTooling)
 }
 
 android {
-    namespace = "ldv.shuuen"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+  namespace = "ldv.shuuen"
+  compileSdk = libs.versions.android.compileSdk.get().toInt()
 
-    defaultConfig {
-        applicationId = "ldv.shuuen"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+  defaultConfig {
+    applicationId = "ldv.shuuen"
+    minSdk = libs.versions.android.minSdk.get().toInt()
+    targetSdk = libs.versions.android.targetSdk.get().toInt()
+    versionCode = 1
+    versionName = "1.0"
+  }
+  packaging {
+    resources {
+      excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
+  }
+  buildTypes {
+    getByName("release") {
+      isMinifyEnabled = false
     }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
+  }
+  compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+  }
 }
