@@ -39,6 +39,9 @@ android {
       excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
   }
+  androidResources {
+    noCompress += "sf2"
+  }
   buildTypes {
     getByName("release") {
       isMinifyEnabled = false

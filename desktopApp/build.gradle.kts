@@ -22,6 +22,7 @@ compose.desktop {
     mainClass = "ldv.shuuen.MainKt"
 
     nativeDistributions {
+      appResourcesRootDir.set(project.layout.projectDirectory.dir("src/main/appResources"))
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
       packageName = "ldv.shuuen"
       packageVersion = "1.0.0"

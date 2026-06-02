@@ -1,11 +1,11 @@
 package ldv.shuuen
 
 import ldv.shuuen.audio.SoundFontProvider
+import ldv.shuuen.bass.Bass
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.io.path.exists
-import kotlin.io.path.outputStream
 
 fun desktopPlatformModules(): List<Module> =
   listOf(
@@ -15,19 +15,25 @@ fun desktopPlatformModules(): List<Module> =
   )
 
 private class DesktopSoundFontProvider : SoundFontProvider {
-  override suspend fun defaultSoundFontPath(): String {
-    val target = Files.createTempDirectory("shuuen-soundfont").resolve("GeneralUser-GS.sf2")
-    if (target.exists()) return target.toAbsolutePath().toString()
+  override suspend fun loadSoundFont(location: String): Int =
+    Bass.loadSoundFont(location)
 
-    val stream = DesktopSoundFontProvider::class.java
-      .getResourceAsStream("/soundfonts/GeneralUser-GS.sf2")
-      ?: error("Default soundfont resource was not found.")
+  override suspend fun loadDefaultSoundFont(): Int {
+    val path = externalDefaultSoundFontPath()
+      ?: error("Default soundfont file was not found.")
+    return Bass.loadSoundFont(path.toString())
+  }
 
-    stream.use { input ->
-      target.outputStream().use { output ->
-        input.copyTo(output)
-      }
-    }
-    return target.toAbsolutePath().toString()
+  private fun externalDefaultSoundFontPath(): Path? {
+    val resourceDir = System.getProperty("compose.application.resources.dir")
+    return listOfNotNull(
+      resourceDir?.let { Path.of(it, "soundfonts", DEFAULT_SOUNDFONT_FILE) },
+      Path.of("desktopApp", "src", "main", "appResources", "common", "soundfonts", DEFAULT_SOUNDFONT_FILE),
+      Path.of("src", "main", "appResources", "common", "soundfonts", DEFAULT_SOUNDFONT_FILE),
+    ).firstOrNull { it.exists() }
+  }
+
+  private companion object {
+    const val DEFAULT_SOUNDFONT_FILE = "GeneralUser-GS.sf2"
   }
 }

@@ -33,8 +33,8 @@ class BassMidiEngine(
       Bass.start(midiStreamHandle)
 
       val settings = settingsRepository.settings.first()
-      val soundFontPath = settings.soundFontPath ?: soundFontProvider.defaultSoundFontPath()
-      soundFontHandle = Bass.loadSoundFont(soundFontPath)
+      soundFontHandle = settings.soundFontPath?.let { soundFontProvider.loadSoundFont(it) }
+        ?: soundFontProvider.loadDefaultSoundFont()
       require(soundFontHandle != 0) { "Unable to load soundfont: ${Bass.errorCode()}." }
       require(Bass.setStreamSoundFont(midiStreamHandle, soundFontHandle)) {
         "Unable to attach soundfont to stream: ${Bass.errorCode()}."
@@ -120,7 +120,7 @@ class BassMidiEngine(
       midiStreamHandle = 0
     }
     if (soundFontHandle != 0) {
-      Bass.freeSoundFont(soundFontHandle)
+      soundFontProvider.freeSoundFont(soundFontHandle)
       soundFontHandle = 0
     }
     Bass.freePlugins()

@@ -1,10 +1,15 @@
 package ldv.shuuen.audio
 
+import ldv.shuuen.bass.Bass
 import ldv.shuuen.music.Chord
 import ldv.shuuen.music.Note
 
 interface SoundFontProvider {
-  suspend fun defaultSoundFontPath(): String
+  suspend fun loadSoundFont(location: String): Int
+  suspend fun loadDefaultSoundFont(): Int
+
+  fun freeSoundFont(handle: Int): Boolean =
+    Bass.freeSoundFont(handle)
 }
 
 sealed interface MidiEngineStatus {
