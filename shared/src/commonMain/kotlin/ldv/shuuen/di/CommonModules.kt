@@ -8,8 +8,8 @@ import ldv.shuuen.screens.MainMenuScreen
 import ldv.shuuen.screens.SettingsScreen
 import ldv.shuuen.settings.InMemorySettingsRepository
 import ldv.shuuen.settings.SettingsRepository
-import ldv.shuuen.singles.SinglesScreen
-import ldv.shuuen.singles.SinglesViewModel
+import ldv.shuuen.free_play.FreePlayScreen
+import ldv.shuuen.free_play.FreePlayViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -22,19 +22,19 @@ val commonModule: Module = module {
   single { AppNavigator() }
   single<SettingsRepository> { InMemorySettingsRepository() }
   single<MidiEngine> { BassMidiEngine(get(), get()) }
-  single { SinglesViewModel(get()) }
+  single { FreePlayViewModel(get()) }
 
   navigation<AppRoute.MainMenu> {
     val navigator = get<AppNavigator>()
     MainMenuScreen(
-      onOpenSingles = { navigator.navigateTo(AppRoute.Singles) },
+      onOpenFreePlay = { navigator.navigateTo(AppRoute.FreePlay) },
       onOpenSettings = { navigator.navigateTo(AppRoute.Settings) },
     )
   }
 
-  navigation<AppRoute.Singles> {
+  navigation<AppRoute.FreePlay> {
     val navigator = get<AppNavigator>()
-    SinglesScreen(
+    FreePlayScreen(
       viewModel = get(),
       onNavigateBack = { navigator.navigateBack() },
     )

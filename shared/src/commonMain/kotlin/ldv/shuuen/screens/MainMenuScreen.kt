@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun MainMenuScreen(
-  onOpenSingles: () -> Unit,
+  onOpenFreePlay: () -> Unit,
   onOpenSettings: () -> Unit,
 ) {
   Column(
@@ -45,12 +45,12 @@ fun MainMenuScreen(
     Spacer(Modifier.height(32.dp))
 
     Button(
-      onClick = onOpenSingles,
+      onClick = onOpenFreePlay,
       modifier = Modifier
         .fillMaxWidth()
         .widthIn(max = 420.dp),
     ) {
-      Text("Singles")
+      Text("Free play")
     }
 
     OutlinedButton(

@@ -13,7 +13,7 @@ sealed interface AppRoute : NavKey {
   data object MainMenu : AppRoute
 
   @Serializable
-  data object Singles : AppRoute
+  data object FreePlay : AppRoute
 
   @Serializable
   data object Settings : AppRoute

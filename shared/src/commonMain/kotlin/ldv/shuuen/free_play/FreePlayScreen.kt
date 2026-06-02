@@ -1,4 +1,4 @@
-package ldv.shuuen.singles
+package ldv.shuuen.free_play
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,15 +27,15 @@ import ldv.shuuen.ui.music.PianoKeyboard
 import ldv.shuuen.ui.music.PianoKeyboardDefaults
 
 @Composable
-fun SinglesScreen(
-  viewModel: SinglesViewModel,
+fun FreePlayScreen(
+  viewModel: FreePlayViewModel,
   onNavigateBack: () -> Unit,
 ) {
   val state by viewModel.state.collectAsState()
 
   DisposableEffect(viewModel) {
     onDispose {
-      viewModel.onAction(SinglesAction.StopAll)
+      viewModel.onAction(FreePlayAction.StopAll)
     }
   }
 
@@ -92,12 +92,12 @@ fun SinglesScreen(
               .aspectRatio(1f),
             itemNames = circleLabels(state),
             onItemPressedChange = { index, pressed ->
-              if (pressed) viewModel.onAction(SinglesAction.ToggleDrone(index))
+              if (pressed) viewModel.onAction(FreePlayAction.ToggleDrone(index))
             },
             programmaticIndications = state.activeFifthsItems.map {
               FifthsCircleIndication(it, durationMillis = null)
             },
-            onCenterClick = { viewModel.onAction(SinglesAction.StopAll) },
+            onCenterClick = { viewModel.onAction(FreePlayAction.StopAll) },
           )
         }
       }
@@ -118,9 +118,9 @@ fun SinglesScreen(
             onKeyPressedChange = { index, pressed ->
               viewModel.onAction(
                 if (pressed) {
-                  SinglesAction.PressPitch(index)
+                  FreePlayAction.PressPitch(index)
                 } else {
-                  SinglesAction.ReleasePitch(index)
+                  FreePlayAction.ReleasePitch(index)
                 },
               )
             },
@@ -135,8 +135,8 @@ fun SinglesScreen(
   }
 }
 
-private fun circleLabels(state: SinglesState): List<String> =
+private fun circleLabels(state: FreePlayState): List<String> =
   when (state.displayMode) {
-    SinglesDisplayMode.Degrees -> Degree.chromaticOrder.map { it.toString() }
-    SinglesDisplayMode.Notes -> Degree.chromaticOrder.map { it.pitch(state.tonic).toString() }
+    FreePlayDisplayMode.Degrees -> Degree.chromaticOrder.map { it.toString() }
+    FreePlayDisplayMode.Notes -> Degree.chromaticOrder.map { it.pitch(state.tonic).toString() }
   }

@@ -1,4 +1,4 @@
-package ldv.shuuen.singles
+package ldv.shuuen.free_play
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SinglesViewModelTest {
+class FreePlayViewModelTest {
   private val dispatcher = StandardTestDispatcher()
 
   @BeforeTest
@@ -37,11 +37,11 @@ class SinglesViewModelTest {
   @Test
   fun pressingEnabledKeyEmitsMidiNote() = runTest(dispatcher) {
     val engine = FakeMidiEngine()
-    val viewModel = SinglesViewModel(engine, initialTonic = Pitch.C)
+    val viewModel = FreePlayViewModel(engine, initialTonic = Pitch.C)
     advanceUntilIdle()
 
-    viewModel.onAction(SinglesAction.PressPitch(Pitch.C.ordinal))
-    viewModel.onAction(SinglesAction.ReleasePitch(Pitch.C.ordinal))
+    viewModel.onAction(FreePlayAction.PressPitch(Pitch.C.ordinal))
+    viewModel.onAction(FreePlayAction.ReleasePitch(Pitch.C.ordinal))
 
     assertEquals(listOf(Note(Pitch.C, 4) to MidiChannel.Notes), engine.playedNotes)
     assertEquals(listOf(Note(Pitch.C, 4) to MidiChannel.Notes), engine.stoppedNotes)
@@ -51,11 +51,11 @@ class SinglesViewModelTest {
   @Test
   fun togglingDroneStartsAndStopsDroneChannel() = runTest(dispatcher) {
     val engine = FakeMidiEngine()
-    val viewModel = SinglesViewModel(engine, initialTonic = Pitch.C)
+    val viewModel = FreePlayViewModel(engine, initialTonic = Pitch.C)
     advanceUntilIdle()
 
-    viewModel.onAction(SinglesAction.ToggleDrone(7))
-    viewModel.onAction(SinglesAction.ToggleDrone(7))
+    viewModel.onAction(FreePlayAction.ToggleDrone(7))
+    viewModel.onAction(FreePlayAction.ToggleDrone(7))
 
     assertEquals(listOf(Note(Pitch.G, 2) to MidiChannel.Drone), engine.playedNotes)
     assertEquals(listOf(Note(Pitch.G, 2) to MidiChannel.Drone), engine.stoppedNotes)

@@ -1,27 +1,27 @@
-package ldv.shuuen.singles
+package ldv.shuuen.free_play
 
 import ldv.shuuen.music.Pitch
 import ldv.shuuen.music.Scale
 
-enum class SinglesDisplayMode {
+enum class FreePlayDisplayMode {
   Degrees,
   Notes,
 }
 
-data class SinglesState(
+data class FreePlayState(
   val tonic: Pitch = Pitch.C,
   val enabledKeyboardKeys: List<Boolean> = List(12) { true },
   val activeKeyboardKeys: Set<Int> = emptySet(),
   val activeFifthsItems: Set<Int> = emptySet(),
-  val displayMode: SinglesDisplayMode = SinglesDisplayMode.Degrees,
+  val displayMode: FreePlayDisplayMode = FreePlayDisplayMode.Degrees,
   val audioReady: Boolean = false,
   val initializingAudio: Boolean = true,
   val errorMessage: String? = null,
 ) {
   companion object {
-    fun initial(tonic: Pitch = Pitch.C): SinglesState {
+    fun initial(tonic: Pitch = Pitch.C): FreePlayState {
       val enabledPitches = Scale.naturalMinor(tonic).pitches.map { it.ordinal }.toSet()
-      return SinglesState(
+      return FreePlayState(
         tonic = tonic,
         enabledKeyboardKeys = List(12) { it in enabledPitches },
       )
@@ -29,10 +29,10 @@ data class SinglesState(
   }
 }
 
-sealed interface SinglesAction {
-  data class PressPitch(val pitchIndex: Int) : SinglesAction
-  data class ReleasePitch(val pitchIndex: Int) : SinglesAction
-  data class ToggleDrone(val fifthsIndex: Int) : SinglesAction
-  data object StopAll : SinglesAction
-  data object DismissError : SinglesAction
+sealed interface FreePlayAction {
+  data class PressPitch(val pitchIndex: Int) : FreePlayAction
+  data class ReleasePitch(val pitchIndex: Int) : FreePlayAction
+  data class ToggleDrone(val fifthsIndex: Int) : FreePlayAction
+  data object StopAll : FreePlayAction
+  data object DismissError : FreePlayAction
 }

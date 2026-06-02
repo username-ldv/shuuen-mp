@@ -1,4 +1,4 @@
-package ldv.shuuen.singles
+package ldv.shuuen.free_play
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,12 +12,12 @@ import ldv.shuuen.audio.MidiEngineStatus
 import ldv.shuuen.music.Note
 import ldv.shuuen.music.Pitch
 
-class SinglesViewModel(
+class FreePlayViewModel(
   private val midiEngine: MidiEngine,
   initialTonic: Pitch = Pitch.random(),
 ) : ViewModel() {
-  private val mutableState = MutableStateFlow(SinglesState.initial(initialTonic))
-  val state: StateFlow<SinglesState> = mutableState
+  private val mutableState = MutableStateFlow(FreePlayState.initial(initialTonic))
+  val state: StateFlow<FreePlayState> = mutableState
 
   private val droneOctave = 2
 
@@ -39,13 +39,13 @@ class SinglesViewModel(
     }
   }
 
-  fun onAction(action: SinglesAction) {
+  fun onAction(action: FreePlayAction) {
     when (action) {
-      SinglesAction.DismissError -> mutableState.update { it.copy(errorMessage = null) }
-      is SinglesAction.PressPitch -> pressPitch(action.pitchIndex)
-      is SinglesAction.ReleasePitch -> releasePitch(action.pitchIndex)
-      SinglesAction.StopAll -> stopAll()
-      is SinglesAction.ToggleDrone -> toggleDrone(action.fifthsIndex)
+      FreePlayAction.DismissError -> mutableState.update { it.copy(errorMessage = null) }
+      is FreePlayAction.PressPitch -> pressPitch(action.pitchIndex)
+      is FreePlayAction.ReleasePitch -> releasePitch(action.pitchIndex)
+      FreePlayAction.StopAll -> stopAll()
+      is FreePlayAction.ToggleDrone -> toggleDrone(action.fifthsIndex)
     }
   }
 
