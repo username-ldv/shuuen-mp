@@ -42,6 +42,7 @@ import shuuen.shared.generated.resources.shuuen_main_logo
 @Composable
 fun MainMenuScreen(
   onOpenFreePlay: () -> Unit,
+  onOpenMelodies: () -> Unit,
   onOpenSingles: () -> Unit,
   onOpenSettings: () -> Unit,
 ) {
@@ -90,6 +91,7 @@ fun MainMenuScreen(
       subtitle = "Transcribe melodies.",
       icon = Icons.AutoMirrored.Rounded.QueueMusic,
       tint = Color(0xFFA9E8EC),
+      onClick = onOpenMelodies,
     )
     MenuExerciseRow(
       title = "CHORDS",

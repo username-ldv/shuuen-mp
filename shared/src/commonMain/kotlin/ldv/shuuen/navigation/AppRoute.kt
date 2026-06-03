@@ -23,6 +23,12 @@ sealed interface AppRoute : NavKey {
 
   @Serializable
   data object SinglesPlay : AppRoute
+
+  @Serializable
+  data object MelodiesSetup : AppRoute
+
+  @Serializable
+  data object MelodiesPlay : AppRoute
 }
 
 class AppNavigator {

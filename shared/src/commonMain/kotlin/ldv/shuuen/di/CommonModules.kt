@@ -5,6 +5,8 @@ import ldv.shuuen.audio.MidiEngine
 import ldv.shuuen.navigation.AppNavigator
 import ldv.shuuen.navigation.AppRoute
 import ldv.shuuen.screens.MainMenuScreen
+import ldv.shuuen.screens.MelodiesPlayScreen
+import ldv.shuuen.screens.MelodiesSetupScreen
 import ldv.shuuen.screens.SettingsScreen
 import ldv.shuuen.screens.SinglesPlayScreen
 import ldv.shuuen.screens.SinglesSetupScreen
@@ -30,6 +32,7 @@ val commonModule: Module = module {
     val navigator = get<AppNavigator>()
     MainMenuScreen(
       onOpenFreePlay = { navigator.navigateTo(AppRoute.FreePlay) },
+      onOpenMelodies = { navigator.navigateTo(AppRoute.MelodiesSetup) },
       onOpenSingles = { navigator.navigateTo(AppRoute.SinglesSetup) },
       onOpenSettings = { navigator.navigateTo(AppRoute.Settings) },
     )
@@ -59,6 +62,19 @@ val commonModule: Module = module {
   navigation<AppRoute.SinglesPlay> {
     val navigator = get<AppNavigator>()
     SinglesPlayScreen(onNavigateBack = { navigator.navigateBack() })
+  }
+
+  navigation<AppRoute.MelodiesSetup> {
+    val navigator = get<AppNavigator>()
+    MelodiesSetupScreen(
+      onNavigateBack = { navigator.navigateBack() },
+      onStartTraining = { navigator.navigateTo(AppRoute.MelodiesPlay) },
+    )
+  }
+
+  navigation<AppRoute.MelodiesPlay> {
+    val navigator = get<AppNavigator>()
+    MelodiesPlayScreen(onNavigateBack = { navigator.navigateBack() })
   }
 }
 
