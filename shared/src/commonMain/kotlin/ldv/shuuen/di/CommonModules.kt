@@ -6,6 +6,8 @@ import ldv.shuuen.navigation.AppNavigator
 import ldv.shuuen.navigation.AppRoute
 import ldv.shuuen.screens.MainMenuScreen
 import ldv.shuuen.screens.SettingsScreen
+import ldv.shuuen.screens.SinglesPlayScreen
+import ldv.shuuen.screens.SinglesSetupScreen
 import ldv.shuuen.settings.InMemorySettingsRepository
 import ldv.shuuen.settings.SettingsRepository
 import ldv.shuuen.free_play.FreePlayScreen
@@ -28,6 +30,7 @@ val commonModule: Module = module {
     val navigator = get<AppNavigator>()
     MainMenuScreen(
       onOpenFreePlay = { navigator.navigateTo(AppRoute.FreePlay) },
+      onOpenSingles = { navigator.navigateTo(AppRoute.SinglesSetup) },
       onOpenSettings = { navigator.navigateTo(AppRoute.Settings) },
     )
   }
@@ -43,6 +46,19 @@ val commonModule: Module = module {
   navigation<AppRoute.Settings> {
     val navigator = get<AppNavigator>()
     SettingsScreen(onNavigateBack = { navigator.navigateBack() })
+  }
+
+  navigation<AppRoute.SinglesSetup> {
+    val navigator = get<AppNavigator>()
+    SinglesSetupScreen(
+      onNavigateBack = { navigator.navigateBack() },
+      onStartTraining = { navigator.navigateTo(AppRoute.SinglesPlay) },
+    )
+  }
+
+  navigation<AppRoute.SinglesPlay> {
+    val navigator = get<AppNavigator>()
+    SinglesPlayScreen(onNavigateBack = { navigator.navigateBack() })
   }
 }
 

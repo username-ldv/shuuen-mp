@@ -110,7 +110,7 @@ fun PianoKeyboard(
   disabledOverlayColor: Color = Color.Black.copy(alpha = 0.16f),
 
   borderWidth: Dp = 4.dp,
-  separatorWidth: Dp = 3.dp,
+  separatorWidth: Dp = 2.dp,
 
   blackKeyWidthFraction: Float = 0.52f,
   blackKeyHeightFraction: Float = 0.62f,
