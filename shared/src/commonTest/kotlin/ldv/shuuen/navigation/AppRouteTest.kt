@@ -10,10 +10,11 @@ class AppRouteTest {
     val routes: List<AppRoute> = listOf(
       AppRoute.MelodiesSetup,
       AppRoute.MelodiesPlay,
+      AppRoute.Context,
     )
 
     assertEquals(AppRoute.MelodiesSetup, routes.first())
-    assertEquals(AppRoute.MelodiesPlay, routes.last())
+    assertEquals(AppRoute.Context, routes.last())
     assertTrue(routes.toSet().size == routes.size)
   }
 }

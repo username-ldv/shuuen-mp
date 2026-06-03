@@ -1,6 +1,7 @@
 package ldv.shuuen.screens
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ import ldv.shuuen.ui.music.PianoKeyboardDefaults
 @Composable
 fun MelodiesSetupScreen(
   onNavigateBack: () -> Unit,
+  onOpenContext: () -> Unit,
   onStartTraining: () -> Unit,
 ) {
   StaticScreenFrame(
@@ -63,6 +65,7 @@ fun MelodiesSetupScreen(
       title = "2. CONTEXT",
       subtitle = "Open context screen to configure.",
       trailing = true,
+      onClick = onOpenContext,
     )
 
     SourceModeSection()
@@ -424,9 +427,12 @@ private fun MelodySetupRow(
   title: String,
   subtitle: String,
   trailing: Boolean = false,
+  onClick: (() -> Unit)? = null,
   extraContent: @Composable (() -> Unit)? = null,
 ) {
-  GlassPanel {
+  GlassPanel(
+    modifier = Modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+  ) {
     Row(
       modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,

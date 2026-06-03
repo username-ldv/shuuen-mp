@@ -1,5 +1,6 @@
 package ldv.shuuen.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SinglesSetupScreen(
   onNavigateBack: () -> Unit,
+  onOpenContext: () -> Unit,
   onStartTraining: () -> Unit,
 ) {
   StaticScreenFrame(
@@ -109,6 +111,7 @@ fun SinglesSetupScreen(
       title = "2. CONTEXT",
       subtitle = "Open context screen to configure.",
       trailing = true,
+      onClick = onOpenContext,
     )
 
     GlassPanel {
@@ -189,8 +192,11 @@ private fun CompactSetupRow(
   title: String,
   subtitle: String,
   trailing: Boolean = false,
+  onClick: (() -> Unit)? = null,
 ) {
-  GlassPanel {
+  GlassPanel(
+    modifier = Modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+  ) {
     Row(
       modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,
