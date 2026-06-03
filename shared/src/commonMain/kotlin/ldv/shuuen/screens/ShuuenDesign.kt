@@ -93,6 +93,7 @@ fun StaticScreenFrame(
   modifier: Modifier = Modifier,
   contentPadding: Dp = 16.dp,
   maxWidth: Dp = 560.dp,
+  scrollable: Boolean = true,
   topBar: @Composable () -> Unit = {},
   content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -118,10 +119,16 @@ fun StaticScreenFrame(
         modifier = Modifier.fillMaxSize().padding(innerPadding),
         contentAlignment = Alignment.TopCenter,
       ) {
+        val scrollState = rememberScrollState()
+        var columnModifier = Modifier.widthIn(max = maxWidth).fillMaxWidth().fillMaxHeight()
+          .navigationBarsPadding()
+
+        if (scrollable) {
+          columnModifier = columnModifier.verticalScroll(scrollState)
+        }
+
         Column(
-          modifier = Modifier.widthIn(max = maxWidth).fillMaxWidth().fillMaxHeight()
-            .navigationBarsPadding().verticalScroll(rememberScrollState())
-            .padding(horizontal = contentPadding, vertical = 16.dp),
+          modifier = columnModifier.padding(horizontal = contentPadding, vertical = 16.dp),
           verticalArrangement = Arrangement.spacedBy(14.dp),
           content = content,
         )

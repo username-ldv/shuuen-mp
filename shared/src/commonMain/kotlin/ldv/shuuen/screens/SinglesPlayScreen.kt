@@ -5,21 +5,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.rounded.Cancel
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.FastForward
+import androidx.compose.material.icons.rounded.Flag
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Replay
-import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,68 +42,65 @@ fun SinglesPlayScreen(onNavigateBack: () -> Unit) {
   var useCircleInput by rememberSaveable { mutableStateOf(false) }
 
   StaticScreenFrame(
+    scrollable = false,
     topBar = {
       ShuuenTopAppBar(
-        title = "SINGLES",
+        title = "D Major",
         onBack = onNavigateBack,
         trailingIcon = Icons.Rounded.Tune,
+        onTrailingClick = { useCircleInput = !useCircleInput },
       )
     },
   ) {
 
     TrainingStatus()
 
-    PillControl(
-      text = if (useCircleInput) "Circle input" else "Keyboard input",
-      selected = false,
-      onClick = { useCircleInput = !useCircleInput },
-    )
-
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-      ActionButton("Prompt", Icons.Rounded.Replay, ShuuenUi.Mint, Modifier.weight(1f))
-      ActionButton("Note", Icons.Rounded.MusicNote, ShuuenUi.Lavender, Modifier.weight(1f))
-      ActionButton("Skip", Icons.Rounded.SkipNext, ShuuenUi.Muted, Modifier.weight(1f))
-    }
+    Spacer(Modifier.weight(1f))
 
     if (useCircleInput) {
       CircleAnswerArea()
     } else {
       KeyboardAnswerArea()
     }
+
+    Spacer(Modifier.weight(0.34f))
+
+    BottomActionBar()
   }
 }
 
 @Composable
 private fun TrainingStatus() {
-  Row(
+  Column(
     modifier = Modifier.fillMaxWidth(),
-    verticalAlignment = Alignment.Top,
+    verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
-    Column(
-      modifier = Modifier.weight(1f),
-      verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-      Text("D Major", color = ShuuenUi.Text, style = MaterialTheme.typography.titleMedium)
-      Text("1/30", color = ShuuenUi.Muted, style = MaterialTheme.typography.titleSmall)
-    }
-
     Row(
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.Top,
     ) {
-      ScorePill("0", Icons.Outlined.CheckCircle, ShuuenUi.Green)
-      Text("|", style = MaterialTheme.typography.titleMedium)
-      ScorePill("0", Icons.Outlined.Cancel, ShuuenUi.Red)
-    }
-  }
+      Text(
+        "1/30",
+        color = ShuuenUi.Muted,
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.weight(1f),
+      )
 
-  LinearTrainingProgress(
-    progress = 0.045f,
-    color = ShuuenUi.Lavender,
-  )
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        ScorePill("0", Icons.Outlined.CheckCircle, ShuuenUi.Green)
+        Text("|", style = MaterialTheme.typography.titleMedium)
+        ScorePill("0", Icons.Outlined.Cancel, ShuuenUi.Red)
+      }
+    }
+
+    LinearTrainingProgress(
+      progress = 0.045f,
+      color = ShuuenUi.Lavender,
+    )
+  }
 }
 
 @Composable
@@ -124,38 +119,65 @@ private fun ScorePill(
 }
 
 @Composable
-private fun ActionButton(
-  text: String,
-  icon: androidx.compose.ui.graphics.vector.ImageVector,
-  tint: Color,
-  modifier: Modifier = Modifier,
-) {
-  SoftControl(modifier = modifier.height(68.dp)) {
-    Column(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-      Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(24.dp))
-      Text(
-        text = text,
-        color = tint,
-        style = MaterialTheme.typography.labelLarge,
-        textAlign = TextAlign.Center,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-      )
-    }
-  }
-}
-
-@Composable
 private fun KeyboardAnswerArea() {
   PianoKeyboard(
     modifier = Modifier.fillMaxWidth().aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
     keyCount = 12,
     pressedKeyColors = PianoKeyboardDefaults.pressedColors(12, ShuuenUi.Lavender),
   )
+}
+
+@Composable
+private fun BottomActionBar() {
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
+    BottomRepeatButton(Modifier.weight(1.8f))
+    BottomIconButton(
+      icon = Icons.Rounded.MusicNote,
+      tint = ShuuenUi.Lavender,
+      modifier = Modifier.width(80.dp),
+    )
+    Spacer(Modifier.weight(0.34f))
+    BottomIconButton(
+      icon = Icons.Rounded.Flag,
+      tint = ShuuenUi.Muted,
+      modifier = Modifier.width(64.dp),
+    )
+  }
+}
+
+@Composable
+private fun BottomRepeatButton(modifier: Modifier = Modifier) {
+  SoftControl(modifier = modifier.height(68.dp)) {
+    Icon(
+      imageVector = Icons.Rounded.Replay,
+      contentDescription = null,
+      tint = ShuuenUi.Mint,
+      modifier = Modifier.size(26.dp),
+    )
+    Text(
+      text = "Repeat",
+      color = ShuuenUi.Mint,
+      style = MaterialTheme.typography.titleSmall,
+      textAlign = TextAlign.Center,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+  }
+}
+
+@Composable
+private fun BottomIconButton(
+  icon: androidx.compose.ui.graphics.vector.ImageVector,
+  tint: Color,
+  modifier: Modifier = Modifier,
+) {
+  SoftControl(modifier = modifier.height(68.dp)) {
+    Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(26.dp))
+  }
 }
 
 @Composable
