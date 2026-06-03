@@ -127,6 +127,11 @@ fun FifthsCircle(
 
   ringStrokeWidth: Dp = 1.dp,
   outerPadding: Dp = 30.dp,
+  /**
+   * When set, positions the ring so each resting dot's outer edge is this far
+   * from the component edge. Null keeps the legacy ring-center outerPadding.
+   */
+  dotEdgePadding: Dp? = null,
   itemTouchRadius: Dp = 36.dp,
   inactiveDotRadius: Dp = 7.dp,
   activeDotRadius: Dp = 10.dp,
@@ -233,12 +238,19 @@ fun FifthsCircle(
           enabledItems,
           visualOrder,
           outerPadding,
+          dotEdgePadding,
+          inactiveDotRadius,
           itemTouchRadius,
         ) {
           fun itemPositionForSlot(slot: Int): Offset {
             val minSide = min(size.width, size.height).toFloat()
             val center = Offset(size.width / 2f, size.height / 2f)
-            val radius = max(0f, minSide / 2f - outerPadding.toPx())
+            val radius = fifthsCircleRingRadiusPx(
+              minSidePx = minSide,
+              outerPaddingPx = outerPadding.toPx(),
+              dotRadiusPx = inactiveDotRadius.toPx(),
+              dotEdgePaddingPx = dotEdgePadding?.toPx(),
+            )
             return pointOnCircle(center, radius, slot, itemCount)
           }
 
@@ -362,7 +374,12 @@ fun FifthsCircle(
       val center = this.center
 
       val ringStrokePx = ringStrokeWidth.toPx()
-      val ringRadius = max(0f, minSide / 2f - outerPadding.toPx())
+      val ringRadius = fifthsCircleRingRadiusPx(
+        minSidePx = minSide,
+        outerPaddingPx = outerPadding.toPx(),
+        dotRadiusPx = inactiveDotRadius.toPx(),
+        dotEdgePaddingPx = dotEdgePadding?.toPx(),
+      )
       val innerMaskRadius = max(0f, ringRadius - ringStrokePx / 2f)
 
       val inactiveDotRadiusPx = inactiveDotRadius.toPx()
@@ -498,6 +515,21 @@ private fun lerpFloat(
   stop: Float,
   fraction: Float,
 ): Float = start + (stop - start) * fraction.coerceIn(0f, 1f)
+
+internal fun fifthsCircleRingRadiusPx(
+  minSidePx: Float,
+  outerPaddingPx: Float,
+  dotRadiusPx: Float,
+  dotEdgePaddingPx: Float?,
+): Float {
+  val padding = if (dotEdgePaddingPx != null) {
+    dotEdgePaddingPx + dotRadiusPx
+  } else {
+    outerPaddingPx
+  }
+
+  return max(0f, minSidePx / 2f - padding)
+}
 
 private tailrec fun gcd(a: Int, b: Int): Int {
   return if (b == 0) abs(a) else gcd(b, a % b)

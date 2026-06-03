@@ -183,7 +183,9 @@ private fun BottomIconButton(
 @Composable
 private fun CircleAnswerArea() {
   FifthsCircle(
-    modifier = Modifier.fillMaxWidth().border(BorderStroke(1.dp, Color.Red)),
+    modifier = Modifier.fillMaxWidth(),
+//      .border(BorderStroke(1.dp, Color.Red)),
+    dotEdgePadding = 0.dp,
     centerButtonSize = 64.dp,
     centerContent = {
       Icon(
