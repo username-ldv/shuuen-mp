@@ -1,6 +1,7 @@
 package ldv.shuuen.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,7 +42,7 @@ import ldv.shuuen.ui.music.PianoKeyboard
 import ldv.shuuen.ui.music.PianoKeyboardDefaults
 
 @Composable
-fun MelodiesPlayScreen(onNavigateBack: () -> Unit) {
+fun MelodiesPlayScreen(onNavigateBack: () -> Unit, onLevelEnd: () -> Unit) {
   var useCircleInput by rememberSaveable { mutableStateOf(false) }
 
   StaticScreenFrame(
@@ -72,7 +73,7 @@ fun MelodiesPlayScreen(onNavigateBack: () -> Unit) {
 
     Spacer(Modifier.weight(0.34f))
 
-    BottomActionBar()
+    BottomActionBar(on1 = onLevelEnd)
   }
 }
 
@@ -190,13 +191,13 @@ private fun KeyboardAnswerArea() {
 }
 
 @Composable
-private fun BottomActionBar() {
+private fun BottomActionBar(on1: () -> Unit) {
   Row(
     modifier = Modifier.fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(12.dp),
   ) {
-    BottomRepeatButton(Modifier.weight(1.8f))
+    BottomRepeatButton(Modifier.weight(1.8f).clickable { on1() })
     BottomIconButton(
       icon = Icons.Rounded.MusicNote,
       tint = ShuuenUi.Lavender,

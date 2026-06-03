@@ -2,19 +2,22 @@ package ldv.shuuen.di
 
 import ldv.shuuen.audio.BassMidiEngine
 import ldv.shuuen.audio.MidiEngine
+import ldv.shuuen.free_play.FreePlayScreen
+import ldv.shuuen.free_play.FreePlayViewModel
 import ldv.shuuen.navigation.AppNavigator
 import ldv.shuuen.navigation.AppRoute
 import ldv.shuuen.screens.ContextScreen
+import ldv.shuuen.screens.LevelCompleteScreen
+import ldv.shuuen.screens.LevelSelectScreen
 import ldv.shuuen.screens.MainMenuScreen
 import ldv.shuuen.screens.MelodiesPlayScreen
 import ldv.shuuen.screens.MelodiesSetupScreen
 import ldv.shuuen.screens.SettingsScreen
 import ldv.shuuen.screens.SinglesPlayScreen
 import ldv.shuuen.screens.SinglesSetupScreen
+import ldv.shuuen.screens.TrainingFlow
 import ldv.shuuen.settings.InMemorySettingsRepository
 import ldv.shuuen.settings.SettingsRepository
-import ldv.shuuen.free_play.FreePlayScreen
-import ldv.shuuen.free_play.FreePlayViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -33,8 +36,8 @@ val commonModule: Module = module {
     val navigator = get<AppNavigator>()
     MainMenuScreen(
       onOpenFreePlay = { navigator.navigateTo(AppRoute.FreePlay) },
-      onOpenMelodies = { navigator.navigateTo(AppRoute.MelodiesSetup) },
-      onOpenSingles = { navigator.navigateTo(AppRoute.SinglesSetup) },
+      onOpenMelodies = { navigator.navigateTo(AppRoute.MelodiesLevelSelect) },
+      onOpenSingles = { navigator.navigateTo(AppRoute.SinglesLevelSelect) },
       onOpenSettings = { navigator.navigateTo(AppRoute.Settings) },
     )
   }
@@ -57,6 +60,44 @@ val commonModule: Module = module {
     ContextScreen(onNavigateBack = { navigator.navigateBack() })
   }
 
+  navigation<AppRoute.SinglesLevelSelect> {
+    val navigator = get<AppNavigator>()
+    LevelSelectScreen(
+      flow = TrainingFlow.Singles,
+      onNavigateBack = { navigator.navigateBack() },
+      onStartLevel = { navigator.navigateTo(AppRoute.SinglesSetup) },
+    )
+  }
+
+  navigation<AppRoute.MelodiesLevelSelect> {
+    val navigator = get<AppNavigator>()
+    LevelSelectScreen(
+      flow = TrainingFlow.Melodies,
+      onNavigateBack = { navigator.navigateBack() },
+      onStartLevel = { navigator.navigateTo(AppRoute.MelodiesSetup) },
+    )
+  }
+
+  navigation<AppRoute.SinglesLevelComplete> {
+    val navigator = get<AppNavigator>()
+    LevelCompleteScreen(
+      flow = TrainingFlow.Singles,
+      onNavigateBack = { navigator.navigateBack() },
+      onRetryLevel = { navigator.navigateTo(AppRoute.SinglesSetup) },
+      onNextLevel = { navigator.navigateTo(AppRoute.SinglesLevelSelect) },
+    )
+  }
+
+  navigation<AppRoute.MelodiesLevelComplete> {
+    val navigator = get<AppNavigator>()
+    LevelCompleteScreen(
+      flow = TrainingFlow.Melodies,
+      onNavigateBack = { navigator.navigateBack() },
+      onRetryLevel = { navigator.navigateTo(AppRoute.MelodiesSetup) },
+      onNextLevel = { navigator.navigateTo(AppRoute.MelodiesLevelSelect) },
+    )
+  }
+
   navigation<AppRoute.SinglesSetup> {
     val navigator = get<AppNavigator>()
     SinglesSetupScreen(
@@ -68,7 +109,11 @@ val commonModule: Module = module {
 
   navigation<AppRoute.SinglesPlay> {
     val navigator = get<AppNavigator>()
-    SinglesPlayScreen(onNavigateBack = { navigator.navigateBack() })
+    SinglesPlayScreen(onNavigateBack = { navigator.navigateBack() }, onLevelEnd = {
+      navigator.navigateTo(
+        AppRoute.SinglesLevelComplete
+      )
+    })
   }
 
   navigation<AppRoute.MelodiesSetup> {
@@ -82,7 +127,9 @@ val commonModule: Module = module {
 
   navigation<AppRoute.MelodiesPlay> {
     val navigator = get<AppNavigator>()
-    MelodiesPlayScreen(onNavigateBack = { navigator.navigateBack() })
+    MelodiesPlayScreen(onNavigateBack = { navigator.navigateBack() }, onLevelEnd = {
+      navigator.navigateTo(AppRoute.MelodiesLevelComplete)
+    })
   }
 }
 

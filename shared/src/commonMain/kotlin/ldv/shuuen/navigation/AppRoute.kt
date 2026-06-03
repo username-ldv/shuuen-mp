@@ -22,6 +22,18 @@ sealed interface AppRoute : NavKey {
   data object Context : AppRoute
 
   @Serializable
+  data object SinglesLevelSelect : AppRoute
+
+  @Serializable
+  data object MelodiesLevelSelect : AppRoute
+
+  @Serializable
+  data object SinglesLevelComplete : AppRoute
+
+  @Serializable
+  data object MelodiesLevelComplete : AppRoute
+
+  @Serializable
   data object SinglesSetup : AppRoute
 
   @Serializable

@@ -11,10 +11,14 @@ class AppRouteTest {
       AppRoute.MelodiesSetup,
       AppRoute.MelodiesPlay,
       AppRoute.Context,
+      AppRoute.SinglesLevelSelect,
+      AppRoute.MelodiesLevelSelect,
+      AppRoute.SinglesLevelComplete,
+      AppRoute.MelodiesLevelComplete,
     )
 
     assertEquals(AppRoute.MelodiesSetup, routes.first())
-    assertEquals(AppRoute.Context, routes.last())
+    assertEquals(AppRoute.MelodiesLevelComplete, routes.last())
     assertTrue(routes.toSet().size == routes.size)
   }
 }
