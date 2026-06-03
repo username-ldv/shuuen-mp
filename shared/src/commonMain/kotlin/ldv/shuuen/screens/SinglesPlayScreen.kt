@@ -49,6 +49,7 @@ fun SinglesPlayScreen(onNavigateBack: () -> Unit) {
         onBack = onNavigateBack,
         trailingIcon = Icons.Rounded.Tune,
         onTrailingClick = { useCircleInput = !useCircleInput },
+        type = ShuuenTopAppBarType.Simple,
       )
     },
   ) {

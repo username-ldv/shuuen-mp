@@ -43,8 +43,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,7 +60,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ldv.shuuen.ui.music.PianoKeyIndication
 import ldv.shuuen.ui.music.PianoKeyboard
 import ldv.shuuen.ui.music.PianoKeyboardDefaults
 
@@ -91,7 +88,9 @@ object ShuuenUi {
 @Composable
 fun StaticScreenFrame(
   modifier: Modifier = Modifier,
-  contentPadding: Dp = 16.dp,
+  horizontalPadding: Dp = 16.dp,
+  topPadding: Dp = 0.dp,
+  bottomPadding: Dp = 16.dp,
   maxWidth: Dp = 560.dp,
   scrollable: Boolean = true,
   topBar: @Composable () -> Unit = {},
@@ -128,7 +127,12 @@ fun StaticScreenFrame(
         }
 
         Column(
-          modifier = columnModifier.padding(horizontal = contentPadding, vertical = 16.dp),
+          modifier = columnModifier.padding(
+            horizontalPadding,
+            topPadding,
+            horizontalPadding,
+            bottomPadding
+          ),
           verticalArrangement = Arrangement.spacedBy(14.dp),
           content = content,
         )

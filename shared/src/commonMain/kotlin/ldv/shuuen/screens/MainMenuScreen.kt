@@ -50,6 +50,7 @@ fun MainMenuScreen(
       ShuuenTopAppBar(
         trailingIcon = Icons.Rounded.Settings,
         onTrailingClick = onOpenSettings,
+        type = ShuuenTopAppBarType.Simple
       )
     },
   ) {
