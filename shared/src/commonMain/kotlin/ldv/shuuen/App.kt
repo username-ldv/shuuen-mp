@@ -9,9 +9,9 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.ui.NavDisplay
-import ldv.shuuen.navigation.AppNavigator
-import ldv.shuuen.navigation.AppRoute
-import ldv.shuuen.navigation.rememberAppNavBackStack
+import ldv.shuuen.ui.navigation.AppNavigator
+import ldv.shuuen.ui.navigation.AppRoute
+import ldv.shuuen.ui.navigation.rememberAppNavBackStack
 import ldv.shuuen.ui.theme.ShuuenTheme
 import org.koin.compose.navigation3.koinEntryProvider
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -35,16 +35,15 @@ fun App() {
       onBack = { navigator.navigateBack() },
       entryProvider = koinEntryProvider(),
       transitionSpec = {
-        slideInHorizontally(initialOffsetX = { it }) togetherWith
-                slideOutHorizontally(targetOffsetX = { -it })
+        slideInHorizontally(initialOffsetX = { it }) togetherWith slideOutHorizontally(targetOffsetX = { -it })
       },
       popTransitionSpec = {
-        slideInHorizontally(initialOffsetX = { -it }) togetherWith
-                slideOutHorizontally(targetOffsetX = { it })
+        slideInHorizontally(initialOffsetX = { -it }) togetherWith slideOutHorizontally(
+          targetOffsetX = { it })
       },
       predictivePopTransitionSpec = {
-        slideInHorizontally(initialOffsetX = { -it }) togetherWith
-                slideOutHorizontally(targetOffsetX = { it })
+        slideInHorizontally(initialOffsetX = { -it }) togetherWith slideOutHorizontally(
+          targetOffsetX = { it })
       },
     )
   }
