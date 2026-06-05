@@ -28,7 +28,7 @@ import org.koin.plugin.module.dsl.single
 import org.koin.plugin.module.dsl.viewModel
 
 @OptIn(KoinExperimentalAPI::class)
-val commonModule: Module = module {
+val commonModule = module {
   single<AppNavigator>()
 
   single<InMemorySettingsRepository>() bind SettingsRepository::class
