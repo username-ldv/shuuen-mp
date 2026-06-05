@@ -7,7 +7,6 @@ plugins {
 }
 
 dependencies {
-  implementation(projects.bass)
   implementation(projects.shared)
 
   implementation(compose.desktop.currentOs)

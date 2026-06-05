@@ -12,7 +12,6 @@ kotlin {
   }
 }
 dependencies {
-  implementation(projects.bass)
   implementation(projects.shared)
 
   implementation(libs.androidx.activity.compose)
