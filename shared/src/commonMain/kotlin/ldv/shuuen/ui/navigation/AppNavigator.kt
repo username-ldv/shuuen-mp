@@ -1,24 +1,15 @@
 package ldv.shuuen.ui.navigation
 
-import androidx.navigation3.runtime.NavBackStack
+import androidx.compose.runtime.mutableStateListOf
 
 class AppNavigator {
-  private var backStack: NavBackStack<AppRoute>? = null
+  val backStack = mutableStateListOf<AppRoute>(AppRoute.MainMenu)
 
-  fun bind(backStack: NavBackStack<AppRoute>) {
-    this.backStack = backStack
+  fun navigateTo(destination: AppRoute) {
+    backStack.add(destination)
   }
 
-  fun navigateTo(route: AppRoute) {
-    backStack?.add(route)
-  }
-
-  fun navigateBack(): Boolean {
-    val boundBackStack = backStack ?: return false
-    if (boundBackStack.size > 1) {
-      boundBackStack.removeAt(boundBackStack.lastIndex)
-      return true
-    }
-    return false
+  fun navigateBack() {
+    if (backStack.size > 1) backStack.removeLastOrNull()
   }
 }

@@ -18,19 +18,23 @@ import ldv.shuuen.ui.screens.training.common.TrainingFlow
 import ldv.shuuen.data.settings.InMemorySettingsRepository
 import ldv.shuuen.domain.repository.SettingsRepository
 import ldv.shuuen.ui.screens.context.ContextScreen
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
-import org.koin.core.context.GlobalContext
-import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
+import org.koin.plugin.module.dsl.single
+import org.koin.plugin.module.dsl.viewModel
 
 @OptIn(KoinExperimentalAPI::class)
 val commonModule: Module = module {
-  single { AppNavigator() }
-  single<SettingsRepository> { InMemorySettingsRepository() }
-  single<MidiEngine> { BassMidiEngine(get(), get()) }
-  single { FreePlayViewModel(get()) }
+  single<AppNavigator>()
+
+  single<InMemorySettingsRepository>() bind SettingsRepository::class
+  single<BassMidiEngine>() bind MidiEngine::class
+
+  viewModel<FreePlayViewModel>()
 
   navigation<AppRoute.MainMenu> {
     val navigator = get<AppNavigator>()
@@ -45,7 +49,7 @@ val commonModule: Module = module {
   navigation<AppRoute.FreePlay> {
     val navigator = get<AppNavigator>()
     FreePlayScreen(
-      viewModel = get(),
+      viewModel = koinViewModel(),
       onNavigateBack = { navigator.navigateBack() },
     )
   }
@@ -132,11 +136,4 @@ val commonModule: Module = module {
     })
   }
 }
-
-fun initShuuenKoin(platformModules: List<Module>) {
-  if (GlobalContext.getOrNull() != null) return
-
-  startKoin {
-    modules(listOf(commonModule) + platformModules)
-  }
-}
+expect val platformModule: Module
