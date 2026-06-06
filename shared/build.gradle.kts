@@ -57,9 +57,14 @@ kotlin {
       // etc
       implementation(libs.kotlinx.serialization.core)
       implementation(libs.napier)
+      implementation(libs.kstore)
+      implementation(libs.kstore.file)
 
       // to review
       implementation(compose.materialIconsExtended)
+    }
+    jvmMain.dependencies {
+      implementation(libs.appdirs)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)

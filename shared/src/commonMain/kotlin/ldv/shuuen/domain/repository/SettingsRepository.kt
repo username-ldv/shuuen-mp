@@ -1,6 +1,7 @@
 package ldv.shuuen.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
 import ldv.shuuen.domain.audio.midi.ChannelPresets
 import ldv.shuuen.domain.audio.midi.DefaultPreset
 import ldv.shuuen.domain.audio.midi.MidiChannel
@@ -14,6 +15,7 @@ interface SettingsRepository {
   suspend fun setPreset(channel: MidiChannel, preset: Preset)
 }
 
+@Serializable
 data class AppSettings(
   val soundFontPath: String? = null,
   val presets: ChannelPresets = ChannelPresets(

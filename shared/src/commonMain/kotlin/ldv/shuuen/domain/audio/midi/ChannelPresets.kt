@@ -1,5 +1,8 @@
 package ldv.shuuen.domain.audio.midi
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ChannelPresets(
   val notes: Preset = DefaultPreset.Notes.preset,
   val drone: Preset = DefaultPreset.Drone.preset,

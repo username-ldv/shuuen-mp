@@ -1,5 +1,8 @@
 package ldv.shuuen.domain.audio.midi
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Preset(
   val bank: Int,
   val id: Int,
