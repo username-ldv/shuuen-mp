@@ -23,14 +23,14 @@ class Utf8StdoutHandlerTest {
     val output = TrackingOutputStream()
     val handler = Utf8StdoutHandler(output, DesktopLogFormatter(ZoneId.of("UTC")))
     val record =
-      LogRecord(Level.INFO, "[INFO] App - Привет").apply {
+      LogRecord(Level.INFO, "[INFO] App - 啦").apply {
         instant = Instant.parse("2026-06-06T14:38:03.123Z")
       }
 
     handler.publish(record)
 
     assertEquals(
-      "2026-06-06 14:38:03.123 [INFO] App - Привет${System.lineSeparator()}",
+      "2026-06-06 14:38:03.123 [INFO] App - 啦${System.lineSeparator()}",
       output.toString(Charsets.UTF_8),
     )
     assertTrue(output.wasFlushed)
