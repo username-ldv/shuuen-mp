@@ -1,10 +1,6 @@
 package ldv.shuuen.ui.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSerializable
-import androidx.navigation3.runtime.NavBackStack
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.serializer
 
 @Serializable
 sealed interface AppRoute {

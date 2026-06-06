@@ -27,6 +27,8 @@ import org.koin.dsl.navigation3.navigation
 import org.koin.plugin.module.dsl.single
 import org.koin.plugin.module.dsl.viewModel
 
+expect val platformModule: Module
+
 @OptIn(KoinExperimentalAPI::class)
 val commonModule = module {
   single<AppNavigator>()
@@ -136,4 +138,3 @@ val commonModule = module {
     })
   }
 }
-expect val platformModule: Module
