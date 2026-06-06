@@ -56,6 +56,7 @@ kotlin {
 
       // etc
       implementation(libs.kotlinx.serialization.core)
+      implementation(libs.napier)
 
       // to review
       implementation(compose.materialIconsExtended)
