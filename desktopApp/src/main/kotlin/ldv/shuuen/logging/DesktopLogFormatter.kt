@@ -12,5 +12,7 @@ internal class DesktopLogFormatter(
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(zoneId)
 
   override fun format(record: LogRecord): String =
-    "${timestampFormatter.format(record.instant)} ${record.message.orEmpty()}${System.lineSeparator()}"
+    "${timestampFormatter.format(record.instant)} " +
+      record.message.orEmpty().removeSuffix(System.lineSeparator()) +
+      System.lineSeparator()
 }

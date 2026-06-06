@@ -28,18 +28,21 @@ class DesktopLogFormatterTest {
   }
 
   @Test
-  fun `preserves multiline throwable text embedded by Napier`() {
+  fun `preserves multiline throwable text without adding a blank line`() {
+    val lineSeparator = System.lineSeparator()
     val message =
-      "[ERROR] Player - Playback failed\n" +
-        "java.lang.IllegalStateException: decoder stopped\n" +
-        "\tat ldv.shuuen.Player.play(Player.kt:42)"
+      listOf(
+        "[ERROR] Player - Playback failed",
+        "java.lang.IllegalStateException: decoder stopped",
+        "\tat ldv.shuuen.Player.play(Player.kt:42)",
+      ).joinToString(lineSeparator, postfix = lineSeparator)
     val record =
       LogRecord(Level.SEVERE, message).apply {
         instant = Instant.parse("2026-06-06T14:38:03.123Z")
       }
 
     assertEquals(
-      "2026-06-06 14:38:03.123 $message${System.lineSeparator()}",
+      "2026-06-06 14:38:03.123 $message",
       formatter.format(record),
     )
   }
