@@ -15,6 +15,9 @@ dependencies {
   implementation(libs.napier)
 
   implementation(libs.compose.uiToolingPreview)
+
+  testImplementation(libs.kotlin.testJunit)
+  testImplementation(libs.junit)
 }
 
 compose.desktop {
