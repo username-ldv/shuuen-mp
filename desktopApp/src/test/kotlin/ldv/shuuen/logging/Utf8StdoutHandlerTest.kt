@@ -62,6 +62,20 @@ class Utf8StdoutHandlerTest {
   }
 
   @Test
+  fun `publish reports flush failure without throwing`() {
+    val failure = IOException("flush failed")
+    val handler = Utf8StdoutHandler(FlushThrowingOutputStream(failure))
+    val errorManager = RecordingErrorManager()
+    handler.errorManager = errorManager
+
+    handler.publish(LogRecord(Level.INFO, "[INFO] App - message"))
+
+    assertEquals("Unable to flush desktop log output", errorManager.message)
+    assertSame(failure, errorManager.exception)
+    assertEquals(ErrorManager.FLUSH_FAILURE, errorManager.code)
+  }
+
+  @Test
   fun `serializes concurrent publish operations`() {
     val output = BlockingOutputStream()
     val handler = Utf8StdoutHandler(output)
@@ -124,6 +138,14 @@ class Utf8StdoutHandlerTest {
     private val failure: IOException,
   ) : OutputStream() {
     override fun write(value: Int) {
+      throw failure
+    }
+  }
+
+  private class FlushThrowingOutputStream(
+    private val failure: IOException,
+  ) : ByteArrayOutputStream() {
+    override fun flush() {
       throw failure
     }
   }

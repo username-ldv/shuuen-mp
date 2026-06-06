@@ -20,14 +20,16 @@ internal class Utf8StdoutHandler(
 
     try {
       output.write(formatter.format(record).toByteArray(Charsets.UTF_8))
-      output.flush()
     } catch (exception: Exception) {
       reportError(
         "Unable to write desktop log record",
         exception,
         ErrorManager.WRITE_FAILURE,
       )
+      return
     }
+
+    flush()
   }
 
   @Synchronized
