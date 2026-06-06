@@ -14,6 +14,7 @@ internal class Utf8StdoutHandler(
     this.formatter = formatter
   }
 
+  @Synchronized
   override fun publish(record: LogRecord) {
     if (!isLoggable(record)) return
 
@@ -29,6 +30,7 @@ internal class Utf8StdoutHandler(
     }
   }
 
+  @Synchronized
   override fun flush() {
     try {
       output.flush()
@@ -41,6 +43,7 @@ internal class Utf8StdoutHandler(
     }
   }
 
+  @Synchronized
   override fun close() {
     flush()
   }
