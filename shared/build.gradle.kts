@@ -48,6 +48,7 @@ kotlin {
       implementation(libs.koin.compose)
       implementation(libs.koin.compose.viewmodel)
       implementation(libs.koin.compose.navigation3)
+      implementation(libs.koin.annotations)
 
       // navigation
       implementation(libs.androidx.navigation3.ui)

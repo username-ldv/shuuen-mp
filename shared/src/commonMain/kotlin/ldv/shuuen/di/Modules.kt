@@ -1,12 +1,8 @@
 package ldv.shuuen.di
 
-import io.github.xxfast.kstore.KStore
-import io.github.xxfast.kstore.file.storeOf
-import kotlinx.io.files.Path
 import ldv.shuuen.data.audio.BassMidiEngine
 import ldv.shuuen.data.settings.KStoreSettingsRepository
 import ldv.shuuen.domain.audio.engine.MidiEngine
-import ldv.shuuen.domain.repository.AppSettings
 import ldv.shuuen.domain.repository.SettingsRepository
 import ldv.shuuen.ui.navigation.AppNavigator
 import ldv.shuuen.ui.navigation.AppRoute
@@ -25,7 +21,6 @@ import ldv.shuuen.ui.screens.training.single.setup.SinglesSetupScreen
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.module.Module
-import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
@@ -38,12 +33,6 @@ expect val platformModule: Module
 val commonModule = module {
   single<AppNavigator>()
 
-  single<KStore<AppSettings>> {
-    storeOf(
-      file = Path(get<Path>(named("files")), "settings.json"),
-      default = AppSettings()
-    )
-  }
   single<KStoreSettingsRepository>() bind SettingsRepository::class
 
   single<BassMidiEngine>() bind MidiEngine::class

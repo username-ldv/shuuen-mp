@@ -51,6 +51,7 @@ koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 koin-compose-navigation3 = { module = "io.insert-koin:koin-compose-navigation3" }
+koin-annotations = { module = "io.insert-koin:koin-annotations" }
 
 # Core Navigation 3 libraries
 androidx-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
@@ -61,10 +62,10 @@ androidx-material3-adaptive-navigation3 = { group = "org.jetbrains.compose.mater
 # etc
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
-napier = {module = "io.github.aakira:napier", version.ref = "napier"}
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 kstore = { module = "io.github.xxfast:kstore", version.ref = "kstore" }
 kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" }
-appdirs = {module = "net.harawata:appdirs", version.ref = "appdirs"}
+appdirs = { module = "net.harawata:appdirs", version.ref = "appdirs" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
