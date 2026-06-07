@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,24 +30,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ldv.shuuen.ui.common.CounterControl
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
 import ldv.shuuen.ui.common.PillControl
 import ldv.shuuen.ui.common.PrimaryCta
-import ldv.shuuen.ui.common.RangeKeyboardStrip
 import ldv.shuuen.ui.common.SectionTitle
+import ldv.shuuen.ui.common.SegmentedPlusMinus
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.StaticScreenFrame
+import ldv.shuuen.ui.common.music.NoteRow
 
 @Composable
 fun SinglesSetupScreen(
+  viewModel: SinglesSetupViewModel,
   onNavigateBack: () -> Unit,
   onOpenContext: () -> Unit,
   onStartTraining: () -> Unit,
 ) {
+  val screenState by viewModel.screenState.collectAsStateWithLifecycle()
   StaticScreenFrame(
     topBar = {
       ShuuenTopAppBar(
@@ -134,7 +138,11 @@ fun SinglesSetupScreen(
         title = "3. NUMBER OF QUESTIONS",
         subtitle = "Set how many questions to include.",
       )
-      CounterControl("20")
+      SegmentedPlusMinus(
+        value = screenState.questionsNumber,
+        onChange = viewModel::changeQuestionsNumber,
+        minimalNumber = 0
+      )
     }
 
     GlassPanel {
@@ -144,22 +152,12 @@ fun SinglesSetupScreen(
         subtitle = "Select the note range.",
       )
       Text(
-        text = "C3 - C5",
-        color = ShuuenUi.Text,
+        text = "${screenState.range.first} - ${screenState.range.second}",
         style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 3.sp),
         modifier = Modifier.align(Alignment.CenterHorizontally),
       )
-      RangeKeyboardStrip()
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-      ) {
-        listOf("C2", "C3", "C4", "C5", "C6").forEach {
-          Text(
-            it, color = ShuuenUi.Muted, style = MaterialTheme.typography.bodySmall
-          )
-        }
-      }
+      NoteRow(value = screenState.range.first) { viewModel.changeRangeStart(it) }
+      NoteRow(value = screenState.range.second) { viewModel.changeRangeEnd(it) }
     }
 
     PrimaryCta(

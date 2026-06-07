@@ -17,6 +17,7 @@ import ldv.shuuen.ui.screens.training.common.TrainingFlow
 import ldv.shuuen.ui.screens.training.melodies.play.MelodiesPlayScreen
 import ldv.shuuen.ui.screens.training.melodies.setup.MelodiesSetupScreen
 import ldv.shuuen.ui.screens.training.single.play.SinglesPlayScreen
+import ldv.shuuen.ui.screens.training.single.setup.SinglesSetupViewModel
 import ldv.shuuen.ui.screens.training.single.setup.SinglesSetupScreen
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -37,7 +38,6 @@ val commonModule = module {
 
   single<BassMidiEngine>() bind MidiEngine::class
 
-  viewModel<FreePlayViewModel>()
 
   navigation<AppRoute.MainMenu> {
     val navigator = get<AppNavigator>()
@@ -49,6 +49,7 @@ val commonModule = module {
     )
   }
 
+  viewModel<FreePlayViewModel>()
   navigation<AppRoute.FreePlay> {
     val navigator = get<AppNavigator>()
     FreePlayScreen(
@@ -105,12 +106,14 @@ val commonModule = module {
     )
   }
 
+  viewModel<SinglesSetupViewModel>()
   navigation<AppRoute.SinglesSetup> {
     val navigator = get<AppNavigator>()
     SinglesSetupScreen(
       onNavigateBack = { navigator.navigateBack() },
       onOpenContext = { navigator.navigateTo(AppRoute.Context) },
       onStartTraining = { navigator.navigateTo(AppRoute.SinglesPlay) },
+      viewModel = koinViewModel()
     )
   }
 

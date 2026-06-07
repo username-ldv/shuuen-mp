@@ -30,6 +30,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,13 +42,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ldv.shuuen.ui.common.CounterControl
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
 import ldv.shuuen.ui.common.LinearTrainingProgress
 import ldv.shuuen.ui.common.PillControl
 import ldv.shuuen.ui.common.PrimaryCta
 import ldv.shuuen.ui.common.SectionTitle
+import ldv.shuuen.ui.common.SegmentedPlusMinus
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
@@ -210,7 +214,12 @@ private fun QuestionCountSection() {
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      CounterControl("20", Modifier.weight(1f))
+      var questions: String by remember { mutableStateOf("20") }
+      SegmentedPlusMinus(
+        value = questions.toIntOrNull(),
+        onChange = { questions = it.toString() },
+        modifier = Modifier.weight(1f)
+      )
       Text(
         text = "∞",
         color = ShuuenUi.Text,
