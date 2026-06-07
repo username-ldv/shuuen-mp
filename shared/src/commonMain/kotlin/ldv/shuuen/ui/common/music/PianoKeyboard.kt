@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ldv.shuuen.domain.audio.music.Pitch
+import kotlin.math.abs
 
 @Immutable
 data class PianoKeyIndication(
@@ -231,7 +232,9 @@ fun PianoKeyboard(
         val geometry = currentGeometry()
 
         val blackHit =
-          geometry.asSequence().filter { it.isBlack }.firstOrNull { it.rect.contains(position) }
+          geometry.asSequence()
+            .filter { it.isBlack && it.hitRect.contains(position) }
+            .minByOrNull { abs(position.x - it.rect.center.x) }
 
         if (blackHit != null) {
           return if (enabledKeys[blackHit.index]) {
@@ -547,6 +550,7 @@ private data class PianoKeyGeometry(
   val index: Int,
   val isBlack: Boolean,
   val rect: Rect,
+  val hitRect: Rect = rect,
 )
 
 private fun buildPianoKeyGeometry(
@@ -608,6 +612,7 @@ private fun buildPianoKeyGeometry(
 
       val left = centerX - blackKeyWidth / 2f
       val right = centerX + blackKeyWidth / 2f
+      val hitboxHalfWidth = whiteKeyWidth * 0.5f
 
       keys += PianoKeyGeometry(
         index = index,
@@ -616,6 +621,12 @@ private fun buildPianoKeyGeometry(
           left = left.coerceAtLeast(contentLeft),
           top = contentTop,
           right = right.coerceAtMost(contentRight),
+          bottom = contentTop + blackKeyHeight,
+        ),
+        hitRect = Rect(
+          left = (left - hitboxHalfWidth).coerceAtLeast(contentLeft),
+          top = contentTop,
+          right = (right + hitboxHalfWidth).coerceAtMost(contentRight),
           bottom = contentTop + blackKeyHeight,
         ),
       )
