@@ -37,50 +37,50 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ldv.shuuen.ui.common.music.FifthsCircle
-import ldv.shuuen.ui.common.music.PianoKeyboard
-import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
 import ldv.shuuen.ui.common.LinearTrainingProgress
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
+import ldv.shuuen.ui.common.music.FifthsCircle
+import ldv.shuuen.ui.common.music.PianoKeyboard
+import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
 
 @Composable
 fun MelodiesPlayScreen(onNavigateBack: () -> Unit, onLevelEnd: () -> Unit) {
   var useCircleInput by rememberSaveable { mutableStateOf(false) }
 
-    StaticScreenFrame(
-        scrollable = false,
-        topBar = {
-            ShuuenTopAppBar(
-                title = "D Major",
-                onBack = onNavigateBack,
-                trailingIcon = Icons.Rounded.Tune,
-                onTrailingClick = { useCircleInput = !useCircleInput },
-                type = ShuuenTopAppBarType.Simple,
-            )
-        },
-    ) {
+  StaticScreenFrame(
+    scrollable = false,
+    topBar = {
+      ShuuenTopAppBar(
+        title = "D Major",
+        onBack = onNavigateBack,
+        trailingIcon = Icons.Rounded.Tune,
+        onTrailingClick = { useCircleInput = !useCircleInput },
+        type = ShuuenTopAppBarType.Simple,
+      )
+    },
+  ) {
 
-        MelodiesTrainingStatus()
+    MelodiesTrainingStatus()
 
-        Spacer(Modifier.weight(1f))
+    Spacer(Modifier.weight(1f))
 
-        MelodyInputCells(useCircleInput = useCircleInput)
+    MelodyInputCells(useCircleInput = useCircleInput)
 
-        if (useCircleInput) {
-            CircleAnswerArea()
-        } else {
-            Spacer(Modifier.height(14.dp))
-            KeyboardAnswerArea()
-        }
-
-        Spacer(Modifier.weight(0.34f))
-
-        BottomActionBar(on1 = onLevelEnd)
+    if (useCircleInput) {
+      CircleAnswerArea()
+    } else {
+      Spacer(Modifier.height(14.dp))
+      KeyboardAnswerArea()
     }
+
+    Spacer(Modifier.weight(0.34f))
+
+    BottomActionBar(on1 = onLevelEnd)
+  }
 }
 
 @Composable
@@ -110,10 +110,10 @@ private fun MelodiesTrainingStatus() {
       }
     }
 
-      LinearTrainingProgress(
-          progress = 0.045f,
-          color = ShuuenUi.Lavender,
-      )
+    LinearTrainingProgress(
+      progress = 0.045f,
+      color = ShuuenUi.Lavender,
+    )
   }
 }
 
@@ -224,22 +224,22 @@ private fun BottomActionBar(on1: () -> Unit) {
 
 @Composable
 private fun BottomRepeatButton(modifier: Modifier = Modifier) {
-    SoftControl(modifier = modifier.height(68.dp)) {
-        Icon(
-            imageVector = Icons.Rounded.Replay,
-            contentDescription = null,
-            tint = ShuuenUi.Mint,
-            modifier = Modifier.size(26.dp),
-        )
-        Text(
-            text = "Repeat",
-            color = ShuuenUi.Mint,
-            style = MaterialTheme.typography.titleSmall,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
+  SoftControl(modifier = modifier.height(68.dp)) {
+    Icon(
+      imageVector = Icons.Rounded.Replay,
+      contentDescription = null,
+      tint = ShuuenUi.Mint,
+      modifier = Modifier.size(26.dp),
+    )
+    Text(
+      text = "Repeat",
+      color = ShuuenUi.Mint,
+      style = MaterialTheme.typography.titleSmall,
+      textAlign = TextAlign.Center,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+  }
 }
 
 @Composable
@@ -248,9 +248,9 @@ private fun BottomIconButton(
   tint: Color,
   modifier: Modifier = Modifier,
 ) {
-    SoftControl(modifier = modifier.height(68.dp)) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(26.dp))
-    }
+  SoftControl(modifier = modifier.height(68.dp)) {
+    Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(26.dp))
+  }
 }
 
 @Composable

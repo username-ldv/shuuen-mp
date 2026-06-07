@@ -9,12 +9,12 @@ class FifthsCircleGeometryTest {
   fun ringRadiusUsesDotEdgePaddingWhenProvided() {
     assertEquals(
       93f,
-        fifthsCircleRingRadiusPx(
-            minSidePx = 200f,
-            outerPaddingPx = 30f,
-            dotRadiusPx = 7f,
-            dotEdgePaddingPx = 0f,
-        ),
+      fifthsCircleRingRadiusPx(
+        minSidePx = 200f,
+        outerPaddingPx = 30f,
+        dotRadiusPx = 7f,
+        dotEdgePaddingPx = 0f,
+      ),
     )
   }
 
@@ -22,12 +22,12 @@ class FifthsCircleGeometryTest {
   fun ringRadiusFallsBackToOuterPadding() {
     assertEquals(
       70f,
-        fifthsCircleRingRadiusPx(
-            minSidePx = 200f,
-            outerPaddingPx = 30f,
-            dotRadiusPx = 7f,
-            dotEdgePaddingPx = null,
-        ),
+      fifthsCircleRingRadiusPx(
+        minSidePx = 200f,
+        outerPaddingPx = 30f,
+        dotRadiusPx = 7f,
+        dotEdgePaddingPx = null,
+      ),
     )
   }
 }

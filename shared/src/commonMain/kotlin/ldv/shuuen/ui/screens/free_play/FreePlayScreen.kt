@@ -45,79 +45,79 @@ fun FreePlayScreen(
       )
     },
   ) {
-      Text(
-        text = state.tonic.toString(),
-        style = MaterialTheme.typography.headlineLarge,
-        modifier = Modifier.align(Alignment.CenterHorizontally),
-      )
+    Text(
+      text = state.tonic.toString(),
+      style = MaterialTheme.typography.headlineLarge,
+      modifier = Modifier.align(Alignment.CenterHorizontally),
+    )
 
     if (state.initializingAudio) {
-        Text(
-          text = "Preparing audio...",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.align(Alignment.CenterHorizontally),
-        )
+      Text(
+        text = "Preparing audio...",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+      )
     }
 
     state.errorMessage?.let { message ->
-        Text(
-          text = message,
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.error,
-          modifier = Modifier.align(Alignment.CenterHorizontally),
-        )
+      Text(
+        text = message,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.error,
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+      )
     }
 
-      BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val circleWidth = maxWidth.coerceAtMost(460.dp)
-        Box(
-          modifier = Modifier.fillMaxWidth(),
-          contentAlignment = Alignment.Center,
-        ) {
-          FifthsCircle(
-            modifier = Modifier
-              .width(circleWidth)
-              .aspectRatio(1f),
-            itemNames = circleLabels(state),
-            onItemPressedChange = { index, pressed ->
-              if (pressed) viewModel.onAction(FreePlayAction.ToggleDrone(index))
-            },
-            programmaticIndications = state.activeFifthsItems.map {
-              FifthsCircleIndication(it, durationMillis = null)
-            },
-            onCenterClick = { viewModel.onAction(FreePlayAction.StopAll) },
-          )
-        }
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+      val circleWidth = maxWidth.coerceAtMost(460.dp)
+      Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+      ) {
+        FifthsCircle(
+          modifier = Modifier
+            .width(circleWidth)
+            .aspectRatio(1f),
+          itemNames = circleLabels(state),
+          onItemPressedChange = { index, pressed ->
+            if (pressed) viewModel.onAction(FreePlayAction.ToggleDrone(index))
+          },
+          programmaticIndications = state.activeFifthsItems.map {
+            FifthsCircleIndication(it, durationMillis = null)
+          },
+          onCenterClick = { viewModel.onAction(FreePlayAction.StopAll) },
+        )
       }
+    }
 
-      BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val keyboardWidth = maxWidth.coerceAtMost(720.dp)
-        Box(
-          modifier = Modifier.fillMaxWidth(),
-          contentAlignment = Alignment.Center,
-        ) {
-          PianoKeyboard(
-            modifier = Modifier
-              .width(keyboardWidth)
-              .aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
-            enabledKeys = state.enabledKeyboardKeys,
-            onKeyPressedChange = { index, pressed ->
-              viewModel.onAction(
-                if (pressed) {
-                  FreePlayAction.PressPitch(index)
-                } else {
-                  FreePlayAction.ReleasePitch(index)
-                },
-              )
-            },
-            programmaticIndications = state.activeKeyboardKeys.map {
-              PianoKeyIndication(it, durationMillis = null)
-            },
-            pressedKeyColors = PianoKeyboardDefaults.colorfulPressedColors(12, state.tonic),
-          )
-        }
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+      val keyboardWidth = maxWidth.coerceAtMost(720.dp)
+      Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+      ) {
+        PianoKeyboard(
+          modifier = Modifier
+            .width(keyboardWidth)
+            .aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
+          enabledKeys = state.enabledKeyboardKeys,
+          onKeyPressedChange = { index, pressed ->
+            viewModel.onAction(
+              if (pressed) {
+                FreePlayAction.PressPitch(index)
+              } else {
+                FreePlayAction.ReleasePitch(index)
+              },
+            )
+          },
+          programmaticIndications = state.activeKeyboardKeys.map {
+            PianoKeyIndication(it, durationMillis = null)
+          },
+          pressedKeyColors = PianoKeyboardDefaults.colorfulPressedColors(12, state.tonic),
+        )
       }
+    }
   }
 }
 

@@ -311,7 +311,10 @@ private fun SoundCategoryRow(
     val compact = maxWidth < 480.dp
 
     if (compact) {
-      Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+      Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth()
+      ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
           verticalAlignment = Alignment.CenterVertically,
@@ -326,7 +329,10 @@ private fun SoundCategoryRow(
           )
           IconBubble(Icons.Rounded.PlayArrow, tint = ShuuenUi.Mint, size = 38.dp)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
+          modifier = Modifier.fillMaxWidth()
+        ) {
           SoundPickerColumn("SOUNDBANK", soundbank, Modifier.weight(1f))
           SoundPickerColumn("PRESET", preset, Modifier.weight(1f))
         }
@@ -346,8 +352,15 @@ private fun SoundCategoryRow(
         )
         SoundPickerColumn("SOUNDBANK", soundbank, Modifier.weight(1f))
         SoundPickerColumn("PRESET", preset, Modifier.weight(1f))
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-          Text("TEST", color = ShuuenUi.Muted, style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp))
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+          Text(
+            "TEST",
+            color = ShuuenUi.Muted,
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp)
+          )
           IconBubble(Icons.Rounded.PlayArrow, tint = ShuuenUi.Mint, size = 42.dp)
         }
       }
@@ -401,7 +414,12 @@ private fun SettingsRow(
     if (trailing != null) {
       PillControl(trailing, modifier = Modifier.width(190.dp))
     } else {
-      Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = ShuuenUi.Muted, modifier = Modifier.size(30.dp))
+      Icon(
+        Icons.Rounded.ChevronRight,
+        contentDescription = null,
+        tint = ShuuenUi.Muted,
+        modifier = Modifier.size(30.dp)
+      )
     }
   }
 }

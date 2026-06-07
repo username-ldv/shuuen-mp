@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ldv.shuuen.domain.audio.midi.MidiChannel
 import ldv.shuuen.domain.audio.engine.MidiEngine
 import ldv.shuuen.domain.audio.engine.MidiEngineStatus
+import ldv.shuuen.domain.audio.midi.MidiChannel
 import ldv.shuuen.domain.audio.music.Note
 import ldv.shuuen.domain.audio.music.Pitch
 

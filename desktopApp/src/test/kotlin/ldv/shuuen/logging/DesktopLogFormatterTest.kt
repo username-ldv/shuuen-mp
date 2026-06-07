@@ -22,7 +22,7 @@ class DesktopLogFormatterTest {
 
     assertEquals(
       "2026-06-06 14:38:03.123 [VERBOSE] AppNavigator\$navigateTo - Navigate happened" +
-        System.lineSeparator(),
+          System.lineSeparator(),
       formatter.format(record),
     )
   }

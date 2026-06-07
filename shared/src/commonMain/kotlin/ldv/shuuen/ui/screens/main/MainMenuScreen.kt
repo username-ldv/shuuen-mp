@@ -167,7 +167,9 @@ private fun ContinueTextBlock(modifier: Modifier = Modifier) {
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     Row(
-      verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+      modifier = Modifier.fillMaxWidth()
     ) {
       Column {
         Text(

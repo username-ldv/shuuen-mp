@@ -15,8 +15,8 @@ actual val platformModule: Module = module {
   single<DesktopSoundFontProvider>() bind SoundFontProvider::class
 
   single<Path>(named("files")) {
-    val path =  Path(AppDirsFactory.getInstance().getUserDataDir("Shuuen", null, null))
-    with(SystemFileSystem) { if(!exists(path)) createDirectories(path) }
+    val path = Path(AppDirsFactory.getInstance().getUserDataDir("Shuuen", null, null))
+    with(SystemFileSystem) { if (!exists(path)) createDirectories(path) }
     path
   }
 }

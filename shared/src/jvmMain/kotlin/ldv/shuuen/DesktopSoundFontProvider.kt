@@ -19,7 +19,15 @@ internal class DesktopSoundFontProvider : SoundFontProvider {
     val resourceDir = System.getProperty("compose.application.resources.dir")
     return listOfNotNull(
       resourceDir?.let { Path.of(it, "soundfonts", DEFAULT_SOUNDFONT_FILE) },
-      Path.of("desktopApp", "src", "main", "appResources", "common", "soundfonts", DEFAULT_SOUNDFONT_FILE),
+      Path.of(
+        "desktopApp",
+        "src",
+        "main",
+        "appResources",
+        "common",
+        "soundfonts",
+        DEFAULT_SOUNDFONT_FILE
+      ),
       Path.of("src", "main", "appResources", "common", "soundfonts", DEFAULT_SOUNDFONT_FILE),
     ).firstOrNull { it.exists() }
   }

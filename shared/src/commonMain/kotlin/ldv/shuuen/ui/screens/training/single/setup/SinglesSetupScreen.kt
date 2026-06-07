@@ -47,137 +47,127 @@ fun SinglesSetupScreen(
   onOpenContext: () -> Unit,
   onStartTraining: () -> Unit,
 ) {
-    StaticScreenFrame(
-        topBar = {
-            ShuuenTopAppBar(
-                title = "SINGLES SETUP",
-                subtitle = "Create a custom training level.",
-                onBack = onNavigateBack,
-                type = ShuuenTopAppBarType.Labeled
-            )
-        },
-    ) {
+  StaticScreenFrame(
+    topBar = {
+      ShuuenTopAppBar(
+        title = "SINGLES SETUP",
+        subtitle = "Create a custom training level.",
+        onBack = onNavigateBack,
+        type = ShuuenTopAppBarType.Labeled
+      )
+    },
+  ) {
 
-        GlassPanel {
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val compact = maxWidth < 430.dp
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.spacedBy(if (compact) 10.dp else 16.dp),
-                ) {
-                    IconBubble(
-                        Icons.Rounded.MusicNote,
-                        tint = ShuuenUi.Mint,
-                        size = if (compact) 52.dp else 62.dp
-                    )
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = "1. SCALE",
-                                    color = ShuuenUi.Text,
-                                    style = MaterialTheme.typography.titleLarge.copy(
-                                        letterSpacing = 2.4.sp, fontWeight = FontWeight.Bold
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                Text(
-                                    "Choose the scale you want to train.",
-                                    color = ShuuenUi.Muted,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                            Icon(
-                                Icons.Rounded.ExpandLess,
-                                contentDescription = null,
-                                tint = ShuuenUi.Muted,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            LabeledPicker("TONIC", "C", Modifier.weight(1f))
-                            LabeledPicker("MODE", "Major", Modifier.weight(1.35f))
-                        }
-                        ScaleChoiceGrid()
-                        PillControl(
-                            "More scales",
-                            leadingIcon = Icons.Rounded.Casino,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        PillControl(
-                            "Custom scale",
-                            leadingIcon = Icons.Rounded.Edit,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
+    GlassPanel {
+      BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val compact = maxWidth < 430.dp
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.Top,
+          horizontalArrangement = Arrangement.spacedBy(if (compact) 10.dp else 16.dp),
+        ) {
+          IconBubble(
+            Icons.Rounded.MusicNote, tint = ShuuenUi.Mint, size = if (compact) 52.dp else 62.dp
+          )
+          Column(
+            modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Column(
+                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
+              ) {
+                Text(
+                  text = "1. SCALE",
+                  color = ShuuenUi.Text,
+                  style = MaterialTheme.typography.titleLarge.copy(
+                    letterSpacing = 2.4.sp, fontWeight = FontWeight.Bold
+                  ),
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                  "Choose the scale you want to train.",
+                  color = ShuuenUi.Muted,
+                  style = MaterialTheme.typography.bodyMedium
+                )
+              }
+              Icon(
+                Icons.Rounded.ExpandLess,
+                contentDescription = null,
+                tint = ShuuenUi.Muted,
+                modifier = Modifier.size(30.dp)
+              )
             }
-        }
 
-        CompactSetupRow(
-            icon = Icons.Rounded.Tune,
-            tint = ShuuenUi.Lavender,
-            title = "2. CONTEXT",
-            subtitle = "Open context screen to configure.",
-            trailing = true,
-            onClick = onOpenContext,
-        )
-
-        GlassPanel {
-            SectionTitle(
-                icon = Icons.Rounded.BarChart,
-                tint = ShuuenUi.Gold,
-                title = "3. NUMBER OF QUESTIONS",
-                subtitle = "Set how many questions to include.",
-            )
-            CounterControl("20")
-        }
-
-        GlassPanel {
-            SectionTitle(
-                icon = Icons.Rounded.GraphicEq,
-                title = "4. RANGE",
-                subtitle = "Select the note range.",
-            )
-            Text(
-                text = "C3 - C5",
-                color = ShuuenUi.Text,
-                style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 3.sp),
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
-            RangeKeyboardStrip()
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+              horizontalArrangement = Arrangement.spacedBy(10.dp),
+              modifier = Modifier.fillMaxWidth()
             ) {
-                listOf("C2", "C3", "C4", "C5", "C6").forEach {
-                    Text(
-                        it,
-                        color = ShuuenUi.Muted,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
+              LabeledPicker("TONIC", "C", Modifier.weight(1f))
+              LabeledPicker("MODE", "Major", Modifier.weight(1.35f))
             }
+            ScaleChoiceGrid()
+            PillControl(
+              "More scales", leadingIcon = Icons.Rounded.Casino, modifier = Modifier.fillMaxWidth()
+            )
+            PillControl(
+              "Custom scale", leadingIcon = Icons.Rounded.Edit, modifier = Modifier.fillMaxWidth()
+            )
+          }
         }
-
-        PrimaryCta(
-            text = "START TRAINING",
-            onClick = onStartTraining,
-            modifier = Modifier.padding(top = 10.dp, bottom = 18.dp),
-        )
+      }
     }
+
+    CompactSetupRow(
+      icon = Icons.Rounded.Tune,
+      tint = ShuuenUi.Lavender,
+      title = "2. CONTEXT",
+      subtitle = "Open context screen to configure.",
+      trailing = true,
+      onClick = onOpenContext,
+    )
+
+    GlassPanel {
+      SectionTitle(
+        icon = Icons.Rounded.BarChart,
+        tint = ShuuenUi.Gold,
+        title = "3. NUMBER OF QUESTIONS",
+        subtitle = "Set how many questions to include.",
+      )
+      CounterControl("20")
+    }
+
+    GlassPanel {
+      SectionTitle(
+        icon = Icons.Rounded.GraphicEq,
+        title = "4. RANGE",
+        subtitle = "Select the note range.",
+      )
+      Text(
+        text = "C3 - C5",
+        color = ShuuenUi.Text,
+        style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 3.sp),
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+      )
+      RangeKeyboardStrip()
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+      ) {
+        listOf("C2", "C3", "C4", "C5", "C6").forEach {
+          Text(
+            it, color = ShuuenUi.Muted, style = MaterialTheme.typography.bodySmall
+          )
+        }
+      }
+    }
+
+    PrimaryCta(
+      text = "START TRAINING",
+      onClick = onStartTraining,
+      modifier = Modifier.padding(top = 10.dp, bottom = 18.dp),
+    )
+  }
 }
 
 @Composable
@@ -185,25 +175,19 @@ private fun ScaleChoiceGrid() {
   Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
       PillControl(
-          "C Major",
-          selected = true,
-          trailingCheck = true,
-          modifier = Modifier.weight(1f)
+        "C Major", selected = true, trailingCheck = true, modifier = Modifier.weight(1f)
       )
-        PillControl(
-            "A Minor",
-            modifier = Modifier.weight(1f)
-        )
+      PillControl(
+        "A Minor", modifier = Modifier.weight(1f)
+      )
     }
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
       PillControl(
-          "G Major",
-          modifier = Modifier.weight(1f)
+        "G Major", modifier = Modifier.weight(1f)
       )
-        PillControl(
-            "E Minor",
-            modifier = Modifier.weight(1f)
-        )
+      PillControl(
+        "E Minor", modifier = Modifier.weight(1f)
+      )
     }
   }
 }
@@ -220,10 +204,9 @@ private fun LabeledPicker(
       color = ShuuenUi.Muted,
       style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp)
     )
-      PillControl(
-          value,
-          modifier = Modifier.fillMaxWidth()
-      )
+    PillControl(
+      value, modifier = Modifier.fillMaxWidth()
+    )
   }
 }
 
@@ -236,40 +219,37 @@ private fun CompactSetupRow(
   trailing: Boolean = false,
   onClick: (() -> Unit)? = null,
 ) {
-    GlassPanel(
-        modifier = Modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+  GlassPanel(
+    modifier = Modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            IconBubble(icon, tint = tint, size = 58.dp)
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = title,
-                    color = ShuuenUi.Text,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        letterSpacing = 3.sp, fontWeight = FontWeight.Bold
-                    ),
-                )
-                Text(
-                    subtitle,
-                    color = ShuuenUi.Muted,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            if (trailing) {
-                Icon(
-                    Icons.Rounded.ChevronRight,
-                    contentDescription = null,
-                    tint = ShuuenUi.Muted,
-                    modifier = Modifier.size(34.dp)
-                )
-            }
-        }
+      IconBubble(icon, tint = tint, size = 58.dp)
+      Column(
+        modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        Text(
+          text = title,
+          color = ShuuenUi.Text,
+          style = MaterialTheme.typography.titleLarge.copy(
+            letterSpacing = 3.sp, fontWeight = FontWeight.Bold
+          ),
+        )
+        Text(
+          subtitle, color = ShuuenUi.Muted, style = MaterialTheme.typography.bodyMedium
+        )
+      }
+      if (trailing) {
+        Icon(
+          Icons.Rounded.ChevronRight,
+          contentDescription = null,
+          tint = ShuuenUi.Muted,
+          modifier = Modifier.size(34.dp)
+        )
+      }
     }
+  }
 }

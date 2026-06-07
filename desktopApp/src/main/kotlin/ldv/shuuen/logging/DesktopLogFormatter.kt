@@ -13,6 +13,6 @@ internal class DesktopLogFormatter(
 
   override fun format(record: LogRecord): String =
     "${timestampFormatter.format(record.instant)} " +
-      record.message.orEmpty().removeSuffix(System.lineSeparator()) +
-      System.lineSeparator()
+        record.message.orEmpty().removeSuffix(System.lineSeparator()) +
+        System.lineSeparator()
 }

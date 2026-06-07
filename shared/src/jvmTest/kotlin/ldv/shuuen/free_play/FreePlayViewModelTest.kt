@@ -7,9 +7,9 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import ldv.shuuen.domain.audio.midi.MidiChannel
 import ldv.shuuen.domain.audio.engine.MidiEngine
 import ldv.shuuen.domain.audio.engine.MidiEngineStatus
+import ldv.shuuen.domain.audio.midi.MidiChannel
 import ldv.shuuen.domain.audio.midi.Preset
 import ldv.shuuen.domain.audio.music.Chord
 import ldv.shuuen.domain.audio.music.Note

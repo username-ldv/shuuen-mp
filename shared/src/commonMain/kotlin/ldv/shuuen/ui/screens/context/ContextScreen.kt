@@ -48,8 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ldv.shuuen.ui.common.music.PianoKeyboard
-import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
 import ldv.shuuen.ui.common.DashedAddButton
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
@@ -60,37 +58,39 @@ import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
+import ldv.shuuen.ui.common.music.PianoKeyboard
+import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
 
 @Composable
 fun ContextScreen(onNavigateBack: () -> Unit) {
   var selectedTab by rememberSaveable { mutableStateOf(ContextTab.Drone) }
 
-    StaticScreenFrame(
-        topBar = {
-            ShuuenTopAppBar(
-                title = "CONTEXT",
-                subtitle = "Configure the listening context.",
-                onBack = onNavigateBack,
-                type = ShuuenTopAppBarType.Labeled,
-            )
-        },
-    ) {
-        ContextTabs(
-            selectedTab = selectedTab,
-            onSelectTab = { selectedTab = it },
-        )
+  StaticScreenFrame(
+    topBar = {
+      ShuuenTopAppBar(
+        title = "CONTEXT",
+        subtitle = "Configure the listening context.",
+        onBack = onNavigateBack,
+        type = ShuuenTopAppBarType.Labeled,
+      )
+    },
+  ) {
+    ContextTabs(
+      selectedTab = selectedTab,
+      onSelectTab = { selectedTab = it },
+    )
 
-        when (selectedTab) {
-            ContextTab.Drone -> DroneContextTab()
-            ContextTab.Cadence -> CadenceContextTab()
-        }
-
-        PrimaryCta(
-            text = "SAVE CONTEXT",
-            onClick = onNavigateBack,
-            modifier = Modifier.padding(bottom = 18.dp),
-        )
+    when (selectedTab) {
+      ContextTab.Drone -> DroneContextTab()
+      ContextTab.Cadence -> CadenceContextTab()
     }
+
+    PrimaryCta(
+      text = "SAVE CONTEXT",
+      onClick = onNavigateBack,
+      modifier = Modifier.padding(bottom = 18.dp),
+    )
+  }
 }
 
 private enum class ContextTab {
@@ -194,7 +194,7 @@ private fun DroneContextTab() {
         questionCount = "8",
       ),
     )
-      DashedAddButton("ADD NODE")
+    DashedAddButton("ADD NODE")
   }
 
   ContextInfoPanel(
@@ -249,7 +249,7 @@ private fun CadenceContextTab() {
         questionCount = "6",
       ),
     )
-      DashedAddButton("ADD NODE")
+    DashedAddButton("ADD NODE")
   }
 
   ContextInfoPanel(
@@ -265,56 +265,56 @@ private fun ContextSequencePanel(
   countLabel: String,
   content: @Composable () -> Unit,
 ) {
-    GlassPanel(borderColor = ShuuenUi.BorderStrong) {
-        SectionTitle(
-            icon = Icons.Rounded.GraphicEq,
-            title = title,
-            subtitle = subtitle,
-            trailing = {
-                SoftControl(modifier = Modifier.width(92.dp)) {
-                    Text(
-                        text = countLabel,
-                        color = ShuuenUi.Mint,
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            },
-        )
-        content()
-    }
+  GlassPanel(borderColor = ShuuenUi.BorderStrong) {
+    SectionTitle(
+      icon = Icons.Rounded.GraphicEq,
+      title = title,
+      subtitle = subtitle,
+      trailing = {
+        SoftControl(modifier = Modifier.width(92.dp)) {
+          Text(
+            text = countLabel,
+            color = ShuuenUi.Mint,
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center,
+          )
+        }
+      },
+    )
+    content()
+  }
 }
 
 @Composable
 private fun PresetProgressionControls() {
-    SoftControl(modifier = Modifier.fillMaxWidth()) {
-        Icon(
-            imageVector = Icons.Rounded.Edit,
-            contentDescription = null,
-            tint = ShuuenUi.Lavender,
-            modifier = Modifier.size(22.dp),
-        )
-        Text(
-            text = "Preset progression",
-            color = ShuuenUi.Text,
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            text = "I-IV-V-I",
-            color = ShuuenUi.Text,
-            style = MaterialTheme.typography.titleSmall,
-        )
-        Icon(
-            Icons.Rounded.ChevronRight,
-            contentDescription = null,
-            tint = ShuuenUi.Muted,
-            modifier = Modifier.size(24.dp),
-        )
-    }
+  SoftControl(modifier = Modifier.fillMaxWidth()) {
+    Icon(
+      imageVector = Icons.Rounded.Edit,
+      contentDescription = null,
+      tint = ShuuenUi.Lavender,
+      modifier = Modifier.size(22.dp),
+    )
+    Text(
+      text = "Preset progression",
+      color = ShuuenUi.Text,
+      style = MaterialTheme.typography.titleSmall,
+      modifier = Modifier.weight(1f),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+    Text(
+      text = "I-IV-V-I",
+      color = ShuuenUi.Text,
+      style = MaterialTheme.typography.titleSmall,
+    )
+    Icon(
+      Icons.Rounded.ChevronRight,
+      contentDescription = null,
+      tint = ShuuenUi.Muted,
+      modifier = Modifier.size(24.dp),
+    )
+  }
   Row(
     modifier = Modifier.fillMaxWidth(),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -331,24 +331,24 @@ private fun PresetProgressionControls() {
 
 @Composable
 private fun PreviewFullSequence() {
-    SoftControl(modifier = Modifier.fillMaxWidth()) {
-        PlayBubble()
-        Text(
-            text = "Preview full sequence",
-            color = ShuuenUi.Text,
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        MiniWaveform(Modifier.width(126.dp).height(30.dp), pieces = 4)
-        Icon(
-            Icons.Rounded.ChevronRight,
-            contentDescription = null,
-            tint = ShuuenUi.Muted,
-            modifier = Modifier.size(24.dp),
-        )
-    }
+  SoftControl(modifier = Modifier.fillMaxWidth()) {
+    PlayBubble()
+    Text(
+      text = "Preview full sequence",
+      color = ShuuenUi.Text,
+      style = MaterialTheme.typography.titleSmall,
+      modifier = Modifier.weight(1f),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+    MiniWaveform(Modifier.width(126.dp).height(30.dp), pieces = 4)
+    Icon(
+      Icons.Rounded.ChevronRight,
+      contentDescription = null,
+      tint = ShuuenUi.Muted,
+      modifier = Modifier.size(24.dp),
+    )
+  }
 }
 
 @Composable
@@ -490,35 +490,35 @@ private fun NodeActionRow(
   play: Boolean = false,
   content: @Composable RowScope.() -> Unit = {},
 ) {
-    SoftControl(modifier = Modifier.fillMaxWidth()) {
-        if (play) {
-            PlayBubble()
-        } else if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = ShuuenUi.Text,
-                modifier = Modifier.size(24.dp),
-            )
-        }
-        Text(
-            text = label,
-            color = ShuuenUi.Text,
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        content()
-        if (trailing) {
-            Icon(
-                Icons.Rounded.ChevronRight,
-                contentDescription = null,
-                tint = ShuuenUi.Muted,
-                modifier = Modifier.size(24.dp),
-            )
-        }
+  SoftControl(modifier = Modifier.fillMaxWidth()) {
+    if (play) {
+      PlayBubble()
+    } else if (icon != null) {
+      Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = ShuuenUi.Text,
+        modifier = Modifier.size(24.dp),
+      )
     }
+    Text(
+      text = label,
+      color = ShuuenUi.Text,
+      style = MaterialTheme.typography.titleSmall,
+      modifier = Modifier.weight(1f),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+    content()
+    if (trailing) {
+      Icon(
+        Icons.Rounded.ChevronRight,
+        contentDescription = null,
+        tint = ShuuenUi.Muted,
+        modifier = Modifier.size(24.dp),
+      )
+    }
+  }
 }
 
 @Composable
@@ -580,48 +580,48 @@ private fun ContextInfoPanel(
   detail: String? = null,
   markerCount: Int,
 ) {
-    GlassPanel {
+  GlassPanel {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.Top,
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      Icon(
+        Icons.Rounded.Info,
+        contentDescription = null,
+        tint = ShuuenUi.Muted,
+        modifier = Modifier.size(30.dp)
+      )
+      Column(
+        modifier = Modifier.weight(1f),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+      ) {
+        Text(
+          text = text,
+          color = ShuuenUi.Muted,
+          style = MaterialTheme.typography.bodyLarge,
+        )
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Icon(
-                Icons.Rounded.Info,
-                contentDescription = null,
-                tint = ShuuenUi.Muted,
-                modifier = Modifier.size(30.dp)
+          MiniRangeKeyboard(
+            markerCount = markerCount,
+            modifier = Modifier.weight(if (detail == null) 1f else 1.5f),
+          )
+          if (detail != null) {
+            Text(
+              text = detail,
+              color = ShuuenUi.Muted,
+              style = MaterialTheme.typography.bodyMedium,
+              modifier = Modifier.weight(1f),
             )
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(
-                    text = text,
-                    color = ShuuenUi.Muted,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    MiniRangeKeyboard(
-                        markerCount = markerCount,
-                        modifier = Modifier.weight(if (detail == null) 1f else 1.5f),
-                    )
-                    if (detail != null) {
-                        Text(
-                            text = detail,
-                            color = ShuuenUi.Muted,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
-            }
+          }
         }
+      }
     }
+  }
 }
 
 @Composable
@@ -642,6 +642,7 @@ private fun MiniRangeKeyboard(
         } else {
           Color(0xFF2A2A2A)
         }
+
         PianoKeyboardDefaults.isBlackKey(index) -> Color(0xFF4A435E)
         else -> Color(0xFFE0D6FF)
       }
