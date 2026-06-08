@@ -1,5 +1,8 @@
 package ldv.shuuen.domain.audio.music
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class Degree(val offset: Int, val label: String) {
   D1(0, "1"),
   D5(7, "5"),

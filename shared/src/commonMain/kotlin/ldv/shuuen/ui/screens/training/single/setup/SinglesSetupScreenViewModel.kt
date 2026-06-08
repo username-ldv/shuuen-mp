@@ -12,11 +12,12 @@ import ldv.shuuen.domain.audio.music.Note
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.ScaleType
 import ldv.shuuen.domain.audio.music.Sustain
-import ldv.shuuen.domain.audio.training.TrainingScale
-import ldv.shuuen.domain.audio.training.singles.SinglesLevel
 import ldv.shuuen.domain.repository.SettingsRepository
+import ldv.shuuen.domain.training.TrainingScale
+import ldv.shuuen.domain.training.TrainingScaleItemStates
+import ldv.shuuen.domain.training.singles.SinglesLevel
 
-class SinglesSetupViewModel(val settingsRepository: SettingsRepository) : ViewModel() {
+class SinglesSetupScreenViewModel(val settingsRepository: SettingsRepository) : ViewModel() {
   private val _singlesLevelState = MutableStateFlow(
     SinglesLevel(
       name = "",
@@ -44,9 +45,21 @@ class SinglesSetupViewModel(val settingsRepository: SettingsRepository) : ViewMo
     _singlesLevelState.update { it.copy(traningScale = t) }
   }
 
-  suspend fun addLevel() {
+  suspend fun upsertLevel() {
     val level = screenState.value
-    settingsRepository.addLevel(level)
+    // todo: what should be the default name?
+    val levelName = when (level.traningScale.itemStates) {
+      is TrainingScaleItemStates.ByPitch -> {
+        level.traningScale.itemStates.items.entries.first().value.label
+      }
+      is TrainingScaleItemStates.ByDegree -> "Random"
+
+    }
+    settingsRepository.upsertLevel(level.copy(name = levelName))
     Napier.v { "Saved new level: $level" }
+  }
+
+  override fun onCleared() {
+    Napier.v { "Setup screen viewmodel cleared?" }
   }
 }

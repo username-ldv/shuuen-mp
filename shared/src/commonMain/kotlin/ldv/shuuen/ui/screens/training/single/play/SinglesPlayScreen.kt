@@ -44,7 +44,7 @@ import ldv.shuuen.ui.common.music.PianoKeyboard
 import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
 
 @Composable
-fun SinglesPlayScreen(onNavigateBack: () -> Unit, onLevelEnd: () -> Unit) {
+fun SinglesPlayScreen(onNavigateBack: () -> Unit, onLevelEnd: () -> Unit, viewModel: SinglesPlayScreenViewModel) {
   var useCircleInput by rememberSaveable { mutableStateOf(false) }
 
   StaticScreenFrame(

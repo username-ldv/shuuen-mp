@@ -1,7 +1,9 @@
 package ldv.shuuen.domain.audio.music
 
+import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
+@Serializable
 enum class Pitch {
   C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B;
 

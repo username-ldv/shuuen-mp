@@ -1,4 +1,4 @@
-package ldv.shuuen.domain.audio.training
+package ldv.shuuen.domain.training
 
 import kotlinx.serialization.Serializable
 import ldv.shuuen.domain.audio.music.Degree

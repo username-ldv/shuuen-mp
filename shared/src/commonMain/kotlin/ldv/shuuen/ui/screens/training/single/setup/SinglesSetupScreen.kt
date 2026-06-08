@@ -43,7 +43,7 @@ import ldv.shuuen.ui.common.music.ScaleChooser
 
 @Composable
 fun SinglesSetupScreen(
-  viewModel: SinglesSetupViewModel,
+  viewModel: SinglesSetupScreenViewModel,
   onNavigateBack: () -> Unit,
   onOpenContext: () -> Unit,
   onSaveLevel: () -> Unit,
@@ -109,7 +109,7 @@ fun SinglesSetupScreen(
         // todo: maybe add loading state
         runBlocking {
           scope.launch {
-            viewModel.addLevel()
+            viewModel.upsertLevel()
           }
         }
         onSaveLevel()

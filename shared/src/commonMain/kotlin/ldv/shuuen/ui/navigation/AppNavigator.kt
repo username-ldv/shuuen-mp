@@ -12,7 +12,8 @@ class AppNavigator {
   }
 
   fun navigateBack() {
-    Napier.v { "Navigate back happened" }
+    Napier.v { "Navigate back triggered $backStack" }
     if (backStack.size > 1) backStack.removeLastOrNull()
+    Napier.v { "After navigate back triggered $backStack" }
   }
 }

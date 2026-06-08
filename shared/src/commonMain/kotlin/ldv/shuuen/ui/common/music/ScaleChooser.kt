@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.sp
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.Scale
 import ldv.shuuen.domain.audio.music.ScaleType
-import ldv.shuuen.domain.audio.training.TrainingScale
-import ldv.shuuen.domain.audio.training.TrainingScaleItemStates
+import ldv.shuuen.domain.training.TrainingScale
+import ldv.shuuen.domain.training.TrainingScaleItemStates
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
 import ldv.shuuen.ui.common.ShuuenUi

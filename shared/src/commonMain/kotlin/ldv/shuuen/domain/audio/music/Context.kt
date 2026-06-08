@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class DegreeContext(val nodes: List<DegreeContextNode>)
+data class DegreeContext(val nodes: List<DegreeContextNode>, val name: String? = null)
 
 @Serializable
 data class DegreeContextNode(

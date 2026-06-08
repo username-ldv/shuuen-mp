@@ -32,7 +32,7 @@ sealed interface AppRoute {
   data object SinglesSetup : AppRoute
 
   @Serializable
-  data object SinglesPlay : AppRoute
+  data class SinglesPlay(val levelId: String) : AppRoute
 
   @Serializable
   data object MelodiesSetup : AppRoute

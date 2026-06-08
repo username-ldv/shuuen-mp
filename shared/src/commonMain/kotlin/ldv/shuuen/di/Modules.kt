@@ -11,17 +11,20 @@ import ldv.shuuen.ui.screens.context.ContextScreen
 import ldv.shuuen.ui.screens.free_play.FreePlayScreen
 import ldv.shuuen.ui.screens.free_play.FreePlayViewModel
 import ldv.shuuen.ui.screens.level_end.LevelCompleteScreen
-import ldv.shuuen.ui.screens.level_select.LevelSelectScreen
 import ldv.shuuen.ui.screens.main.MainMenuScreen
 import ldv.shuuen.ui.screens.training.common.TrainingFlow
 import ldv.shuuen.ui.screens.training.melodies.play.MelodiesPlayScreen
 import ldv.shuuen.ui.screens.training.melodies.setup.MelodiesSetupScreen
+import ldv.shuuen.ui.screens.training.single.level_select.SinglesLevelSelectScreen
+import ldv.shuuen.ui.screens.training.single.level_select.SinglesLevelSelectScreenViewModel
 import ldv.shuuen.ui.screens.training.single.play.SinglesPlayScreen
+import ldv.shuuen.ui.screens.training.single.play.SinglesPlayScreenViewModel
 import ldv.shuuen.ui.screens.training.single.setup.SinglesSetupScreen
-import ldv.shuuen.ui.screens.training.single.setup.SinglesSetupViewModel
+import ldv.shuuen.ui.screens.training.single.setup.SinglesSetupScreenViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.module.Module
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
@@ -68,33 +71,16 @@ val commonModule = module {
     ContextScreen(onNavigateBack = { navigator.navigateBack() })
   }
 
-  navigation<AppRoute.SinglesLevelSelect> {
-    val navigator = get<AppNavigator>()
-    LevelSelectScreen(
-      flow = TrainingFlow.Singles,
-      onNavigateBack = { navigator.navigateBack() },
-      onStartLevel = { navigator.navigateTo(AppRoute.SinglesSetup) },
-    )
-  }
 
   navigation<AppRoute.MelodiesLevelSelect> {
     val navigator = get<AppNavigator>()
-    LevelSelectScreen(
-      flow = TrainingFlow.Melodies,
-      onNavigateBack = { navigator.navigateBack() },
-      onStartLevel = { navigator.navigateTo(AppRoute.MelodiesSetup) },
-    )
+//    LevelSelectScreen(
+//      flow = TrainingFlow.Melodies,
+//      onNavigateBack = { navigator.navigateBack() },
+//      onStartLevel = { navigator.navigateTo(AppRoute.MelodiesSetup) },
+//    )
   }
 
-  navigation<AppRoute.SinglesLevelComplete> {
-    val navigator = get<AppNavigator>()
-    LevelCompleteScreen(
-      flow = TrainingFlow.Singles,
-      onNavigateBack = { navigator.navigateBack() },
-      onRetryLevel = { navigator.navigateTo(AppRoute.SinglesSetup) },
-      onNextLevel = { navigator.navigateTo(AppRoute.SinglesLevelSelect) },
-    )
-  }
 
   navigation<AppRoute.MelodiesLevelComplete> {
     val navigator = get<AppNavigator>()
@@ -106,24 +92,46 @@ val commonModule = module {
     )
   }
 
-  viewModel<SinglesSetupViewModel>()
+  viewModel<SinglesLevelSelectScreenViewModel>()
+  navigation<AppRoute.SinglesLevelSelect> {
+    val navigator = get<AppNavigator>()
+    SinglesLevelSelectScreen(
+      onNavigateBack = { navigator.navigateBack() },
+      onStartLevel = { levelId -> navigator.navigateTo(AppRoute.SinglesPlay(levelId)) },
+      onCreateNewLevel = { navigator.navigateTo(AppRoute.SinglesSetup) },
+      viewModel = koinViewModel()
+    )
+  }
+
+  viewModel<SinglesSetupScreenViewModel>()
   navigation<AppRoute.SinglesSetup> {
     val navigator = get<AppNavigator>()
     SinglesSetupScreen(
       onNavigateBack = { navigator.navigateBack() },
       onOpenContext = { navigator.navigateTo(AppRoute.Context) },
-      onSaveLevel = { navigator.navigateTo(AppRoute.SinglesLevelSelect) },
+      onSaveLevel = { navigator.navigateBack() },
       viewModel = koinViewModel()
     )
   }
 
-  navigation<AppRoute.SinglesPlay> {
+  viewModel<SinglesPlayScreenViewModel>()
+  navigation<AppRoute.SinglesPlay> { route ->
     val navigator = get<AppNavigator>()
     SinglesPlayScreen(onNavigateBack = { navigator.navigateBack() }, onLevelEnd = {
       navigator.navigateTo(
         AppRoute.SinglesLevelComplete
       )
-    })
+    }, viewModel = koinViewModel { parametersOf(route.levelId) })
+  }
+
+  navigation<AppRoute.SinglesLevelComplete> {
+    val navigator = get<AppNavigator>()
+    LevelCompleteScreen(
+      flow = TrainingFlow.Singles,
+      onNavigateBack = { navigator.navigateBack() },
+      onRetryLevel = { navigator.navigateTo(AppRoute.SinglesSetup) },
+      onNextLevel = { navigator.navigateTo(AppRoute.SinglesLevelSelect) },
+    )
   }
 
   navigation<AppRoute.MelodiesSetup> {

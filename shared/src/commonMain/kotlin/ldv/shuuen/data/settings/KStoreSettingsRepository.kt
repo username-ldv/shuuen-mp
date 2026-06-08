@@ -4,11 +4,12 @@ import io.github.xxfast.kstore.file.storeOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.io.files.Path
+import ldv.shuuen.common.upsertBy
 import ldv.shuuen.domain.audio.midi.MidiChannel
 import ldv.shuuen.domain.audio.midi.Preset
+import ldv.shuuen.domain.training.singles.SinglesLevel
 import ldv.shuuen.domain.repository.AppSettings
 import ldv.shuuen.domain.repository.SettingsRepository
-import ldv.shuuen.domain.audio.training.singles.SinglesLevel
 import org.koin.core.annotation.Named
 
 class KStoreSettingsRepository(
@@ -33,13 +34,9 @@ class KStoreSettingsRepository(
     store.update { it?.copy(soundFontPath = path) }
   }
 
-  override suspend fun addLevel(level: SinglesLevel) {
+  override suspend fun upsertLevel(level: SinglesLevel) {
     store.update { settings ->
-      settings?.let {
-        val newLevels = it.singlesLevels.toMutableList()
-        newLevels.add(level)
-        it.copy(singlesLevels = newLevels)
-      }
+      settings?.copy(singlesLevels = settings.singlesLevels.upsertBy(level, SinglesLevel::id))
     }
   }
 }

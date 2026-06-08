@@ -6,7 +6,7 @@ import ldv.shuuen.domain.audio.midi.ChannelPresets
 import ldv.shuuen.domain.audio.midi.DefaultPreset
 import ldv.shuuen.domain.audio.midi.MidiChannel
 import ldv.shuuen.domain.audio.midi.Preset
-import ldv.shuuen.domain.audio.training.singles.SinglesLevel
+import ldv.shuuen.domain.training.singles.SinglesLevel
 
 interface SettingsRepository {
   val settings: Flow<AppSettings>
@@ -15,7 +15,7 @@ interface SettingsRepository {
 
   suspend fun setPreset(channel: MidiChannel, preset: Preset)
 
-  suspend fun addLevel(level: SinglesLevel)
+  suspend fun upsertLevel(level: SinglesLevel)
 }
 
 @Serializable
