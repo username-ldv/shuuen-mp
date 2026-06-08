@@ -4,20 +4,54 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import ldv.shuuen.domain.audio.music.Degree
 import ldv.shuuen.domain.audio.music.Note
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.Scale
-import ldv.shuuen.ui.common.music.PitchState
+import ldv.shuuen.domain.audio.music.ScaleType
+import ldv.shuuen.ui.common.music.BoxedListItemState
 
-data class PitchOrRandom(val pitcha: Pitch?)
+enum class TrainingScaleType {
+  Relative, Absolute
+}
 
-data class TrainingScale(val pitchStates: Map<Pitch, PitchState>) {
+sealed interface TrainingItemStates {
+  val items: Map<*, BoxedListItemState>
+
+  data class ByPitch(
+    val value: Map<Pitch, BoxedListItemState>
+  ) : TrainingItemStates {
+    override val items: Map<Pitch, BoxedListItemState> = value
+  }
+
+  data class ByDegree(
+    val value: Map<Degree, BoxedListItemState>
+  ) : TrainingItemStates {
+    override val items: Map<Degree, BoxedListItemState> = value
+  }
+}
+
+data class TrainingScale(val root: Pitch?, val itemStates: TrainingItemStates) {
+  val type = if (root != null) TrainingScaleType.Absolute else TrainingScaleType.Relative
+
   companion object {
     fun fromScale(s: Scale): TrainingScale {
       val names = s.appropriatePitchNames()
-      return TrainingScale(pitchStates = s.pitches.zip(names).map { (pitch, name) ->
-        pitch to PitchState(true, name)
-      }.toMap())
+      return TrainingScale(
+        root = s.root,
+        itemStates = TrainingItemStates.ByPitch(s.pitches.zip(names).associate { (pitch, name) ->
+          pitch to BoxedListItemState(true, name)
+        })
+      )
+    }
+
+    fun degreesFromType(m: ScaleType, formula: List<Int>? = null): TrainingScale {
+      val sampleScale = Scale.fromScaleType(Pitch.C, m, formula ?: listOf(0))
+      return TrainingScale(
+        root = null,
+        itemStates = TrainingItemStates.ByDegree(
+          sampleScale.degrees.associateWith { BoxedListItemState(true, it.label) })
+      )
     }
   }
 }
@@ -31,7 +65,7 @@ class SinglesSetupViewModel : ViewModel() {
     SaveableScreenState(
       questionsNumber = 20,
       range = Note(Pitch.C, 2) to Note(Pitch.C, 6),
-      traningScale = TrainingScale.fromScale(Scale.major(Pitch.C))
+      traningScale = TrainingScale.degreesFromType(ScaleType.Major)
     )
   )
   val screenState = _saveableScreenState.asStateFlow()

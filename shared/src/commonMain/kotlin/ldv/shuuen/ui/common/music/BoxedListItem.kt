@@ -13,6 +13,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+
+data class BoxedListItemState(val active: Boolean, val label: String)
+
 @Composable
 fun BoxedListItem(
   label: String,

@@ -3,7 +3,7 @@ package ldv.shuuen.domain.audio.music
 import io.github.aakira.napier.Napier
 
 enum class ScaleType(val scaleName: String) {
-  Major("Major"), NaturalMinor("Natural Minor"), Custom("Custom");
+  Major("Major"), NaturalMinor("Natural Minor"), Chromatic("Chromatic"), Custom("Custom");
 
   override fun toString(): String {
     return this.scaleName
@@ -37,6 +37,11 @@ data class Scale(
     return formula.runningReduce { acc, step -> acc + step }.map { rootNote + it }
   }
 
+  val degrees: List<Degree>
+    get() {
+      return formula.runningReduce { acc, step -> acc + step }.map { Degree.fromOffset(it) }
+    }
+
   fun appropriatePitchNames(accidentalResolutionType: ScaleAccidentalType = ScaleAccidentalType.Sharps): List<String> {
     return pitches.map { pitch ->
       appropriatePitchName(
@@ -49,6 +54,9 @@ data class Scale(
   }
 
   companion object {
+    fun chromatic(root: Pitch): Scale =
+      fromFormula(root, listOf(0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), ScaleType.Chromatic)
+
     fun major(root: Pitch): Scale = fromFormula(root, listOf(0, 2, 2, 1, 2, 2, 2), ScaleType.Major)
 
     fun naturalMinor(root: Pitch): Scale =
@@ -57,6 +65,15 @@ data class Scale(
     fun custom(root: Pitch, formula: List<Int>): Scale =
       fromFormula(root, formula, ScaleType.Custom)
 
+    fun fromScaleType(root: Pitch, scaleType: ScaleType, formula: List<Int>): Scale {
+      return when (scaleType) {
+        ScaleType.Major -> major(root)
+        ScaleType.NaturalMinor -> naturalMinor(root)
+        ScaleType.Chromatic -> chromatic(root)
+        ScaleType.Custom -> custom(root, formula)
+      }
+    }
+
     fun appropriatePitchName(
       root: Pitch,
       pitch: Pitch,
@@ -64,12 +81,12 @@ data class Scale(
       accidentalResolutionType: ScaleAccidentalType = ScaleAccidentalType.Sharps,
     ): String {
       val useSharps = when (type) {
-        ScaleType.Custom -> accidentalResolutionType == ScaleAccidentalType.Sharps
         ScaleType.Major -> if (accidentalResolutionType == ScaleAccidentalType.Sharps) (root in sharpMajorKeys) else (root !in flatMajorKeys)
         ScaleType.NaturalMinor -> if (accidentalResolutionType == ScaleAccidentalType.Sharps) (root in sharpMinorKeys) else (root !in flatMinorKeys)
+        ScaleType.Chromatic, ScaleType.Custom -> accidentalResolutionType == ScaleAccidentalType.Sharps
       }
-      val appropriateName =  if (useSharps) pitch.toString() else pitch.toFlatString()
-      if(pitch == Pitch.ASharp) Napier.v { "Appropriate pitch name root: $root, name: $appropriateName, type: $type, useSharps: $useSharps" }
+      val appropriateName = if (useSharps) pitch.toString() else pitch.toFlatString()
+      if (pitch == Pitch.ASharp) Napier.v { "Appropriate pitch name root: $root, name: $appropriateName, type: $type, useSharps: $useSharps" }
       return appropriateName
     }
 
