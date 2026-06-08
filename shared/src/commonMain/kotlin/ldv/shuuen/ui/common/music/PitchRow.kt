@@ -8,6 +8,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.Scale
+import ldv.shuuen.ui.common.BoxedListItem
+import ldv.shuuen.ui.common.BoxedListItemState
 import ldv.shuuen.ui.theme.ShuuenTheme
 
 

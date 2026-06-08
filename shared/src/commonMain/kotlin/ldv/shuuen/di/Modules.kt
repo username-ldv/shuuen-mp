@@ -17,8 +17,8 @@ import ldv.shuuen.ui.screens.training.common.TrainingFlow
 import ldv.shuuen.ui.screens.training.melodies.play.MelodiesPlayScreen
 import ldv.shuuen.ui.screens.training.melodies.setup.MelodiesSetupScreen
 import ldv.shuuen.ui.screens.training.single.play.SinglesPlayScreen
-import ldv.shuuen.ui.screens.training.single.setup.SinglesSetupViewModel
 import ldv.shuuen.ui.screens.training.single.setup.SinglesSetupScreen
+import ldv.shuuen.ui.screens.training.single.setup.SinglesSetupViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.module.Module
@@ -112,7 +112,7 @@ val commonModule = module {
     SinglesSetupScreen(
       onNavigateBack = { navigator.navigateBack() },
       onOpenContext = { navigator.navigateTo(AppRoute.Context) },
-      onStartTraining = { navigator.navigateTo(AppRoute.SinglesPlay) },
+      onSaveLevel = { navigator.navigateTo(AppRoute.SinglesLevelSelect) },
       viewModel = koinViewModel()
     )
   }

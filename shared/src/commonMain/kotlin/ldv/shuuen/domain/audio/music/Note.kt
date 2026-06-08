@@ -1,8 +1,10 @@
 package ldv.shuuen.domain.audio.music
 
+import kotlinx.serialization.Serializable
 import kotlin.math.ceil
 import kotlin.random.Random
 
+@Serializable
 data class Note(val midiIndex: Int) {
   init {
     require(midiIndex in MidiMin..MidiMax) {

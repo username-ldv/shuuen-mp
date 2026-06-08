@@ -9,6 +9,7 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +43,14 @@ fun TextDropdownMenu(
     OutlinedTextField(
       value = selectedItem,
       onValueChange = {},
+      enabled = false,
+      colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
+        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+        disabledBorderColor = MaterialTheme.colorScheme.outline,
+        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+      ),
       readOnly = true,
       singleLine = true,
       trailingIcon = {

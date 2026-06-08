@@ -1,4 +1,4 @@
-package ldv.shuuen.ui.screens.training.single.setup
+package ldv.shuuen.ui.common.music
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,11 +27,12 @@ import androidx.compose.ui.unit.sp
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.Scale
 import ldv.shuuen.domain.audio.music.ScaleType
+import ldv.shuuen.domain.audio.training.TrainingScale
+import ldv.shuuen.domain.audio.training.TrainingScaleItemStates
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.TextDropdownMenu
-import ldv.shuuen.ui.common.music.BoxedItemRow
 
 @Composable
 fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) -> Unit = {}) {
@@ -50,7 +52,8 @@ fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) ->
         onScaleChosen(newTrainingScale)
       }
       Column(
-        verticalArrangement = Arrangement.spacedBy(arrangementSpace)
+        verticalArrangement = Arrangement.spacedBy(arrangementSpace),
+        horizontalAlignment = Alignment.CenterHorizontally
       ) {
         Row(
           horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()
@@ -75,21 +78,21 @@ fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) ->
           )
         }
         when (trainingScale.itemStates) {
-          is TrainingItemStates.ByPitch -> {
+          is TrainingScaleItemStates.ByPitch -> {
             BoxedItemRow(
               items = trainingScale.itemStates.items, onClick = { pitch ->
                 val m = trainingScale.itemStates.items.toMutableMap()
                 m[pitch]?.let { m[pitch] = it.copy(active = !it.active) }
-                onScaleChosen(TrainingScale(tonic, TrainingItemStates.ByPitch(m)))
+                onScaleChosen(TrainingScale(tonic, TrainingScaleItemStates.ByPitch(m)))
               })
           }
 
-          is TrainingItemStates.ByDegree -> {
+          is TrainingScaleItemStates.ByDegree -> {
             BoxedItemRow(
               items = trainingScale.itemStates.items, onClick = { degree ->
                 val m = trainingScale.itemStates.items.toMutableMap()
                 m[degree]?.let { m[degree] = it.copy(active = !it.active) }
-                onScaleChosen(TrainingScale(tonic, TrainingItemStates.ByDegree(m)))
+                onScaleChosen(TrainingScale(tonic, TrainingScaleItemStates.ByDegree(m)))
               })
           }
         }
@@ -102,7 +105,7 @@ fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) ->
 private fun Header() {
   Row(
     horizontalArrangement = Arrangement.spacedBy(16.dp),
-    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically
   ) {
     IconBubble(
       Icons.Rounded.MusicNote, tint = ShuuenUi.Mint, size = 64.dp

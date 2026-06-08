@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
 import ldv.shuuen.ui.common.PrimaryCta
@@ -36,13 +39,14 @@ import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.StaticScreenFrame
 import ldv.shuuen.ui.common.music.NoteRow
+import ldv.shuuen.ui.common.music.ScaleChooser
 
 @Composable
 fun SinglesSetupScreen(
   viewModel: SinglesSetupViewModel,
   onNavigateBack: () -> Unit,
   onOpenContext: () -> Unit,
-  onStartTraining: () -> Unit,
+  onSaveLevel: () -> Unit,
 ) {
   val saveableScreenState by viewModel.screenState.collectAsStateWithLifecycle()
   StaticScreenFrame(
@@ -98,9 +102,18 @@ fun SinglesSetupScreen(
       NoteRow(value = saveableScreenState.range.second) { viewModel.changeRangeEnd(it) }
     }
 
+    val scope = rememberCoroutineScope()
     PrimaryCta(
       text = "SAVE LEVEL",
-      onClick = onStartTraining,
+      onClick = {
+        // todo: maybe add loading state
+        runBlocking {
+          scope.launch {
+            viewModel.addLevel()
+          }
+        }
+        onSaveLevel()
+      },
       modifier = Modifier.padding(top = 10.dp, bottom = 18.dp),
       icon = Icons.Rounded.Save
     )
