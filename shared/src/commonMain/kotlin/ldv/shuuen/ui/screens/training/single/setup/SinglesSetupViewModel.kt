@@ -19,16 +19,12 @@ sealed interface TrainingItemStates {
   val items: Map<*, BoxedListItemState>
 
   data class ByPitch(
-    val value: Map<Pitch, BoxedListItemState>
-  ) : TrainingItemStates {
-    override val items: Map<Pitch, BoxedListItemState> = value
-  }
+    override val items: Map<Pitch, BoxedListItemState>
+  ) : TrainingItemStates
 
   data class ByDegree(
-    val value: Map<Degree, BoxedListItemState>
-  ) : TrainingItemStates {
-    override val items: Map<Degree, BoxedListItemState> = value
-  }
+    override val items: Map<Degree, BoxedListItemState>
+  ) : TrainingItemStates
 }
 
 data class TrainingScale(val root: Pitch?, val itemStates: TrainingItemStates) {

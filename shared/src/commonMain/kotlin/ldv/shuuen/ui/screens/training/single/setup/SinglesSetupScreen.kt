@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.GraphicEq
+import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -98,9 +99,10 @@ fun SinglesSetupScreen(
     }
 
     PrimaryCta(
-      text = "START TRAINING",
+      text = "SAVE LEVEL",
       onClick = onStartTraining,
       modifier = Modifier.padding(top = 10.dp, bottom = 18.dp),
+      icon = Icons.Rounded.Save
     )
   }
 }

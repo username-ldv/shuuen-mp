@@ -57,10 +57,10 @@ fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) ->
         ) {
           TextDropdownMenu(
             items = listOf("Random") + Pitch.entries.map {
-              Scale.appropriatePitchName(
-                it, it, mode
-              )
-            },
+            Scale.appropriatePitchName(
+              it, it, mode
+            )
+          },
             selectedItem = tonic?.let { Scale.appropriatePitchName(it, it, mode) } ?: "Random",
             onItemSelected = { tonic = Pitch.fromName(it) },
             modifier = Modifier.weight(0.75f)
