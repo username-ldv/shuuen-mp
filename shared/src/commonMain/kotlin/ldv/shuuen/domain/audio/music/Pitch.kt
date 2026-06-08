@@ -3,18 +3,7 @@ package ldv.shuuen.domain.audio.music
 import kotlin.random.Random
 
 enum class Pitch {
-  C,
-  CSharp,
-  D,
-  DSharp,
-  E,
-  F,
-  FSharp,
-  G,
-  GSharp,
-  A,
-  ASharp,
-  B;
+  C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B;
 
   override fun toString(): String = name.replace("Sharp", "#")
 

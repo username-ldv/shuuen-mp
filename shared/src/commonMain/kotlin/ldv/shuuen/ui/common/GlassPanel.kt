@@ -22,7 +22,6 @@ fun GlassPanel(
   Surface(
     modifier = modifier.fillMaxWidth(),
     color = ShuuenUi.Panel,
-    contentColor = ShuuenUi.Text,
     shape = MaterialTheme.shapes.medium,
     border = BorderStroke(1.dp, borderColor),
     tonalElevation = 0.dp,

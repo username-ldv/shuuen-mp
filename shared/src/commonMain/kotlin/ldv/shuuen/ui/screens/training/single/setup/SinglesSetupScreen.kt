@@ -2,7 +2,6 @@ package ldv.shuuen.ui.screens.training.single.setup
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,12 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.Casino
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.GraphicEq
-import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,13 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
-import ldv.shuuen.ui.common.PillControl
 import ldv.shuuen.ui.common.PrimaryCta
 import ldv.shuuen.ui.common.SectionTitle
 import ldv.shuuen.ui.common.SegmentedPlusMinus
@@ -50,7 +43,7 @@ fun SinglesSetupScreen(
   onOpenContext: () -> Unit,
   onStartTraining: () -> Unit,
 ) {
-  val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+  val saveableScreenState by viewModel.screenState.collectAsStateWithLifecycle()
   StaticScreenFrame(
     topBar = {
       ShuuenTopAppBar(
@@ -62,65 +55,9 @@ fun SinglesSetupScreen(
     },
   ) {
 
-    GlassPanel {
-      BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = maxWidth < 430.dp
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          verticalAlignment = Alignment.Top,
-          horizontalArrangement = Arrangement.spacedBy(if (compact) 10.dp else 16.dp),
-        ) {
-          IconBubble(
-            Icons.Rounded.MusicNote, tint = ShuuenUi.Mint, size = if (compact) 52.dp else 62.dp
-          )
-          Column(
-            modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)
-          ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Column(
-                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
-              ) {
-                Text(
-                  text = "1. SCALE",
-                  color = ShuuenUi.Text,
-                  style = MaterialTheme.typography.titleLarge.copy(
-                    letterSpacing = 2.4.sp, fontWeight = FontWeight.Bold
-                  ),
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                  "Choose the scale you want to train.",
-                  color = ShuuenUi.Muted,
-                  style = MaterialTheme.typography.bodyMedium
-                )
-              }
-              Icon(
-                Icons.Rounded.ExpandLess,
-                contentDescription = null,
-                tint = ShuuenUi.Muted,
-                modifier = Modifier.size(30.dp)
-              )
-            }
-
-            Row(
-              horizontalArrangement = Arrangement.spacedBy(10.dp),
-              modifier = Modifier.fillMaxWidth()
-            ) {
-              LabeledPicker("TONIC", "C", Modifier.weight(1f))
-              LabeledPicker("MODE", "Major", Modifier.weight(1.35f))
-            }
-            ScaleChoiceGrid()
-            PillControl(
-              "More scales", leadingIcon = Icons.Rounded.Casino, modifier = Modifier.fillMaxWidth()
-            )
-            PillControl(
-              "Custom scale", leadingIcon = Icons.Rounded.Edit, modifier = Modifier.fillMaxWidth()
-            )
-          }
-        }
-      }
-    }
+    ScaleChooser(
+      trainingScale = saveableScreenState.traningScale, onScaleChosen = viewModel::changeScale
+    )
 
     CompactSetupRow(
       icon = Icons.Rounded.Tune,
@@ -139,7 +76,7 @@ fun SinglesSetupScreen(
         subtitle = "Set how many questions to include.",
       )
       SegmentedPlusMinus(
-        value = screenState.questionsNumber,
+        value = saveableScreenState.questionsNumber,
         onChange = viewModel::changeQuestionsNumber,
         minimalNumber = 0
       )
@@ -152,58 +89,18 @@ fun SinglesSetupScreen(
         subtitle = "Select the note range.",
       )
       Text(
-        text = "${screenState.range.first} - ${screenState.range.second}",
+        text = "${saveableScreenState.range.first} - ${saveableScreenState.range.second}",
         style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 3.sp),
         modifier = Modifier.align(Alignment.CenterHorizontally),
       )
-      NoteRow(value = screenState.range.first) { viewModel.changeRangeStart(it) }
-      NoteRow(value = screenState.range.second) { viewModel.changeRangeEnd(it) }
+      NoteRow(value = saveableScreenState.range.first) { viewModel.changeRangeStart(it) }
+      NoteRow(value = saveableScreenState.range.second) { viewModel.changeRangeEnd(it) }
     }
 
     PrimaryCta(
       text = "START TRAINING",
       onClick = onStartTraining,
       modifier = Modifier.padding(top = 10.dp, bottom = 18.dp),
-    )
-  }
-}
-
-@Composable
-private fun ScaleChoiceGrid() {
-  Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-      PillControl(
-        "C Major", selected = true, trailingCheck = true, modifier = Modifier.weight(1f)
-      )
-      PillControl(
-        "A Minor", modifier = Modifier.weight(1f)
-      )
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-      PillControl(
-        "G Major", modifier = Modifier.weight(1f)
-      )
-      PillControl(
-        "E Minor", modifier = Modifier.weight(1f)
-      )
-    }
-  }
-}
-
-@Composable
-private fun LabeledPicker(
-  label: String,
-  value: String,
-  modifier: Modifier = Modifier,
-) {
-  Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text(
-      label,
-      color = ShuuenUi.Muted,
-      style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp)
-    )
-    PillControl(
-      value, modifier = Modifier.fillMaxWidth()
     )
   }
 }

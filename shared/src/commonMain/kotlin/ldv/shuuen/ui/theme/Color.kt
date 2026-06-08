@@ -42,10 +42,10 @@ val ErrorLightContainer = Color(0xFFF9DEDC)
 val AppScrim = Color(0xCC000000)
 
 // Dark theme roles
-val md_theme_dark_primary = Neutral95
+val md_theme_dark_primary = Neutral60
 val md_theme_dark_onPrimary = Neutral0
 val md_theme_dark_primaryContainer = Neutral17
-val md_theme_dark_onPrimaryContainer = Neutral95
+val md_theme_dark_onPrimaryContainer = Neutral60
 val md_theme_dark_inversePrimary = Neutral20
 
 val md_theme_dark_secondary = Neutral80

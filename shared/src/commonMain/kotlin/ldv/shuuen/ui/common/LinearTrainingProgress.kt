@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
 
+// todo: why not just use Material3 ProgressIndicator?
 @Composable
 fun LinearTrainingProgress(
   progress: Float,
