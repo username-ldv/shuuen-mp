@@ -1,14 +1,15 @@
 package ldv.shuuen.domain.audio.music
 
 data class Timing(val tempo: Int) {
+  init {
+    require(tempo > 0) { "Tempo must be positive." }
+  }
+
   fun whole(): Double = quarter() * 4.0
 
   fun half(): Double = quarter() * 2.0
 
-  fun quarter(): Double {
-    require(tempo > 0) { "Tempo must be positive." }
-    return 60_000.0 / tempo
-  }
+  fun quarter(): Double = 60_000.0 / tempo
 
   fun eighth(): Double = quarter() / 2.0
 
