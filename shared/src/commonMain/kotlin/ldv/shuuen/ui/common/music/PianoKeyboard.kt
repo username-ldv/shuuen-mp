@@ -546,14 +546,14 @@ fun PianoKeyboard(
   }
 }
 
-private data class PianoKeyGeometry(
+data class PianoKeyGeometry(
   val index: Int,
   val isBlack: Boolean,
   val rect: Rect,
   val hitRect: Rect = rect,
 )
 
-private fun buildPianoKeyGeometry(
+fun buildPianoKeyGeometry(
   width: Float,
   height: Float,
   keyCount: Int,
