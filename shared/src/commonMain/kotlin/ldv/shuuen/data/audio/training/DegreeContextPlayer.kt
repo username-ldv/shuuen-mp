@@ -94,7 +94,6 @@ class DegreeContextPlayer(
       when (val sustain = node.sustain) {
         is Sustain.Endless -> {
           delay(endlessPreMelody.milliseconds)
-          // todo: can maybe play some small setup melody like 1351 or something
           if (c.setupMelody != null) {
             var currentlyPlaying: Note? = null
             constructAscSetupMelodyFlow(root, c.setupMelody).collect { note ->
