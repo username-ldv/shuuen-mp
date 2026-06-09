@@ -13,6 +13,7 @@ import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.Sustain
 import ldv.shuuen.domain.audio.music.chord
 import ldv.shuuen.domain.audio.music.constructAscSetupMelodyFlow
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 private data class CurrentlyPlayingNode(
@@ -26,8 +27,8 @@ class DegreeContextPlayer(
   val midiEngine: MidiEngine,
   val context: DegreeContext,
   val root: Pitch,
-  val endlessPreMelody: Double = 1500.0,
-  val afterSetupMelody: Double = 1500.0
+  val endlessPreMelody: Duration = 2000.milliseconds,
+  val afterSetupMelody: Duration = 1500.milliseconds
 ) {
   private val currentQuestion = MutableStateFlow(0)
   private val _ready = MutableStateFlow(false)
@@ -93,7 +94,7 @@ class DegreeContextPlayer(
 
       when (val sustain = node.sustain) {
         is Sustain.Endless -> {
-          delay(endlessPreMelody.milliseconds)
+          delay(endlessPreMelody)
           if (c.setupMelody != null) {
             var currentlyPlaying: Note? = null
             constructAscSetupMelodyFlow(root, c.setupMelody).collect { note ->
@@ -102,14 +103,14 @@ class DegreeContextPlayer(
               currentlyPlaying = note
             }
             currentlyPlaying?.let { midiEngine.stopNote(it) }
-            delay(afterSetupMelody.milliseconds)
+            delay(afterSetupMelody)
           }
           _ready.value = true
           return
         }
 
         is Sustain.Finite -> {
-          delay(sustain.duration.milliseconds)
+          delay(sustain.duration)
           stopCurrent(true)
           // if durationInQuestion = 0 then just play next immediately
           if (node.durationInQuestions == 0) continue

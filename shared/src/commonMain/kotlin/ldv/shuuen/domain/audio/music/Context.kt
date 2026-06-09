@@ -1,6 +1,7 @@
 package ldv.shuuen.domain.audio.music
 
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 
 @Serializable
@@ -19,5 +20,5 @@ sealed interface Sustain {
   data object Endless : Sustain
 
   @Serializable
-  data class Finite(val duration: Double) : Sustain
+  data class Finite(val duration: Duration) : Sustain
 }
