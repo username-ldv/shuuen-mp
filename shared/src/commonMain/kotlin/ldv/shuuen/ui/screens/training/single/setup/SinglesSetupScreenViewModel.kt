@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.update
 import ldv.shuuen.domain.audio.music.Degree
 import ldv.shuuen.domain.audio.music.DegreeContext
 import ldv.shuuen.domain.audio.music.DegreeContextNode
+import ldv.shuuen.domain.audio.music.DegreeWithOctave
 import ldv.shuuen.domain.audio.music.Note
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.ScaleType
@@ -22,7 +23,15 @@ class SinglesSetupScreenViewModel(val settingsRepository: SettingsRepository) : 
     SinglesLevel(
       name = "",
       traningScale = TrainingScale.degreesFromType(ScaleType.Major),
-      context = DegreeContext(listOf(DegreeContextNode(listOf(Degree.D1), null, Sustain.Endless))),
+      context = DegreeContext(
+        listOf(DegreeContextNode(listOf(DegreeWithOctave(Degree.D1, 2)), null, Sustain.Endless)),
+        setupMelody = listOf(
+          Degree.D1,
+          Degree.D3,
+          Degree.D5,
+          Degree.D1,
+        )
+      ),
       questionsNumber = 20,
       range = Note(Pitch.C, 2) to Note(Pitch.C, 6),
     )
@@ -52,6 +61,7 @@ class SinglesSetupScreenViewModel(val settingsRepository: SettingsRepository) : 
       is TrainingScaleItemStates.ByPitch -> {
         level.traningScale.itemStates.items.entries.first().value.label
       }
+
       is TrainingScaleItemStates.ByDegree -> "Random"
 
     }

@@ -33,6 +33,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ldv.shuuen.common.ResponseState
 import ldv.shuuen.ui.common.LinearTrainingProgress
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
@@ -45,13 +47,19 @@ import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
 
 @Composable
 fun SinglesPlayScreen(onNavigateBack: () -> Unit, onLevelEnd: () -> Unit, viewModel: SinglesPlayScreenViewModel) {
+  val screenState by viewModel.state.collectAsStateWithLifecycle()
   var useCircleInput by rememberSaveable { mutableStateOf(false) }
+  val title = when (val level = screenState.levelData) {
+    is ResponseState.Loading -> "Loading..."
+    is ResponseState.Error -> "Error"
+    is ResponseState.Success -> level.result.name
+  }
 
   StaticScreenFrame(
     scrollable = false,
     topBar = {
       ShuuenTopAppBar(
-        title = "D Major",
+        title = title,
         onBack = onNavigateBack,
         trailingIcon = Icons.Rounded.Tune,
         onTrailingClick = { useCircleInput = !useCircleInput },
@@ -72,7 +80,7 @@ fun SinglesPlayScreen(onNavigateBack: () -> Unit, onLevelEnd: () -> Unit, viewMo
 
     Spacer(Modifier.weight(0.34f))
 
-    BottomActionBar(on1 = onLevelEnd)
+    BottomActionBar(on1 = {})
   }
 }
 

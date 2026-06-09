@@ -4,11 +4,11 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class DegreeContext(val nodes: List<DegreeContextNode>, val name: String? = null)
+data class DegreeContext(val nodes: List<DegreeContextNode>, val name: String? = null, val setupMelody: List<Degree>?)
 
 @Serializable
 data class DegreeContextNode(
-  val degrees: List<Degree>,
+  val degrees: List<DegreeWithOctave>,
   val durationInQuestions: Int?,
   val sustain: Sustain
 )

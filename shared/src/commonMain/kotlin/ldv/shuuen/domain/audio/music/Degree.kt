@@ -33,3 +33,11 @@ enum class Degree(val offset: Int, val label: String) {
       entries.first { it.offset == offset.floorMod(12) }
   }
 }
+
+@Serializable
+data class DegreeWithOctave(val degree: Degree, val octave: Int) {
+  init {
+    // todo: better check
+    require(octave in 0..8) { "out of bounds" }
+  }
+}

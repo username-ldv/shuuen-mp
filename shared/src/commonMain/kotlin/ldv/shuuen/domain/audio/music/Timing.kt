@@ -1,25 +1,28 @@
 package ldv.shuuen.domain.audio.music
 
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+
 data class Timing(val tempo: Int) {
   init {
     require(tempo > 0) { "Tempo must be positive." }
   }
 
-  fun whole(): Double = quarter() * 4.0
+  fun whole(): Duration = quarter() * 4.0
 
-  fun half(): Double = quarter() * 2.0
+  fun half(): Duration = quarter() * 2.0
 
-  fun quarter(): Double = 60_000.0 / tempo
+  fun quarter(): Duration = (60_000.0 / tempo).milliseconds
 
-  fun eighth(): Double = quarter() / 2.0
+  fun eighth(): Duration = quarter() / 2.0
 
-  fun sixteenth(): Double = quarter() / 4.0
+  fun sixteenth(): Duration = quarter() / 4.0
 
-  fun thirtySecond(): Double = quarter() / 8.0
+  fun thirtySecond(): Duration = quarter() / 8.0
 
-  fun sixtyFourth(): Double = quarter() / 16.0
+  fun sixtyFourth(): Duration = quarter() / 16.0
 
-  fun oneHundredTwentyEighth(): Double = quarter() / 32.0
+  fun oneHundredTwentyEighth(): Duration = quarter() / 32.0
 }
 
 inline fun <T> withTiming(tempo: Int, block: Timing.() -> T): T = Timing(tempo).block()

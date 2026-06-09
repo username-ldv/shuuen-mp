@@ -34,3 +34,5 @@ data class Chord(
     }
   }
 }
+
+fun List<Note>.chord(): Chord = Chord(this)

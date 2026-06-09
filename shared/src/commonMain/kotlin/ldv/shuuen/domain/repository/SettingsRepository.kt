@@ -2,6 +2,7 @@ package ldv.shuuen.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
+import ldv.shuuen.common.ResponseState
 import ldv.shuuen.domain.audio.midi.ChannelPresets
 import ldv.shuuen.domain.audio.midi.DefaultPreset
 import ldv.shuuen.domain.audio.midi.MidiChannel
@@ -16,6 +17,8 @@ interface SettingsRepository {
   suspend fun setPreset(channel: MidiChannel, preset: Preset)
 
   suspend fun upsertLevel(level: SinglesLevel)
+
+  suspend fun getLevelById(id: String): Flow<ResponseState<SinglesLevel>>
 }
 
 @Serializable
