@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ldv.shuuen.common.ResponseState
 import ldv.shuuen.domain.training.TrainingScaleItemStates
 import ldv.shuuen.domain.training.singles.SinglesLevel
 import ldv.shuuen.ui.common.PrimaryCta
@@ -45,7 +46,7 @@ fun SinglesLevelSelectScreen(
   onCreateNewLevel: () -> Unit,
   viewModel: SinglesLevelSelectScreenViewModel
 ) {
-  val levels by viewModel.levels.collectAsStateWithLifecycle(listOf())
+  val levels by viewModel.levels.collectAsStateWithLifecycle(ResponseState.Loading)
   StaticScreenFrame(
     topBar = {
       ShuuenTopAppBar(
@@ -66,10 +67,17 @@ fun SinglesLevelSelectScreen(
           modifier = Modifier.padding(top = 8.dp),
         )
       }
-      levels.forEach { level ->
-        item {
-          LevelCard(level, onLevelChosen = { level -> onStartLevel(level.id) })
+      when (levels) {
+        is ResponseState.Loading -> item { Text(text = "Loading...") }
+        is ResponseState.Success -> {
+          (levels as ResponseState.Success<List<SinglesLevel>>).result.forEach { level ->
+            item {
+              LevelCard(level, onLevelChosen = { onStartLevel(it.id) })
+            }
+          }
         }
+
+        is ResponseState.Error -> item { Text(text = "Error loading levels") }
       }
     }
   }
@@ -99,13 +107,13 @@ private fun LevelCard(level: SinglesLevel, onLevelChosen: (SinglesLevel) -> Unit
         ) {
           LevelText(level.name)
           LevelParameterGrid(level = level)
-          when (level.traningScale.itemStates) {
+          when (val first = level.traningScales.first().itemStates) {
             is TrainingScaleItemStates.ByDegree -> {
-              BoxedItemRow(level.traningScale.itemStates.items, itemSize = 32.dp)
+              BoxedItemRow(first.items, itemSize = 32.dp)
             }
 
             is TrainingScaleItemStates.ByPitch -> {
-              BoxedItemRow(level.traningScale.itemStates.items, itemSize = 32.dp)
+              BoxedItemRow(first.items, itemSize = 32.dp)
             }
           }
         }

@@ -11,26 +11,27 @@ enum class TrainingScaleType {
 }
 
 @Serializable
-data class TrainingScale(val root: Pitch?, val itemStates: TrainingScaleItemStates) {
+data class TrainingScale(
+  val root: Pitch?, val scaleType: ScaleType, val itemStates: TrainingScaleItemStates
+) {
   val type = if (root != null) TrainingScaleType.Absolute else TrainingScaleType.Relative
 
   companion object {
     fun fromScale(s: Scale): TrainingScale {
       val names = s.appropriatePitchNames()
       return TrainingScale(
-        root = s.root,
-        itemStates = TrainingScaleItemStates.ByPitch(s.pitches.zip(names).associate { (pitch, name) ->
-          pitch to BoxedListItemState(true, name)
-        })
+        root = s.root, itemStates = TrainingScaleItemStates.ByPitch(
+          s.pitches.zip(names).associate { (pitch, name) ->
+            pitch to BoxedListItemState(true, name)
+          }), scaleType = s.type
       )
     }
 
     fun degreesFromType(m: ScaleType, formula: List<Int>? = null): TrainingScale {
       val sampleScale = Scale.fromScaleType(Pitch.C, m, formula ?: listOf(0))
       return TrainingScale(
-        root = null,
-        itemStates = TrainingScaleItemStates.ByDegree(
-          sampleScale.degrees.associateWith { BoxedListItemState(true, it.label) })
+        root = null, itemStates = TrainingScaleItemStates.ByDegree(
+          sampleScale.degrees.associateWith { BoxedListItemState(true, it.label) }), scaleType = m
       )
     }
   }

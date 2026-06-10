@@ -60,10 +60,10 @@ fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) ->
         ) {
           TextDropdownMenu(
             items = listOf("Random") + Pitch.entries.map {
-            Scale.appropriatePitchName(
-              it, it, mode
-            )
-          },
+              Scale.appropriatePitchName(
+                it, it, mode
+              )
+            },
             selectedItem = tonic?.let { Scale.appropriatePitchName(it, it, mode) } ?: "Random",
             onItemSelected = { tonic = Pitch.fromName(it) },
             modifier = Modifier.weight(0.75f)
@@ -83,7 +83,11 @@ fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) ->
               items = trainingScale.itemStates.items, onClick = { pitch ->
                 val m = trainingScale.itemStates.items.toMutableMap()
                 m[pitch]?.let { m[pitch] = it.copy(active = !it.active) }
-                onScaleChosen(TrainingScale(tonic, TrainingScaleItemStates.ByPitch(m)))
+                onScaleChosen(
+                  TrainingScale(
+                    root = tonic, scaleType = mode, itemStates = TrainingScaleItemStates.ByPitch(m)
+                  )
+                )
               })
           }
 
@@ -92,7 +96,11 @@ fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) ->
               items = trainingScale.itemStates.items, onClick = { degree ->
                 val m = trainingScale.itemStates.items.toMutableMap()
                 m[degree]?.let { m[degree] = it.copy(active = !it.active) }
-                onScaleChosen(TrainingScale(tonic, TrainingScaleItemStates.ByDegree(m)))
+                onScaleChosen(
+                  TrainingScale(
+                    root = tonic, scaleType = mode, itemStates = TrainingScaleItemStates.ByDegree(m)
+                  )
+                )
               })
           }
         }

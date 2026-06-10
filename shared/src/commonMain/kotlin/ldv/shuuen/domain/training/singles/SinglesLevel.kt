@@ -12,7 +12,7 @@ import kotlin.uuid.Uuid
 data class SinglesLevel(
   val id: String = Uuid.generateV7().toString(),
   val name: String,
-  val traningScale: TrainingScale,
+  val traningScales: List<TrainingScale>,
   val context: DegreeContext,
   val questionsNumber: Int?,
   val range: Pair<Note, Note>,

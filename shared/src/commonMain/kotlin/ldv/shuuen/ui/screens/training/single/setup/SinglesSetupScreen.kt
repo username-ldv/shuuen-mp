@@ -61,7 +61,7 @@ fun SinglesSetupScreen(
   ) {
 
     ScaleChooser(
-      trainingScale = saveableScreenState.traningScale, onScaleChosen = viewModel::changeScale
+      trainingScale = saveableScreenState.traningScales.first(), onScaleChosen = viewModel::changeScale
     )
 
     CompactSetupRow(

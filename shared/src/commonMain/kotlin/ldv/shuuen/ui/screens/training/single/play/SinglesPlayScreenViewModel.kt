@@ -13,17 +13,16 @@ import ldv.shuuen.data.audio.training.DegreeContextPlayer
 import ldv.shuuen.domain.audio.engine.MidiEngine
 import ldv.shuuen.domain.audio.engine.MidiEngineStatus
 import ldv.shuuen.domain.audio.music.Pitch
-import ldv.shuuen.domain.repository.SettingsRepository
+import ldv.shuuen.domain.repository.local.SinglesLocalLevelRepository
 import ldv.shuuen.domain.training.singles.SinglesLevel
 
 data class SinglesPlayScreenState(
   val levelData: ResponseState<SinglesLevel> = ResponseState.Loading,
   val isReady: Boolean = false,
-  val pitch: Pitch = Pitch.random()
 )
 
 class SinglesPlayScreenViewModel(
-  levelId: String, settingsRepository: SettingsRepository, val midiEngine: MidiEngine
+  levelId: String, levelRepository: SinglesLocalLevelRepository, val midiEngine: MidiEngine
 ) : ViewModel() {
   private val _state = MutableStateFlow(SinglesPlayScreenState())
   val state = _state.asStateFlow()
@@ -42,13 +41,15 @@ class SinglesPlayScreenViewModel(
 
         is MidiEngineStatus.Failed -> error("Failed MidiEngine audio initializition")
       }
-      settingsRepository.getLevelById(levelId).collect { responseState ->
+      levelRepository.getLevelById(levelId).collect { responseState ->
         _state.update {
           it.copy(levelData = responseState)
         }
         if (responseState is ResponseState.Success) startContext(
-          responseState.result, state.value.pitch
-        )
+          responseState.result, responseState.result.traningScales.first().root ?: Pitch.random()
+        ) else if (responseState is ResponseState.Error) {
+          Napier.e { "error getting level" }
+        }
       }
     }
   }

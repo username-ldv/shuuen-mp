@@ -7,6 +7,8 @@ plugins {
   alias(libs.plugins.composeCompiler)
   alias(libs.plugins.koin.compiler)
   alias(libs.plugins.jetbrains.kotlin.serialization)
+  alias(libs.plugins.ksp)
+  alias(libs.plugins.androidx.room3)
 }
 
 kotlin {
@@ -43,6 +45,10 @@ kotlin {
       implementation(libs.androidx.lifecycle.viewmodelCompose)
       implementation(libs.androidx.lifecycle.runtimeCompose)
 
+      // room
+      implementation(libs.androidx.room3.runtime)
+      implementation(libs.androidx.sqlite.bundled)
+
       // koin
       implementation(project.dependencies.platform(libs.koin.bom))
       implementation(libs.koin.compose)
@@ -57,6 +63,7 @@ kotlin {
 
       // etc
       implementation(libs.kotlinx.serialization.core)
+      implementation(libs.kotlinx.serialization.json)
       implementation(libs.napier)
       implementation(libs.kstore)
       implementation(libs.kstore.file)
@@ -75,4 +82,10 @@ kotlin {
 
 dependencies {
   androidRuntimeClasspath(libs.compose.uiTooling)
+  add("kspAndroid", libs.androidx.room3.compiler)
+  add("kspJvm", libs.androidx.room3.compiler)
+}
+
+room3 {
+  schemaDirectory("$projectDir/schemas")
 }

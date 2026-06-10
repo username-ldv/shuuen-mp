@@ -1,9 +1,16 @@
 package ldv.shuuen.di
 
 import ldv.shuuen.data.audio.BassMidiEngine
+import ldv.shuuen.data.database.AppDatabase
+import ldv.shuuen.data.database.dao.ContextDao
+import ldv.shuuen.data.database.dao.SinglesLevelDao
+import ldv.shuuen.data.repository.local.ContextLocalRepositoryImpl
+import ldv.shuuen.data.repository.local.SinglesLocalLevelRepositoryImpl
 import ldv.shuuen.data.settings.KStoreSettingsRepository
 import ldv.shuuen.domain.audio.engine.MidiEngine
 import ldv.shuuen.domain.repository.SettingsRepository
+import ldv.shuuen.domain.repository.local.ContextLocalRepository
+import ldv.shuuen.domain.repository.local.SinglesLocalLevelRepository
 import ldv.shuuen.ui.navigation.AppNavigator
 import ldv.shuuen.ui.navigation.AppRoute
 import ldv.shuuen.ui.screens.app_settings.SettingsScreen
@@ -39,8 +46,13 @@ val commonModule = module {
 
   single<KStoreSettingsRepository>() bind SettingsRepository::class
 
-  single<BassMidiEngine>() bind MidiEngine::class
+  single<SinglesLevelDao> { get<AppDatabase>().singlesLevelDao() }
+  single<ContextDao> { get<AppDatabase>().contextDao() }
 
+  single<ContextLocalRepositoryImpl>() bind ContextLocalRepository::class
+  single<SinglesLocalLevelRepositoryImpl>() bind SinglesLocalLevelRepository::class
+
+  single<BassMidiEngine>() bind MidiEngine::class
 
   navigation<AppRoute.MainMenu> {
     val navigator = get<AppNavigator>()

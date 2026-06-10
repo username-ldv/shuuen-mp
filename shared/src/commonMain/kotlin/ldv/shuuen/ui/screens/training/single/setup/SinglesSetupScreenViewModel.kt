@@ -5,33 +5,24 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import ldv.shuuen.domain.audio.music.Degree
-import ldv.shuuen.domain.audio.music.DegreeContext
-import ldv.shuuen.domain.audio.music.DegreeContextNode
-import ldv.shuuen.domain.audio.music.DegreeWithOctave
 import ldv.shuuen.domain.audio.music.Note
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.ScaleType
-import ldv.shuuen.domain.audio.music.Sustain
-import ldv.shuuen.domain.repository.SettingsRepository
+import ldv.shuuen.domain.audio.music.defaultContext
+import ldv.shuuen.domain.repository.local.SinglesLocalLevelRepository
 import ldv.shuuen.domain.training.TrainingScale
 import ldv.shuuen.domain.training.TrainingScaleItemStates
+import ldv.shuuen.domain.training.level.LevelSource
 import ldv.shuuen.domain.training.singles.SinglesLevel
 
-class SinglesSetupScreenViewModel(val settingsRepository: SettingsRepository) : ViewModel() {
+class SinglesSetupScreenViewModel(
+  val levelRepository: SinglesLocalLevelRepository
+) : ViewModel() {
   private val _singlesLevelState = MutableStateFlow(
     SinglesLevel(
       name = "",
-      traningScale = TrainingScale.degreesFromType(ScaleType.Major),
-      context = DegreeContext(
-        listOf(DegreeContextNode(listOf(DegreeWithOctave(Degree.D1, 2)), null, Sustain.Endless)),
-        setupMelody = listOf(
-          Degree.D1,
-          Degree.D3,
-          Degree.D5,
-          Degree.D1,
-        )
-      ),
+      traningScales = listOf(TrainingScale.degreesFromType(ScaleType.Major)),
+      context = defaultContext.copy(),
       questionsNumber = 20,
       range = Note(Pitch.C, 2) to Note(Pitch.C, 6),
     )
@@ -51,21 +42,22 @@ class SinglesSetupScreenViewModel(val settingsRepository: SettingsRepository) : 
   }
 
   fun changeScale(t: TrainingScale) {
-    _singlesLevelState.update { it.copy(traningScale = t) }
+    _singlesLevelState.update { it.copy(traningScales = listOf(t)) }
   }
 
   suspend fun upsertLevel() {
     val level = screenState.value
+    val firstScale = level.traningScales.first()
     // todo: what should be the default name?
-    val levelName = when (level.traningScale.itemStates) {
+    val levelName = when (val itemStates = firstScale.itemStates) {
       is TrainingScaleItemStates.ByPitch -> {
-        level.traningScale.itemStates.items.entries.first().value.label
+        itemStates.items.entries.first().value.label
       }
 
       is TrainingScaleItemStates.ByDegree -> "Random"
 
     }
-    settingsRepository.upsertLevel(level.copy(name = levelName))
+    levelRepository.upsertLevel(level.copy(name = levelName), source = LevelSource.User)
     Napier.v { "Saved new level: $level" }
   }
 
