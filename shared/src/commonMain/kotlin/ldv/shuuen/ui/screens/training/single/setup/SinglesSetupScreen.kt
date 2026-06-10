@@ -27,8 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
 import ldv.shuuen.ui.common.PrimaryCta
@@ -61,7 +61,8 @@ fun SinglesSetupScreen(
   ) {
 
     ScaleChooser(
-      trainingScale = saveableScreenState.traningScales.first(), onScaleChosen = viewModel::changeScale
+      trainingScale = saveableScreenState.traningScales.first(),
+      onScaleChosen = viewModel::changeScale
     )
 
     CompactSetupRow(
@@ -107,12 +108,10 @@ fun SinglesSetupScreen(
       text = "SAVE LEVEL",
       onClick = {
         // todo: maybe add loading state
-        runBlocking {
-          scope.launch {
-            viewModel.upsertLevel()
-          }
+        scope.launch {
+          viewModel.upsertLevel()
+          onSaveLevel()
         }
-        onSaveLevel()
       },
       modifier = Modifier.padding(top = 10.dp, bottom = 18.dp),
       icon = Icons.Rounded.Save
