@@ -42,8 +42,6 @@ expect val platformModule: Module
 
 @OptIn(KoinExperimentalAPI::class)
 val commonModule = module {
-  single<AppNavigator>()
-
   single<KStoreSettingsRepository>() bind SettingsRepository::class
 
   single<SinglesLevelDao> { get<AppDatabase>().singlesLevelDao() }
@@ -53,6 +51,8 @@ val commonModule = module {
   single<SinglesLocalLevelRepositoryImpl>() bind SinglesLocalLevelRepository::class
 
   single<BassMidiEngine>() bind MidiEngine::class
+
+  single<AppNavigator>()
 
   navigation<AppRoute.MainMenu> {
     val navigator = get<AppNavigator>()
