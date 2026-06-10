@@ -34,7 +34,7 @@ class SinglesLocalLevelRepositoryImpl(
     }
   }
 
-  override suspend fun getLevelById(id: String): Flow<ResponseState<SinglesLevel>> {
+  override fun getLevelById(id: String): Flow<ResponseState<SinglesLevel>> {
     return flow {
       emit(ResponseState.Loading)
       val response =

@@ -9,7 +9,7 @@ interface SinglesLocalLevelRepository {
 
   fun getLevels(): Flow<ResponseState<List<SinglesLevel>>>
 
-  suspend fun getLevelById(id: String): Flow<ResponseState<SinglesLevel>>
+  fun getLevelById(id: String): Flow<ResponseState<SinglesLevel>>
 
   suspend fun upsertLevel(level: SinglesLevel, source: LevelSource)
 }
