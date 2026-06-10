@@ -41,10 +41,8 @@ fun BoxedItemRowPreview() {
   ShuuenTheme {
     BoxedItemRow(items = Scale.major(Pitch.C).pitches.map {
       it to BoxedListItemState(
-        true,
-        it.toString()
+        true, it.toString()
       )
-    }
-      .toMap())
+    }.toMap())
   }
 }

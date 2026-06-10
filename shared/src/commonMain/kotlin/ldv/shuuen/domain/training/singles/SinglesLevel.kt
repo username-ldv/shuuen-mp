@@ -2,18 +2,19 @@ package ldv.shuuen.domain.training.singles
 
 import kotlinx.serialization.Serializable
 import ldv.shuuen.domain.audio.music.DegreeContext
-import ldv.shuuen.domain.audio.music.Note
-import ldv.shuuen.domain.training.TrainingScale
+import ldv.shuuen.domain.audio.music.NoteRange
+import ldv.shuuen.domain.training.level.LevelConfig
+import ldv.shuuen.domain.training.level.LevelSource
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 @Serializable
 @OptIn(ExperimentalUuidApi::class)
 data class SinglesLevel(
-  val id: String = Uuid.generateV7().toString(),
+  val id: String,
   val name: String,
-  val trainingScales: List<TrainingScale>,
-  val context: DegreeContext,
+  val levelConfig: LevelConfig.Singles,
+  val context: DegreeContext?,
+  val source: LevelSource,
   val questionsNumber: Int?,
-  val range: Pair<Note, Note>,
+  val range: NoteRange
 )

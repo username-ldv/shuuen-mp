@@ -24,18 +24,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ldv.shuuen.common.updateBy
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.Scale
 import ldv.shuuen.domain.audio.music.ScaleType
-import ldv.shuuen.domain.training.TrainingScale
-import ldv.shuuen.domain.training.TrainingScaleItemStates
+import ldv.shuuen.domain.training.level.ScaleConfig
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.TextDropdownMenu
+import ldv.shuuen.ui.screens.training.common.asConfigDegreeStates
+import ldv.shuuen.ui.screens.training.common.asPitchStates
+import ldv.shuuen.ui.screens.training.common.toBoxedItems
 
 @Composable
-fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) -> Unit = {}) {
+fun ScaleChooser(scaleConfig: ScaleConfig, onScaleChosen: (ScaleConfig) -> Unit = {}) {
   GlassPanel {
     val arrangementSpace = 14.dp
     Column(
@@ -46,10 +49,14 @@ fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) ->
       var tonic: Pitch? by rememberSaveable { mutableStateOf(null) }
       var mode by rememberSaveable { mutableStateOf(ScaleType.Major) }
       LaunchedEffect(tonic, mode) {
-        val newTrainingScale = tonic?.let { t ->
-          TrainingScale.fromScale(Scale.fromScaleType(t, mode, listOf(0)))
-        } ?: TrainingScale.degreesFromType(mode, listOf(0))
-        onScaleChosen(newTrainingScale)
+        val newScaleConfig: ScaleConfig = tonic?.let { t ->
+          val pitchStates = Scale.fromScaleType(t, mode, listOf(0)).asPitchStates()
+          ScaleConfig.AbsoluteScaleConfig(t, mode, pitchStates)
+        } ?: run {
+          val degreeStates1 = Scale.fromScaleType(Pitch.C, mode, listOf(0)).asConfigDegreeStates()
+          ScaleConfig.RelativeScaleConfig(scaleType = mode, degreeStates = degreeStates1)
+        }
+        onScaleChosen(newScaleConfig)
       }
       Column(
         verticalArrangement = Arrangement.spacedBy(arrangementSpace),
@@ -77,31 +84,27 @@ fun ScaleChooser(trainingScale: TrainingScale, onScaleChosen: (TrainingScale) ->
             modifier = Modifier.weight(1f)
           )
         }
-        when (trainingScale.itemStates) {
-          is TrainingScaleItemStates.ByPitch -> {
-            BoxedItemRow(
-              items = trainingScale.itemStates.items, onClick = { pitch ->
-                val m = trainingScale.itemStates.items.toMutableMap()
-                m[pitch]?.let { m[pitch] = it.copy(active = !it.active) }
-                onScaleChosen(
-                  TrainingScale(
-                    root = tonic, scaleType = mode, itemStates = TrainingScaleItemStates.ByPitch(m)
-                  )
-                )
-              })
+        when (scaleConfig) {
+          is ScaleConfig.RelativeScaleConfig -> {
+            BoxedItemRow(items = scaleConfig.degreeStates.toBoxedItems(), onClick = { degree ->
+              val degreeStates =
+                scaleConfig.degreeStates.updateBy(condition = { it.degree == degree }) { previous ->
+                  ScaleConfig.ScaleItemState.ScaleDegreeState(degree, !previous.active)
+                }
+              val config = ScaleConfig.RelativeScaleConfig(mode, degreeStates)
+              onScaleChosen(config)
+            })
           }
 
-          is TrainingScaleItemStates.ByDegree -> {
-            BoxedItemRow(
-              items = trainingScale.itemStates.items, onClick = { degree ->
-                val m = trainingScale.itemStates.items.toMutableMap()
-                m[degree]?.let { m[degree] = it.copy(active = !it.active) }
-                onScaleChosen(
-                  TrainingScale(
-                    root = tonic, scaleType = mode, itemStates = TrainingScaleItemStates.ByDegree(m)
-                  )
-                )
-              })
+          is ScaleConfig.AbsoluteScaleConfig -> {
+            BoxedItemRow(items = scaleConfig.pitchStates.toBoxedItems(), onClick = { pitch ->
+              val pitchStates =
+                scaleConfig.pitchStates.updateBy(condition = { it.pitch == pitch }) { previous ->
+                  ScaleConfig.ScaleItemState.ScalePitchState(pitch, !previous.active)
+                }
+              val config = ScaleConfig.AbsoluteScaleConfig(scaleConfig.root, mode, pitchStates)
+              onScaleChosen(config)
+            })
           }
         }
       }

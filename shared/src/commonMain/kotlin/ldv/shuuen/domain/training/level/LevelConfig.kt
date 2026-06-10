@@ -13,12 +13,12 @@ sealed interface LevelConfig {
 
     @Serializable
     data class Absolute(
-      val scales: List<ScaleConfig.AbsoluteScaleConfig>, override val rotateEveryQuestions: Int?
+      val scales: List<ScaleConfig.AbsoluteScaleConfig>, override val rotateEveryQuestions: Int? = 5
     ) : Singles
 
     @Serializable
     data class Relative(
-      val config: ScaleConfig.RelativeScaleConfig, override val rotateEveryQuestions: Int?
+      val scaleConfig: ScaleConfig.RelativeScaleConfig, override val rotateEveryQuestions: Int? = 5
     ) : Singles
   }
 }

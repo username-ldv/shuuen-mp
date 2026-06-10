@@ -12,8 +12,10 @@ import ldv.shuuen.common.ResponseState
 import ldv.shuuen.data.audio.training.DegreeContextPlayer
 import ldv.shuuen.domain.audio.engine.MidiEngine
 import ldv.shuuen.domain.audio.engine.MidiEngineStatus
+import ldv.shuuen.domain.audio.music.DegreeContext
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.repository.local.SinglesLocalLevelRepository
+import ldv.shuuen.domain.training.level.LevelConfig
 import ldv.shuuen.domain.training.singles.SinglesLevel
 
 data class SinglesPlayScreenState(
@@ -45,18 +47,27 @@ class SinglesPlayScreenViewModel(
         _state.update {
           it.copy(levelData = responseState)
         }
-        if (responseState is ResponseState.Success) startContext(
-          responseState.result, responseState.result.trainingScales.first().root ?: Pitch.random()
-        ) else if (responseState is ResponseState.Error) {
+        if (responseState is ResponseState.Success) {
+          val level = responseState.result
+          require(level.context != null) {"context is null, but need context for now"}
+          when (val config = level.levelConfig) {
+            is LevelConfig.Singles.Absolute -> {
+              startContext(context = level.context, root = config.scales.first().root)
+            }
+            is LevelConfig.Singles.Relative -> {
+              startContext(context = level.context, root = Pitch.random())
+            }
+          }
+        } else if (responseState is ResponseState.Error) {
           Napier.e { "error getting level" }
         }
       }
     }
   }
 
-  fun startContext(level: SinglesLevel, pitch: Pitch) {
-    Napier.v { "Random pitch: $pitch" }
-    val player = DegreeContextPlayer(midiEngine, level.context, pitch)
+  fun startContext(context: DegreeContext, root: Pitch) {
+    Napier.v { "Starting context with pitch $root" }
+    val player = DegreeContextPlayer(midiEngine, context, root)
     degreeContextPlayer = player
 
     readyStatusJob = viewModelScope.launch {

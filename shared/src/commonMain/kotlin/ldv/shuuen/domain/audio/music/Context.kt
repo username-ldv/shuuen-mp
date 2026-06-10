@@ -6,7 +6,10 @@ import kotlin.time.Duration
 
 @Serializable
 data class DegreeContext(
-  val nodes: List<DegreeContextNode>, val name: String? = null, val setupMelody: List<Degree>?
+  val id: String,
+  val nodes: List<DegreeContextNode>,
+  val name: String? = null,
+  val setupMelody: List<Degree>?
 )
 
 @Serializable
@@ -24,6 +27,7 @@ sealed interface Sustain {
 }
 
 val defaultContext = DegreeContext(
+  id = "default",
   listOf(DegreeContextNode(listOf(DegreeWithOctave(Degree.D1, 2)), null, Sustain.Endless)),
   setupMelody = listOf(
     Degree.D1,

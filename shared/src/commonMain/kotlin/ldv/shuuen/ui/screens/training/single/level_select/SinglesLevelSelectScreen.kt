@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ldv.shuuen.common.ResponseState
-import ldv.shuuen.domain.training.TrainingScaleItemStates
+import ldv.shuuen.domain.training.level.LevelConfig
 import ldv.shuuen.domain.training.singles.SinglesLevel
 import ldv.shuuen.ui.common.PrimaryCta
 import ldv.shuuen.ui.common.ShuuenTopAppBar
@@ -38,6 +38,7 @@ import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
 import ldv.shuuen.ui.common.music.BoxedItemRow
+import ldv.shuuen.ui.screens.training.common.toBoxedItems
 
 @Composable
 fun SinglesLevelSelectScreen(
@@ -104,13 +105,13 @@ private fun LevelCard(level: SinglesLevel, onLevelChosen: (SinglesLevel) -> Unit
         ) {
           LevelText(level.name)
           LevelParameterGrid(level = level)
-          when (val first = level.trainingScales.first().itemStates) {
-            is TrainingScaleItemStates.ByDegree -> {
-              BoxedItemRow(first.items, itemSize = 32.dp)
+          when (val levelConfig = level.levelConfig) {
+            is LevelConfig.Singles.Absolute -> {
+              BoxedItemRow(levelConfig.scales.first().pitchStates.toBoxedItems(), itemSize = 32.dp)
             }
 
-            is TrainingScaleItemStates.ByPitch -> {
-              BoxedItemRow(first.items, itemSize = 32.dp)
+            is LevelConfig.Singles.Relative -> {
+              BoxedItemRow(levelConfig.scaleConfig.degreeStates.toBoxedItems(), itemSize = 32.dp)
             }
           }
         }
@@ -141,7 +142,7 @@ private fun LevelParameterGrid(
       Icons.AutoMirrored.Rounded.HelpOutline,
       1.25f
     ),
-    Triple(level.range.toList().joinToString(" - "), Icons.Rounded.Keyboard, 1f),
+    Triple(level.range.toPair().toList().joinToString(" - "), Icons.Rounded.Keyboard, 1f),
   )
 
   Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier) {

@@ -6,25 +6,38 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import ldv.shuuen.domain.audio.music.Note
+import ldv.shuuen.domain.audio.music.NoteRange
 import ldv.shuuen.domain.audio.music.Pitch
+import ldv.shuuen.domain.audio.music.Scale
 import ldv.shuuen.domain.audio.music.ScaleType
-import ldv.shuuen.domain.audio.music.defaultContext
+import ldv.shuuen.domain.audio.music.toNoteRange
 import ldv.shuuen.domain.repository.local.SinglesLocalLevelRepository
-import ldv.shuuen.domain.training.TrainingScale
-import ldv.shuuen.domain.training.TrainingScaleItemStates
+import ldv.shuuen.domain.training.level.LevelConfig
 import ldv.shuuen.domain.training.level.LevelSource
+import ldv.shuuen.domain.training.level.ScaleConfig
 import ldv.shuuen.domain.training.singles.SinglesLevel
+import ldv.shuuen.ui.screens.training.common.asConfigDegreeStates
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class SinglesSetupScreenViewModel(
   val levelRepository: SinglesLocalLevelRepository
 ) : ViewModel() {
+  @OptIn(ExperimentalUuidApi::class)
   private val _singlesLevelState = MutableStateFlow(
     SinglesLevel(
+      id = Uuid.generateV7().toString(),
       name = "",
-      trainingScales = listOf(TrainingScale.degreesFromType(ScaleType.Major)),
-      context = defaultContext.copy(),
+      levelConfig = LevelConfig.Singles.Relative(
+        scaleConfig = ScaleConfig.RelativeScaleConfig(
+          scaleType = ScaleType.Major,
+          degreeStates = Scale.major(Pitch.C).asConfigDegreeStates()
+        ),
+      ),
+      context = null,
+      source = LevelSource.User,
       questionsNumber = 20,
-      range = Note(Pitch.C, 2) to Note(Pitch.C, 6),
+      range = NoteRange(Note(Pitch.C, 2), Note(Pitch.C, 6)),
     )
   )
   val screenState = _singlesLevelState.asStateFlow()
@@ -34,30 +47,45 @@ class SinglesSetupScreenViewModel(
   }
 
   fun changeRangeStart(v: Note) {
-    _singlesLevelState.update { it.copy(range = v to it.range.second) }
+    _singlesLevelState.update { it.copy(range = (v to it.range.to).toNoteRange()) }
   }
 
   fun changeRangeEnd(v: Note) {
-    _singlesLevelState.update { it.copy(range = it.range.first to v) }
+    _singlesLevelState.update { it.copy(range = (it.range.from to v).toNoteRange()) }
   }
 
-  fun changeScale(t: TrainingScale) {
-    _singlesLevelState.update { it.copy(trainingScales = listOf(t)) }
+  fun changeScale(scaleConfig: ScaleConfig) {
+    _singlesLevelState.update {
+      val levelConfig = when (scaleConfig) {
+        is ScaleConfig.AbsoluteScaleConfig -> LevelConfig.Singles.Absolute(
+          scales = listOf(
+            scaleConfig
+          ), rotateEveryQuestions = it.levelConfig.rotateEveryQuestions
+        )
+
+        is ScaleConfig.RelativeScaleConfig -> LevelConfig.Singles.Relative(
+          scaleConfig = scaleConfig,
+          rotateEveryQuestions = it.levelConfig.rotateEveryQuestions
+        )
+      }
+      it.copy(levelConfig = levelConfig)
+    }
   }
 
   suspend fun upsertLevel() {
     val level = screenState.value
-    val firstScale = level.trainingScales.first()
     // todo: what should be the default name?
-    val levelName = when (val itemStates = firstScale.itemStates) {
-      is TrainingScaleItemStates.ByPitch -> {
-        itemStates.items.entries.first().value.label
+    val levelName = when (val levelConfig = level.levelConfig) {
+      is LevelConfig.Singles.Absolute -> {
+        val scale = levelConfig.scales.first()
+        "${scale.root} ${scale.scaleType}"
       }
 
-      is TrainingScaleItemStates.ByDegree -> "Random"
-
+      is LevelConfig.Singles.Relative -> {
+        "Random ${levelConfig.scaleConfig.scaleType}"
+      }
     }
-    levelRepository.upsertLevel(level.copy(name = levelName), source = LevelSource.User)
+    levelRepository.upsertLevel(level.copy(name = levelName))
     Napier.v { "Saved new level: $level" }
   }
 

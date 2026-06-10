@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import ldv.shuuen.domain.training.level.LevelConfig
 import ldv.shuuen.ui.common.GlassPanel
 import ldv.shuuen.ui.common.IconBubble
 import ldv.shuuen.ui.common.PrimaryCta
@@ -59,8 +60,13 @@ fun SinglesSetupScreen(
     },
   ) {
 
+    val config = when (val levelConfig = saveableScreenState.levelConfig) {
+      is LevelConfig.Singles.Relative -> levelConfig.scaleConfig
+      is LevelConfig.Singles.Absolute -> levelConfig.scales.first()
+    }
+
     ScaleChooser(
-      trainingScale = saveableScreenState.trainingScales.first(),
+      scaleConfig = config,
       onScaleChosen = viewModel::changeScale
     )
 
@@ -94,12 +100,12 @@ fun SinglesSetupScreen(
         subtitle = "Select the note range.",
       )
       Text(
-        text = "${saveableScreenState.range.first} - ${saveableScreenState.range.second}",
+        text = "${saveableScreenState.range.from} - ${saveableScreenState.range.to}",
         style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 3.sp),
         modifier = Modifier.align(Alignment.CenterHorizontally),
       )
-      NoteRow(value = saveableScreenState.range.first) { viewModel.changeRangeStart(it) }
-      NoteRow(value = saveableScreenState.range.second) { viewModel.changeRangeEnd(it) }
+      NoteRow(value = saveableScreenState.range.from) { viewModel.changeRangeStart(it) }
+      NoteRow(value = saveableScreenState.range.to) { viewModel.changeRangeEnd(it) }
     }
 
     val scope = rememberCoroutineScope()

@@ -65,12 +65,15 @@ data class Scale(
     fun custom(root: Pitch, formula: List<Int>): Scale =
       fromFormula(root, formula, ScaleType.Custom)
 
-    fun fromScaleType(root: Pitch, scaleType: ScaleType, formula: List<Int>): Scale {
+    fun fromScaleType(root: Pitch, scaleType: ScaleType, formula: List<Int>? = null): Scale {
       return when (scaleType) {
         ScaleType.Major -> major(root)
         ScaleType.NaturalMinor -> naturalMinor(root)
         ScaleType.Chromatic -> chromatic(root)
-        ScaleType.Custom -> custom(root, formula)
+        ScaleType.Custom -> {
+          require(formula != null) { "with custom scale, formula can't be null" }
+          custom(root, formula)
+        }
       }
     }
 

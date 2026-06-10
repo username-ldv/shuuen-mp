@@ -1,14 +1,14 @@
 package ldv.shuuen.common
 
-inline fun <T, K> List<T>.upsertBy(
-  item: T,
-  key: (T) -> K,
+inline fun <T> List<T>.updateBy(
+  condition: (T) -> Boolean,
+  by: (T) -> T
 ): List<T> {
-  val index = indexOfFirst { key(it) == key(item) }
+  val index = indexOfFirst { condition(it) }
 
   return if (index == -1) {
-    this + item
+    this
   } else {
-    toMutableList().also { it[index] = item }
+    toMutableList().also { it[index] = by(it[index]) }
   }
 }
