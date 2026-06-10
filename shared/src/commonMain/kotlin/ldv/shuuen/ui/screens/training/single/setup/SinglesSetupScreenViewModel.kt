@@ -21,7 +21,7 @@ class SinglesSetupScreenViewModel(
   private val _singlesLevelState = MutableStateFlow(
     SinglesLevel(
       name = "",
-      traningScales = listOf(TrainingScale.degreesFromType(ScaleType.Major)),
+      trainingScales = listOf(TrainingScale.degreesFromType(ScaleType.Major)),
       context = defaultContext.copy(),
       questionsNumber = 20,
       range = Note(Pitch.C, 2) to Note(Pitch.C, 6),
@@ -42,12 +42,12 @@ class SinglesSetupScreenViewModel(
   }
 
   fun changeScale(t: TrainingScale) {
-    _singlesLevelState.update { it.copy(traningScales = listOf(t)) }
+    _singlesLevelState.update { it.copy(trainingScales = listOf(t)) }
   }
 
   suspend fun upsertLevel() {
     val level = screenState.value
-    val firstScale = level.traningScales.first()
+    val firstScale = level.trainingScales.first()
     // todo: what should be the default name?
     val levelName = when (val itemStates = firstScale.itemStates) {
       is TrainingScaleItemStates.ByPitch -> {

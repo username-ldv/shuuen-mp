@@ -46,7 +46,7 @@ class SinglesPlayScreenViewModel(
           it.copy(levelData = responseState)
         }
         if (responseState is ResponseState.Success) startContext(
-          responseState.result, responseState.result.traningScales.first().root ?: Pitch.random()
+          responseState.result, responseState.result.trainingScales.first().root ?: Pitch.random()
         ) else if (responseState is ResponseState.Error) {
           Napier.e { "error getting level" }
         }

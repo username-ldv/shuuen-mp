@@ -47,7 +47,7 @@ class SinglesLocalLevelRepositoryImpl(
 
   override suspend fun upsertLevel(level: SinglesLevel, source: LevelSource) {
     val firstScale =
-      level.traningScales.firstOrNull() ?: error("No scales in the level ${level.id}")
+      level.trainingScales.firstOrNull() ?: error("No scales in the level ${level.id}")
     val levelConfig: LevelConfig.Singles = when (val itemStates = firstScale.itemStates) {
       is TrainingScaleItemStates.ByPitch -> {
         val pitchStates = itemStates.items.map {
@@ -112,7 +112,7 @@ class SinglesLocalLevelRepositoryImpl(
     return SinglesLevel(
       id = entity.id,
       name = entity.name,
-      traningScales = trainingScale,
+      trainingScales = trainingScale,
       context = context,
       questionsNumber = entity.questionsNumber,
       range = entity.range.toPair()

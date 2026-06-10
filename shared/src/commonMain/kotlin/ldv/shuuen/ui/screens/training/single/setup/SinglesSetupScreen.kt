@@ -60,7 +60,7 @@ fun SinglesSetupScreen(
   ) {
 
     ScaleChooser(
-      trainingScale = saveableScreenState.traningScales.first(),
+      trainingScale = saveableScreenState.trainingScales.first(),
       onScaleChosen = viewModel::changeScale
     )
 

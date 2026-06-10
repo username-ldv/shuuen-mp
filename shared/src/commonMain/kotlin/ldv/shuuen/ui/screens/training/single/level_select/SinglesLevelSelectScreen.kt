@@ -104,7 +104,7 @@ private fun LevelCard(level: SinglesLevel, onLevelChosen: (SinglesLevel) -> Unit
         ) {
           LevelText(level.name)
           LevelParameterGrid(level = level)
-          when (val first = level.traningScales.first().itemStates) {
+          when (val first = level.trainingScales.first().itemStates) {
             is TrainingScaleItemStates.ByDegree -> {
               BoxedItemRow(first.items, itemSize = 32.dp)
             }
