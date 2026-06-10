@@ -7,10 +7,10 @@ import ldv.shuuen.data.database.entity.SinglesLevelDbEntity
 
 @Dao
 interface SinglesLevelDao {
-  @Query("select * from singles_levels")
+  @Query("select * from levels_singles")
   suspend fun getAll(): List<SinglesLevelDbEntity>
 
-  @Query("select * from singles_levels where id = :id")
+  @Query("select * from levels_singles where id = :id")
   suspend fun getById(id: String): SinglesLevelDbEntity?
 
   @Upsert

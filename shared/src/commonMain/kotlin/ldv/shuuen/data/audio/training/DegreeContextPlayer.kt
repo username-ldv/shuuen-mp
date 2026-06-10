@@ -4,6 +4,8 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import ldv.shuuen.domain.audio.engine.MidiEngine
 import ldv.shuuen.domain.audio.midi.MidiChannel
 import ldv.shuuen.domain.audio.music.Chord
@@ -97,12 +99,14 @@ class DegreeContextPlayer(
           delay(endlessPreMelody)
           if (c.setupMelody != null) {
             var currentlyPlaying: Note? = null
-            constructAscSetupMelodyFlow(root, c.setupMelody).collect { note ->
+            constructAscSetupMelodyFlow(root, c.setupMelody).onEach { note ->
               currentlyPlaying?.let { midiEngine.stopNote(it) }
+            }.onCompletion {
+              currentlyPlaying?.let { midiEngine.stopNote(it) }
+            }.collect { note ->
               midiEngine.playNote(note, MidiChannel.Notes)
               currentlyPlaying = note
             }
-            currentlyPlaying?.let { midiEngine.stopNote(it) }
             delay(afterSetupMelody)
           }
           _ready.value = true

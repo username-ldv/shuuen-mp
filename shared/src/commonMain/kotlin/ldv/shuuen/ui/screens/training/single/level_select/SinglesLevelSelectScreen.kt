@@ -55,8 +55,7 @@ fun SinglesLevelSelectScreen(
         onBack = onNavigateBack,
         type = ShuuenTopAppBarType.Labeled,
       )
-    },
-    scrollable = false
+    }, scrollable = false
   ) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
       item {
@@ -67,17 +66,15 @@ fun SinglesLevelSelectScreen(
           modifier = Modifier.padding(top = 8.dp),
         )
       }
-      when (levels) {
+      when (val l = levels) {
         is ResponseState.Loading -> item { Text(text = "Loading...") }
-        is ResponseState.Success -> {
-          (levels as ResponseState.Success<List<SinglesLevel>>).result.forEach { level ->
-            item {
-              LevelCard(level, onLevelChosen = { onStartLevel(it.id) })
-            }
+        is ResponseState.Success -> l.result.forEach { level ->
+          item {
+            LevelCard(level, onLevelChosen = { onStartLevel(it.id) })
           }
         }
 
-        is ResponseState.Error -> item { Text(text = "Error loading levels") }
+        is ResponseState.Error -> item { Text(text = "Error loading levels: ${l.throwable.message}") }
       }
     }
   }
@@ -136,8 +133,7 @@ private fun LevelText(title: String, modifier: Modifier = Modifier) {
 
 @Composable
 private fun LevelParameterGrid(
-  level: SinglesLevel,
-  modifier: Modifier = Modifier
+  level: SinglesLevel, modifier: Modifier = Modifier
 ) {
   val items = listOf(
     Triple(

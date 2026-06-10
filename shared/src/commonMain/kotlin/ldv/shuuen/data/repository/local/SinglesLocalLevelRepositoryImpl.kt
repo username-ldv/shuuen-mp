@@ -23,7 +23,7 @@ class SinglesLocalLevelRepositoryImpl(
   private val contextLocalRepository: ContextLocalRepository
 ) : SinglesLocalLevelRepository {
   override fun getLevels(): Flow<ResponseState<List<SinglesLevel>>> {
-    return flow<ResponseState<List<SinglesLevel>>> {
+    return flow {
       emit(ResponseState.Loading)
       Napier.v { "getting levels" }
       val entities = singlesLevelDao.getAll()
@@ -79,7 +79,9 @@ class SinglesLocalLevelRepositoryImpl(
       config = levelConfig,
       source = source,
       questionsNumber = level.questionsNumber,
-      range = level.range.toNoteRange()
+      range = level.range.toNoteRange(),
+      // for now
+      contextId = null
     )
     singlesLevelDao.upsertLevel(entity)
   }

@@ -10,5 +10,5 @@ fun getDatabaseBuilder(filesPath: Path): RoomDatabase.Builder<AppDatabase> {
   Napier.v { "Desktop database path $dbFilePath" }
   return Room.databaseBuilder<AppDatabase>(
     name = dbFilePath,
-  )
+  ).fallbackToDestructiveMigration()
 }

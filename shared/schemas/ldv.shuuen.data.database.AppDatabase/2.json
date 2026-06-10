@@ -1,11 +1,11 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 1,
-    "identityHash": "39b1ea31d81b704c84fa3d7b8ebf3b77",
+    "version": 2,
+    "identityHash": "033b4c2cc23252b30e77ae783747eab8",
     "entities": [
       {
-        "tableName": "singles_levels",
+        "tableName": "levels_singles",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `config` TEXT NOT NULL, `contextId` TEXT, `source` TEXT NOT NULL, `questionsNumber` INTEGER, `range` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`contextId`) REFERENCES `context`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
@@ -57,13 +57,13 @@
         },
         "indices": [
           {
-            "name": "index_singles_levels_contextId",
+            "name": "index_levels_singles_contextId",
             "unique": false,
             "columnNames": [
               "contextId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_singles_levels_contextId` ON `${TABLE_NAME}` (`contextId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_levels_singles_contextId` ON `${TABLE_NAME}` (`contextId`)"
           }
         ],
         "foreignKeys": [
@@ -118,7 +118,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '39b1ea31d81b704c84fa3d7b8ebf3b77')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '033b4c2cc23252b30e77ae783747eab8')"
     ]
   }
 }
