@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import ldv.shuuen.ui.common.music.PianoKeyboard
-import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
+import ldv.shuuen.ui.common.music.inputs.PianoKeyboard
+import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
 
 @Composable
 fun RangeKeyboardStrip(

@@ -17,11 +17,11 @@ import androidx.compose.ui.unit.dp
 import ldv.shuuen.domain.audio.music.Degree
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.StaticScreenFrame
-import ldv.shuuen.ui.common.music.FifthsCircle
-import ldv.shuuen.ui.common.music.FifthsCircleIndication
-import ldv.shuuen.ui.common.music.PianoKeyIndication
-import ldv.shuuen.ui.common.music.PianoKeyboard
-import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
+import ldv.shuuen.ui.common.music.inputs.FifthsCircle
+import ldv.shuuen.ui.common.music.inputs.FifthsCircleIndication
+import ldv.shuuen.ui.common.music.inputs.PianoKeyIndication
+import ldv.shuuen.ui.common.music.inputs.PianoKeyboard
+import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
 
 @Composable
 fun FreePlayScreen(

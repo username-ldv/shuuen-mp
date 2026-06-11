@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material.icons.rounded.Flag
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Replay
@@ -41,12 +40,13 @@ import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
-import ldv.shuuen.ui.common.music.FifthsCircle
-import ldv.shuuen.ui.common.music.PianoKeyboard
-import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
+import ldv.shuuen.ui.common.music.inputs.PianoKeyboard
+import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
 
 @Composable
-fun SinglesPlayScreen(onNavigateBack: () -> Unit, onLevelEnd: () -> Unit, viewModel: SinglesPlayScreenViewModel) {
+fun SinglesPlayScreen(
+  onNavigateBack: () -> Unit, onLevelEnd: () -> Unit, viewModel: SinglesPlayScreenViewModel
+) {
   val screenState by viewModel.state.collectAsStateWithLifecycle()
   var useCircleInput by rememberSaveable { mutableStateOf(false) }
   val title = when (val level = screenState.levelData) {
@@ -72,11 +72,24 @@ fun SinglesPlayScreen(onNavigateBack: () -> Unit, onLevelEnd: () -> Unit, viewMo
 
     Spacer(Modifier.weight(1f))
 
-    if (useCircleInput) {
-      CircleAnswerArea()
-    } else {
-      KeyboardAnswerArea()
-    }
+//    if (useCircleInput) {
+//      FifthsCircle(
+//        modifier = Modifier.fillMaxWidth(),
+////      .border(BorderStroke(1.dp, Color.Red)),
+//        dotEdgePadding = 0.dp,
+//        centerButtonSize = 64.dp,
+//      )
+//    } else {
+    val indication by viewModel.answerIndications.collectAsStateWithLifecycle()
+    PianoKeyboard(
+      modifier = Modifier.fillMaxWidth()
+      .aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
+      keyCount = 12,
+      pressedKeyColors = screenState.root?.let {
+        PianoKeyboardDefaults.colorfulPressedColors(12, it)
+      } ?: PianoKeyboardDefaults.pressedColors(12),
+      programmaticIndications = indication?.let { listOf(it) } ?: listOf())
+//    }
 
     Spacer(Modifier.weight(0.34f))
 
@@ -134,15 +147,6 @@ private fun ScorePill(
 }
 
 @Composable
-private fun KeyboardAnswerArea() {
-  PianoKeyboard(
-    modifier = Modifier.fillMaxWidth().aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
-    keyCount = 12,
-    pressedKeyColors = PianoKeyboardDefaults.pressedColors(12, ShuuenUi.Lavender),
-  )
-}
-
-@Composable
 private fun BottomActionBar(on1: () -> Unit) {
   Row(
     modifier = Modifier.fillMaxWidth(),
@@ -193,22 +197,4 @@ private fun BottomIconButton(
   SoftControl(modifier = modifier.height(68.dp)) {
     Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(26.dp))
   }
-}
-
-@Composable
-private fun CircleAnswerArea() {
-  FifthsCircle(
-    modifier = Modifier.fillMaxWidth(),
-//      .border(BorderStroke(1.dp, Color.Red)),
-    dotEdgePadding = 0.dp,
-    centerButtonSize = 64.dp,
-    centerContent = {
-      Icon(
-        imageVector = Icons.Rounded.FastForward,
-        contentDescription = null,
-        tint = ShuuenUi.Text,
-        modifier = Modifier.size(72.dp),
-      )
-    },
-  )
 }

@@ -1,4 +1,4 @@
-package ldv.shuuen.ui.common.music
+package ldv.shuuen.ui.common.music.inputs
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ldv.shuuen.ui.common.music.Palette
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos

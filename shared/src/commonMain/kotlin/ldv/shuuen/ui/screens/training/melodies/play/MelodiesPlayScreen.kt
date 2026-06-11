@@ -43,9 +43,9 @@ import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
-import ldv.shuuen.ui.common.music.FifthsCircle
-import ldv.shuuen.ui.common.music.PianoKeyboard
-import ldv.shuuen.ui.common.music.PianoKeyboardDefaults
+import ldv.shuuen.ui.common.music.inputs.FifthsCircle
+import ldv.shuuen.ui.common.music.inputs.PianoKeyboard
+import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
 
 @Composable
 fun MelodiesPlayScreen(onNavigateBack: () -> Unit, onLevelEnd: () -> Unit) {

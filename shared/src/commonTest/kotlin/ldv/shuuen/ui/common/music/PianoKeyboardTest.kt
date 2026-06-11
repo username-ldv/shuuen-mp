@@ -1,6 +1,8 @@
 package ldv.shuuen.ui.common.music
 
 import androidx.compose.ui.geometry.Offset
+import ldv.shuuen.ui.common.music.inputs.PianoKeyGeometry
+import ldv.shuuen.ui.common.music.inputs.buildPianoKeyGeometry
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals

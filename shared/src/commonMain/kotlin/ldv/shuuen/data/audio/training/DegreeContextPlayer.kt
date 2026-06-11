@@ -35,6 +35,8 @@ class DegreeContextPlayer(
   private val currentQuestion = MutableStateFlow(0)
   private val _ready = MutableStateFlow(false)
   val ready = _ready.asStateFlow()
+  private val _setupMelodyNotes = MutableStateFlow<Note?>(null)
+  val setupMelodyNotes = _setupMelodyNotes.asStateFlow()
   private var currentlyPlaying: CurrentlyPlayingNode? = null
   private var currentNodeCount = 0
 
@@ -103,9 +105,11 @@ class DegreeContextPlayer(
               currentlyPlaying?.let { midiEngine.stopNote(it) }
             }.onCompletion {
               currentlyPlaying?.let { midiEngine.stopNote(it) }
+              _setupMelodyNotes.value = null
             }.collect { note ->
               midiEngine.playNote(note, MidiChannel.Notes)
               currentlyPlaying = note
+              _setupMelodyNotes.value = note
             }
             delay(afterSetupMelody)
           }

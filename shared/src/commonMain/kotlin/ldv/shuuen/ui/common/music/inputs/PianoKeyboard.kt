@@ -1,4 +1,4 @@
-package ldv.shuuen.ui.common.music
+package ldv.shuuen.ui.common.music.inputs
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ldv.shuuen.domain.audio.music.Pitch
+import ldv.shuuen.ui.common.music.Palette
 import kotlin.math.abs
 
 @Immutable
@@ -60,7 +61,7 @@ object PianoKeyboardDefaults {
 
   fun pressedColors(
     keyCount: Int,
-    color: Color = Color(0xFFEFFF2B),
+    color: Color = Color.White,
   ): List<Color> = List(keyCount) { color }
 
   fun colorfulPressedColors(

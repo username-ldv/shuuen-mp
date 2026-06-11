@@ -16,6 +16,10 @@ enum class Pitch {
 
   operator fun minus(semitones: Int): Pitch = this + -semitones
 
+  fun asRoot(other: Pitch): Degree {
+    return Degree.fromOffset((other.ordinal - this.ordinal + 12).mod(12))
+  }
+
   companion object {
     fun random(random: Random = Random.Default): Pitch = entries[random.nextInt(entries.size)]
 

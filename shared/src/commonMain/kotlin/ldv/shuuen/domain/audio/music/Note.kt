@@ -59,12 +59,11 @@ data class Note(val midiIndex: Int) {
     const val MidiMax: Int = 108
 
     fun random(
-      from: Note = Note(Pitch.A, 0),
-      to: Note = Note(Pitch.C, 8),
+      noteRange: NoteRange = NoteRange(Note(Pitch.A, 0), Note(Pitch.C, 8)),
       random: Random = Random.Default,
     ): Note {
-      require(from.midiIndex <= to.midiIndex) { "From note must be lower than or equal to to note." }
-      return Note(random.nextInt(from.midiIndex, to.midiIndex + 1))
+      require(noteRange.from.midiIndex <= noteRange.to.midiIndex) { "From note must be lower than or equal to to note." }
+      return Note(random.nextInt(noteRange.from.midiIndex, noteRange.to.midiIndex + 1))
     }
 
     private fun midiIndexFor(pitch: Pitch, octave: Int): Int {
