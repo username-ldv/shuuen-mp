@@ -1,9 +1,10 @@
 package ldv.shuuen.ui.screens.training.single.play
 
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import ldv.shuuen.domain.audio.engine.MidiEngine
+import kotlinx.coroutines.flow.update
 import ldv.shuuen.domain.audio.music.Note
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.generator.NaiveRandomDegreeNoteGenerator
@@ -12,39 +13,89 @@ import ldv.shuuen.domain.audio.music.generator.NoteGenerator
 import ldv.shuuen.domain.training.level.LevelConfig
 import ldv.shuuen.domain.training.singles.SinglesLevel
 
-class SinglesLevelQuizzer(val level: SinglesLevel, midiEngine: MidiEngine) {
-  private val _currentNote: MutableStateFlow<Note>
-  private val _currentRoot: MutableStateFlow<Pitch>
-  private val generator: NoteGenerator
+data class IncorrectSinglesAnswer(val questionNumber: Int, val correctPitch: Pitch)
 
-  val currentNote: StateFlow<Note>
-  val currentRoot: StateFlow<Pitch>
+data class QuizState(
+  val root: Pitch,
+  val currentQuestionNumber: Int,
+  val questionsNumber: Int?,
+  val currentNote: Note,
+  val correctAnswers: Int,
+  val incorrectAnswers: List<IncorrectSinglesAnswer>,
+  val newQuestion: Boolean,
+  val needNewContext: Boolean,
+)
+
+class SinglesLevelQuizzer(val level: SinglesLevel) {
+  private val generator: NoteGenerator
+  private val _quizState: MutableStateFlow<QuizState>
+  val quizState: StateFlow<QuizState>
 
   init {
+    val root: Pitch
     when (val c = level.levelConfig) {
       is LevelConfig.Singles.Relative -> {
-        val randomRoot = Pitch.random()
-        _currentRoot = MutableStateFlow(randomRoot)
-
+        root = Pitch.random()
         generator = NaiveRandomDegreeNoteGenerator(
-          root = randomRoot,
+          root = root,
           range = level.range,
           allowedDegrees = c.scaleConfig.degreeStates.filter { it.active }.map { it.degree })
       }
 
       is LevelConfig.Singles.Absolute -> {
-        _currentRoot = MutableStateFlow(c.scales.first().root)
+        root = c.scales.first().root
         generator = NaiveRandomNoteGenerator(
           range = level.range,
           allowedPitches = c.scales.first().pitchStates.filter { it.active }.map { it.pitch })
       }
     }
-    _currentNote = MutableStateFlow(generator.next())
-    currentNote = _currentNote.asStateFlow()
-    currentRoot = _currentRoot.asStateFlow()
+    _quizState = MutableStateFlow(
+      QuizState(
+        root,
+        currentQuestionNumber = 1,
+        currentNote = generator.next(),
+        correctAnswers = 0,
+        incorrectAnswers = listOf(),
+        questionsNumber = level.questionsNumber,
+        newQuestion = true,
+        needNewContext = true
+      )
+    )
+    quizState = _quizState.asStateFlow()
   }
 
-  fun next() {
+  fun ready() {
+    _quizState.update { it.copy(newQuestion = !it.newQuestion) }
+  }
 
+  fun initializedContext() {
+    _quizState.update { it.copy(needNewContext = false) }
+  }
+
+  fun check(pitch: Pitch) {
+    return if (quizState.value.currentNote.pitch == pitch) {
+      _quizState.update { quizState ->
+        val count = if (quizState.incorrectAnswers.any { it.questionNumber == quizState.currentQuestionNumber }) 0 else 1
+        quizState.copy(
+          correctAnswers = quizState.correctAnswers + count,
+          currentQuestionNumber = quizState.currentQuestionNumber + 1,
+          currentNote = generator.next(),
+          newQuestion = true
+        )
+      }
+    } else {
+      _quizState.update {
+        val isDupe =
+          it.incorrectAnswers.any { answer -> answer.correctPitch == it.currentNote.pitch }
+        if (!isDupe) {
+          it.copy(
+            incorrectAnswers = it.incorrectAnswers + IncorrectSinglesAnswer(
+              it.currentQuestionNumber,
+              it.currentNote.pitch
+            )
+          )
+        } else it
+      }
+    }
   }
 }

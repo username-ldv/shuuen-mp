@@ -190,8 +190,8 @@ fun PianoKeyboard(
     animateFloatAsState(
       targetValue = if (index in activeKeys) 1f else 0f,
       animationSpec = spring(
-        dampingRatio = Spring.DampingRatioMediumBouncy,
-        stiffness = Spring.StiffnessMediumLow,
+        dampingRatio = 0.3f,
+        stiffness = 300f,
       ),
       label = "piano-key-press-$index",
     ).value

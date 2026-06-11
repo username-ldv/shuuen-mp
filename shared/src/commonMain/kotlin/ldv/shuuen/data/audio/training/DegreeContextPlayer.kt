@@ -71,8 +71,8 @@ class DegreeContextPlayer(
     }
   }
 
-  fun onQuestionChanged(questionNumber: Int) {
-    currentQuestion.value = questionNumber
+  fun onNextQuestion() {
+    currentQuestion.value++
   }
 
   private fun stopCurrent(advance: Boolean) {

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ldv.shuuen.common.ResponseState
+import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.ui.common.LinearTrainingProgress
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
@@ -68,7 +69,14 @@ fun SinglesPlayScreen(
     },
   ) {
 
-    TrainingStatus()
+    screenState.quizState?.let {
+      TrainingStatus(
+        it.currentQuestionNumber,
+        it.correctAnswers,
+        it.incorrectAnswers.size,
+        it.questionsNumber
+      )
+    }
 
     Spacer(Modifier.weight(1f))
 
@@ -81,24 +89,38 @@ fun SinglesPlayScreen(
 //      )
 //    } else {
     val indication by viewModel.answerIndications.collectAsStateWithLifecycle()
+    val keyColors by viewModel.keyColors.collectAsStateWithLifecycle()
+//    val keyColors = screenState.quizState?.root?.let {
+//      PianoKeyboardDefaults.colorfulPressedColors(12, it)
+//    } ?: PianoKeyboardDefaults.pressedColors(12)
     PianoKeyboard(
       modifier = Modifier.fillMaxWidth()
-      .aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
+        .aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
       keyCount = 12,
-      pressedKeyColors = screenState.root?.let {
-        PianoKeyboardDefaults.colorfulPressedColors(12, it)
-      } ?: PianoKeyboardDefaults.pressedColors(12),
-      programmaticIndications = indication?.let { listOf(it) } ?: listOf())
+      pressedKeyColors = keyColors,
+      programmaticIndications = indication?.let { listOf(it) } ?: listOf(),
+      onKeyPressedChange = { offset, pressed ->
+        if (!pressed) {
+          val pitch = Pitch.fromOrdinal(offset)
+          viewModel.userGuessed(pitch)
+        }
+      }
+    )
 //    }
 
     Spacer(Modifier.weight(0.34f))
 
-    BottomActionBar(on1 = {})
+    BottomActionBar(on1 = { viewModel.repeatNote() })
   }
 }
 
 @Composable
-private fun TrainingStatus() {
+private fun TrainingStatus(
+  questionNumber: Int = 1,
+  correct: Int = 0,
+  incorrect: Int = 0,
+  questionsAmount: Int? = null
+) {
   Column(
     modifier = Modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -108,7 +130,7 @@ private fun TrainingStatus() {
       verticalAlignment = Alignment.Top,
     ) {
       Text(
-        "1/30",
+        "$questionNumber/${questionsAmount ?: "∞"}",
         color = ShuuenUi.Muted,
         style = MaterialTheme.typography.titleSmall,
         modifier = Modifier.weight(1f),
@@ -118,14 +140,14 @@ private fun TrainingStatus() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
-        ScorePill("0", Icons.Outlined.CheckCircle, ShuuenUi.Green)
+        ScorePill("$correct", Icons.Outlined.CheckCircle, ShuuenUi.Green)
         Text("|", style = MaterialTheme.typography.titleMedium)
-        ScorePill("0", Icons.Outlined.Cancel, ShuuenUi.Red)
+        ScorePill("$incorrect", Icons.Outlined.Cancel, ShuuenUi.Red)
       }
     }
 
     LinearTrainingProgress(
-      progress = 0.045f,
+      progress = questionNumber.toFloat() / (questionsAmount ?: questionNumber),
       color = ShuuenUi.Lavender,
     )
   }
