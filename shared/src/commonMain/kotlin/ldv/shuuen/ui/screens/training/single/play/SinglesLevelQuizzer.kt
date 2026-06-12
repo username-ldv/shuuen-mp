@@ -22,8 +22,6 @@ data class QuizState(
   val currentNote: Note,
   val correctAnswers: Int,
   val incorrectAnswers: List<IncorrectSinglesAnswer>,
-  val newQuestion: Boolean,
-  val needNewContext: Boolean,
 )
 
 class SinglesLevelQuizzer(val level: SinglesLevel) {
@@ -57,23 +55,14 @@ class SinglesLevelQuizzer(val level: SinglesLevel) {
         correctAnswers = 0,
         incorrectAnswers = listOf(),
         questionsNumber = level.questionsNumber,
-        newQuestion = true,
-        needNewContext = true
       )
     )
     quizState = _quizState.asStateFlow()
   }
 
-  fun ready() {
-    _quizState.update { it.copy(newQuestion = !it.newQuestion) }
-  }
-
-  fun initializedContext() {
-    _quizState.update { it.copy(needNewContext = false) }
-  }
-
-  fun check(pitch: Pitch) {
-    return if (quizState.value.currentNote.pitch == pitch) {
+  fun check(pitch: Pitch): Boolean {
+    val correctNow = quizState.value.currentNote.pitch == pitch
+    if (correctNow) {
       _quizState.update { quizState ->
         val count =
           if (quizState.incorrectAnswers.any { it.questionNumber == quizState.currentQuestionNumber }) 0 else 1
@@ -81,7 +70,6 @@ class SinglesLevelQuizzer(val level: SinglesLevel) {
           correctAnswers = quizState.correctAnswers + count,
           currentQuestionNumber = quizState.currentQuestionNumber + 1,
           currentNote = generator.next(),
-          newQuestion = true
         )
       }
     } else {
@@ -98,5 +86,6 @@ class SinglesLevelQuizzer(val level: SinglesLevel) {
         } else it
       }
     }
+    return correctNow
   }
 }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,10 +30,16 @@ enum class AnswerColors(val color: Color) {
   Correct(Color(0xff32cc73)), Incorrect(Color(0xffe74d3c))
 }
 
+sealed interface QuizPhase {
+  object LoadingContext : QuizPhase
+  object AwaitingAnswer : QuizPhase
+  object Complete : QuizPhase
+}
+
 data class SinglesPlayScreenState(
   val levelData: ResponseState<SinglesLevel> = ResponseState.Loading,
-  val isReady: Boolean = false,
-  val quizState: QuizState? = null
+  val phase: QuizPhase = QuizPhase.LoadingContext,
+  val quizState: QuizState? = null,
 )
 
 val playNoteDuration = 1500.milliseconds
@@ -50,11 +57,16 @@ class SinglesPlayScreenViewModel(
   private var setupMelodyNotesIndicationJob: Job? = null
 
   private var quizzer: SinglesLevelQuizzer? = null
+  var lastHandledQuestion = 0
+  var lastHandledRoot: Pitch? = null
 
-  private val _answerIndications = MutableStateFlow<PianoKeyIndication?>(null)
+  private val _answerIndications = MutableStateFlow<List<PianoKeyIndication>>(listOf())
   val answerIndications = _answerIndications.asStateFlow()
-  private val _keyColors = MutableStateFlow(PianoKeyboardDefaults.pressedColors(12))
-  val keyColors = _keyColors.asStateFlow()
+//  private val _keyColors = MutableStateFlow(PianoKeyboardDefaults.pressedColors(12))
+//  val keyColors = _keyColors.asStateFlow()
+//  private val _pressedFeedback = MutableStateFlow<Map<Int, Color>>(emptyMap())
+//  val pressedFeedback = _pressedFeedback.asStateFlow()
+
 
   init {
     Napier.v { "Started level with id: $levelId" }
@@ -86,29 +98,39 @@ class SinglesPlayScreenViewModel(
       quizzer?.quizState?.collect { quizState ->
         _state.update { it.copy(quizState = quizState) }
 
-        if (!quizState.newQuestion) return@collect
+        val isNewQuestion = quizState.currentQuestionNumber != lastHandledQuestion
+        val isNewRoot = quizState.root != lastHandledRoot
 
-        if (quizState.needNewContext) {
+        if (!isNewQuestion) return@collect
+
+        if (quizState.currentQuestionNumber > (quizState.questionsNumber ?: Int.MAX_VALUE)) {
+          _state.update { it.copy(phase = QuizPhase.Complete) }
+          return@collect
+        }
+
+        lastHandledQuestion = quizState.currentQuestionNumber
+
+        if (isNewRoot) {
           readyStatusJob?.cancel()
           degreeContextJob?.cancel()
           setupMelodyNotesIndicationJob?.cancel()
 
+          _state.update { it.copy(phase = QuizPhase.LoadingContext) }
+
           degreeContextPlayer = startContext(c, quizState.root)
+          lastHandledRoot = quizState.root
+
           degreeContextPlayer.ready.first { it }
-          quizzer?.initializedContext()
         }
 
-        launch {
-          delay(500.milliseconds)
-          _keyColors.value = Pitch.entries.map { if (it == quizState.currentNote.pitch) AnswerColors.Correct.color else AnswerColors.Incorrect.color }
-        }
-
-
-        quizzer?.ready()
+//        launch {
+//          delay(500.milliseconds)
+//          _keyColors.value =
+//            Pitch.entries.map { if (it == quizState.currentNote.pitch) AnswerColors.Correct.color else AnswerColors.Incorrect.color }
+//        }
 
         Napier.v { "Playing ${quizState.currentNote}" }
         playNote(quizState.currentNote)
-
       }
     }
   }
@@ -143,7 +165,7 @@ class SinglesPlayScreenViewModel(
       player.ready.collect { ready ->
         Napier.v { "ready state: $ready" }
         _state.update {
-          it.copy(isReady = ready)
+          it.copy(phase = if (ready) QuizPhase.AwaitingAnswer else QuizPhase.LoadingContext)
         }
       }
     }
@@ -152,12 +174,12 @@ class SinglesPlayScreenViewModel(
       player.start()
     }
     setupMelodyNotesIndicationJob = viewModelScope.launch {
-      _keyColors.value = PianoKeyboardDefaults.colorfulPressedColors(12, root)
+//      _keyColors.value = PianoKeyboardDefaults.colorfulPressedColors(12, root)
       player.setupMelodyNotes.collect { note ->
         Napier.v { "got setup melody note $note" }
         _answerIndications.value = note?.let {
-          PianoKeyIndication(it.pitch.ordinal, 500)
-        }
+          listOf(PianoKeyIndication(it.pitch.ordinal, 500))
+        } ?: listOf()
       }
     }
     return player

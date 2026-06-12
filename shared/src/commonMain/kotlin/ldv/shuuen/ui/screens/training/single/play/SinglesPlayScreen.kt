@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.aakira.napier.Napier
 import ldv.shuuen.common.ResponseState
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.ui.common.LinearTrainingProgress
@@ -56,6 +58,14 @@ fun SinglesPlayScreen(
     is ResponseState.Success -> level.result.name
   }
 
+  LaunchedEffect(screenState.phase) {
+    when (screenState.phase) {
+      is QuizPhase.Complete -> onLevelEnd()
+      // for now
+      else -> Unit
+    }
+  }
+
   StaticScreenFrame(
     scrollable = false,
     topBar = {
@@ -71,10 +81,7 @@ fun SinglesPlayScreen(
 
     screenState.quizState?.let {
       TrainingStatus(
-        it.currentQuestionNumber,
-        it.correctAnswers,
-        it.incorrectAnswers.size,
-        it.questionsNumber
+        it.currentQuestionNumber, it.correctAnswers, it.incorrectAnswers.size, it.questionsNumber
       )
     }
 
@@ -89,23 +96,43 @@ fun SinglesPlayScreen(
 //      )
 //    } else {
     val indication by viewModel.answerIndications.collectAsStateWithLifecycle()
-    val keyColors by viewModel.keyColors.collectAsStateWithLifecycle()
+//    val keyColors by viewModel.keyColors.collectAsStateWithLifecycle()
 //    val keyColors = screenState.quizState?.root?.let {
 //      PianoKeyboardDefaults.colorfulPressedColors(12, it)
 //    } ?: PianoKeyboardDefaults.pressedColors(12)
+    val keyColors: List<Color> = when (screenState.phase) {
+      is QuizPhase.LoadingContext -> {
+        val root = screenState.quizState?.root
+        if (root == null) PianoKeyboardDefaults.pressedColors(12)
+        else {
+          PianoKeyboardDefaults.colorfulPressedColors(
+            12, root
+          )
+        }
+      }
+
+      else -> {
+        val currentNote = screenState.quizState?.currentNote
+        if (currentNote == null) PianoKeyboardDefaults.pressedColors(12)
+        else {
+          Pitch.entries.map {
+            if (it.ordinal == currentNote.pitch.ordinal) AnswerColors.Correct.color else AnswerColors.Incorrect.color
+          }
+        }
+      }
+    }
+    Napier.v { "screen state phase: ${screenState.phase}" }
     PianoKeyboard(
-      modifier = Modifier.fillMaxWidth()
-        .aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
+      modifier = Modifier.fillMaxWidth().aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
       keyCount = 12,
       pressedKeyColors = keyColors,
-      programmaticIndications = indication?.let { listOf(it) } ?: listOf(),
+      programmaticIndications = indication,
       onKeyPressedChange = { offset, pressed ->
         if (!pressed) {
           val pitch = Pitch.fromOrdinal(offset)
           viewModel.userGuessed(pitch)
         }
-      }
-    )
+      })
 //    }
 
     Spacer(Modifier.weight(0.34f))
@@ -116,10 +143,7 @@ fun SinglesPlayScreen(
 
 @Composable
 private fun TrainingStatus(
-  questionNumber: Int = 1,
-  correct: Int = 0,
-  incorrect: Int = 0,
-  questionsAmount: Int? = null
+  questionNumber: Int = 1, correct: Int = 0, incorrect: Int = 0, questionsAmount: Int? = null
 ) {
   Column(
     modifier = Modifier.fillMaxWidth(),
@@ -147,7 +171,7 @@ private fun TrainingStatus(
     }
 
     LinearTrainingProgress(
-      progress = questionNumber.toFloat() / (questionsAmount ?: questionNumber),
+      progress = (questionNumber.toFloat() - 1) / (questionsAmount ?: questionNumber),
       color = ShuuenUi.Lavender,
     )
   }

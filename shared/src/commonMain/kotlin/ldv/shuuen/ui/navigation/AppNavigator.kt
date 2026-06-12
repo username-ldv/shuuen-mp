@@ -16,4 +16,9 @@ class AppNavigator {
     if (backStack.size > 1) backStack.removeLastOrNull()
     Napier.v { "After navigate back triggered $backStack" }
   }
+
+  fun replaceWith(destination: AppRoute) {
+    navigateBack()
+    navigateTo(destination)
+  }
 }

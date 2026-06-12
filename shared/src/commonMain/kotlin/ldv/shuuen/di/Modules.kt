@@ -130,7 +130,7 @@ val commonModule = module {
   navigation<AppRoute.SinglesPlay> { route ->
     val navigator = get<AppNavigator>()
     SinglesPlayScreen(onNavigateBack = { navigator.navigateBack() }, onLevelEnd = {
-      navigator.navigateTo(
+      navigator.replaceWith(
         AppRoute.SinglesLevelComplete
       )
     }, viewModel = koinViewModel { parametersOf(route.levelId) })
