@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ldv.shuuen.domain.audio.music.Note
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.audio.music.Scale
 import ldv.shuuen.domain.audio.music.ScaleType
@@ -46,6 +47,7 @@ import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
+import ldv.shuuen.ui.common.music.NoteRow
 import ldv.shuuen.ui.common.music.ScaleChooser
 import ldv.shuuen.ui.common.music.inputs.PianoKeyboard
 import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
@@ -300,23 +302,11 @@ private fun MelodyRangeSection() {
   ) {
     Text(
       text = "C3 - C5",
-      color = ShuuenUi.Text,
       style = MaterialTheme.typography.headlineMedium.copy(letterSpacing = 3.sp),
       modifier = Modifier.align(Alignment.CenterHorizontally),
     )
-    MelodyRangeKeyboardStrip()
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-      listOf("C2", "C3", "C4", "C5", "C6").forEach {
-        Text(
-          it,
-          color = ShuuenUi.Dim,
-          style = MaterialTheme.typography.bodySmall
-        )
-      }
-    }
+    NoteRow(value = Note(Pitch.C, 3)) {}
+    NoteRow(value = Note(Pitch.C, 5)) {}
   }
 }
 

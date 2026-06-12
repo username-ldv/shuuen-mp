@@ -26,6 +26,7 @@ import ldv.shuuen.domain.audio.music.Note
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.repository.local.SinglesLocalLevelRepository
 import ldv.shuuen.domain.training.singles.SinglesLevel
+import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
 import kotlin.time.Duration.Companion.milliseconds
 
 enum class AnswerColors(val color: Color) {
@@ -33,7 +34,7 @@ enum class AnswerColors(val color: Color) {
 }
 
 /** Monotone flash used for setup-melody key highlights (colorful palette is a future option). */
-val SetupMelodyFlashColor = Color(0xFFD9D9DE)
+//val SetupMelodyFlashColor = Color(0xFFD9D9DE)
 
 /** A request from the VM for the screen to flash a key (used for setup-melody highlights). */
 data class KeyFlashRequest(val index: Int, val color: Color)
@@ -198,7 +199,7 @@ class SinglesPlayScreenViewModel(
         Napier.v { "got setup melody note $note" }
         if (note != null) {
           _setupMelodyFlashes.emit(
-            KeyFlashRequest(note.pitch.ordinal, SetupMelodyFlashColor)
+            KeyFlashRequest(note.pitch.ordinal, PianoKeyboardDefaults.MonochromePressedColor)
           )
         }
       }
