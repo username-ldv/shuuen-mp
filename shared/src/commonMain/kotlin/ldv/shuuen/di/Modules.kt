@@ -11,8 +11,8 @@ import ldv.shuuen.domain.audio.engine.MidiEngine
 import ldv.shuuen.domain.repository.SettingsRepository
 import ldv.shuuen.domain.repository.local.ContextLocalRepository
 import ldv.shuuen.domain.repository.local.SinglesLocalLevelRepository
-import ldv.shuuen.ui.navigation.AppNavigator
 import ldv.shuuen.ui.navigation.AppRoute
+import ldv.shuuen.ui.navigation.LocalAppNavigator
 import ldv.shuuen.ui.screens.app_settings.SettingsScreen
 import ldv.shuuen.ui.screens.context.ContextScreen
 import ldv.shuuen.ui.screens.free_play.FreePlayScreen
@@ -52,10 +52,8 @@ val commonModule = module {
 
   single<BassMidiEngine>() bind MidiEngine::class
 
-  single<AppNavigator>()
-
   navigation<AppRoute.MainMenu> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     MainMenuScreen(
       onOpenFreePlay = { navigator.navigateTo(AppRoute.FreePlay) },
       onOpenMelodies = { navigator.navigateTo(AppRoute.MelodiesLevelSelect) },
@@ -66,7 +64,7 @@ val commonModule = module {
 
   viewModel<FreePlayViewModel>()
   navigation<AppRoute.FreePlay> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     FreePlayScreen(
       viewModel = koinViewModel(),
       onNavigateBack = { navigator.navigateBack() },
@@ -74,18 +72,18 @@ val commonModule = module {
   }
 
   navigation<AppRoute.Settings> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     SettingsScreen(onNavigateBack = { navigator.navigateBack() })
   }
 
   navigation<AppRoute.Context> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     ContextScreen(onNavigateBack = { navigator.navigateBack() })
   }
 
 
   navigation<AppRoute.MelodiesLevelSelect> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
 //    LevelSelectScreen(
 //      flow = TrainingFlow.Melodies,
 //      onNavigateBack = { navigator.navigateBack() },
@@ -95,7 +93,7 @@ val commonModule = module {
 
 
   navigation<AppRoute.MelodiesLevelComplete> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     LevelCompleteScreen(
       flow = TrainingFlow.Melodies,
       onNavigateBack = { navigator.navigateBack() },
@@ -106,7 +104,7 @@ val commonModule = module {
 
   viewModel<SinglesLevelSelectScreenViewModel>()
   navigation<AppRoute.SinglesLevelSelect> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     SinglesLevelSelectScreen(
       onNavigateBack = { navigator.navigateBack() },
       onStartLevel = { levelId -> navigator.navigateTo(AppRoute.SinglesPlay(levelId)) },
@@ -117,7 +115,7 @@ val commonModule = module {
 
   viewModel<SinglesSetupScreenViewModel>()
   navigation<AppRoute.SinglesSetup> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     SinglesSetupScreen(
       onNavigateBack = { navigator.navigateBack() },
       onOpenContext = { navigator.navigateTo(AppRoute.Context) },
@@ -128,7 +126,7 @@ val commonModule = module {
 
   viewModel<SinglesPlayScreenViewModel>()
   navigation<AppRoute.SinglesPlay> { route ->
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     SinglesPlayScreen(onNavigateBack = { navigator.navigateBack() }, onLevelEnd = {
       navigator.replaceWith(
         AppRoute.SinglesLevelComplete
@@ -137,7 +135,7 @@ val commonModule = module {
   }
 
   navigation<AppRoute.SinglesLevelComplete> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     LevelCompleteScreen(
       flow = TrainingFlow.Singles,
       onNavigateBack = { navigator.navigateBack() },
@@ -147,7 +145,7 @@ val commonModule = module {
   }
 
   navigation<AppRoute.MelodiesSetup> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     MelodiesSetupScreen(
       onNavigateBack = { navigator.navigateBack() },
       onOpenContext = { navigator.navigateTo(AppRoute.Context) },
@@ -156,7 +154,7 @@ val commonModule = module {
   }
 
   navigation<AppRoute.MelodiesPlay> {
-    val navigator = get<AppNavigator>()
+    val navigator = LocalAppNavigator.current
     MelodiesPlayScreen(onNavigateBack = { navigator.navigateBack() }, onLevelEnd = {
       navigator.navigateTo(AppRoute.MelodiesLevelComplete)
     })

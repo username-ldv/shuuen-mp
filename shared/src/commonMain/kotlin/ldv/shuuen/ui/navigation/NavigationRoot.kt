@@ -3,11 +3,15 @@ package ldv.shuuen.ui.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
-import org.koin.compose.koinInject
+import kotlinx.serialization.serializer
 import org.koin.compose.navigation3.koinEntryProvider
 import org.koin.core.annotation.KoinExperimentalAPI
 
@@ -22,18 +26,28 @@ expect val transitions: Transitions
 @OptIn(KoinExperimentalAPI::class)
 @Composable
 fun NavigationRoot() {
+  val backStack = rememberAppNavBackStack(AppRoute.MainMenu)
+  val navigator = remember(backStack) { AppNavigator(backStack) }
   val entryProvider = koinEntryProvider<AppRoute>()
-  val navigator = koinInject<AppNavigator>()
 
-  NavDisplay(
-    entryProvider = entryProvider,
-    backStack = navigator.backStack,
-    onBack = { navigator.navigateBack() },
-    entryDecorators = listOf(
-      rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()
-    ),
-    transitionSpec = transitions.transitionSpec,
-    popTransitionSpec = transitions.popTransitionSpec,
-    predictivePopTransitionSpec = transitions.predictivePopTransitionSpec,
-  )
+  CompositionLocalProvider(LocalAppNavigator provides navigator) {
+    NavDisplay(
+      entryProvider = entryProvider,
+      backStack = backStack,
+      onBack = { navigator.navigateBack() },
+      entryDecorators = listOf(
+        rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()
+      ),
+      transitionSpec = transitions.transitionSpec,
+      popTransitionSpec = transitions.popTransitionSpec,
+      predictivePopTransitionSpec = transitions.predictivePopTransitionSpec,
+    )
+  }
+}
+
+@Composable
+private fun rememberAppNavBackStack(
+  vararg elements: AppRoute,
+): NavBackStack<AppRoute> = rememberSerializable(serializer = serializer()) {
+  NavBackStack(*elements)
 }

@@ -1,9 +1,10 @@
 package ldv.shuuen.ui.navigation
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface AppRoute {
+sealed interface AppRoute : NavKey {
   @Serializable
   data object MainMenu : AppRoute
 

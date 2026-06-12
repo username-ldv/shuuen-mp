@@ -1,10 +1,12 @@
 package ldv.shuuen.ui.navigation
 
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.navigation3.runtime.NavBackStack
 import io.github.aakira.napier.Napier
 
-class AppNavigator {
-  val backStack = mutableStateListOf<AppRoute>(AppRoute.MainMenu)
+class AppNavigator(
+  val backStack: NavBackStack<AppRoute>,
+) {
 
   fun navigateTo(destination: AppRoute) {
     Napier.v { "Navigate happened" }
@@ -18,7 +20,10 @@ class AppNavigator {
   }
 
   fun replaceWith(destination: AppRoute) {
-    navigateBack()
-    navigateTo(destination)
+    backStack[backStack.size - 1] = destination
   }
+}
+
+val LocalAppNavigator = staticCompositionLocalOf<AppNavigator> {
+  error("AppNavigator is not available outside NavigationRoot")
 }

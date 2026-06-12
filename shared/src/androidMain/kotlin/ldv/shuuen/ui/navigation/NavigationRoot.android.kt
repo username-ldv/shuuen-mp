@@ -1,16 +1,21 @@
 package ldv.shuuen.ui.navigation
 
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.togetherWith
 
 actual val transitions: Transitions = Transitions(
-  { slideInHorizontally(initialOffsetX = { it }) togetherWith slideOutHorizontally(targetOffsetX = { -it }) },
   {
-    slideInHorizontally(initialOffsetX = { -it }) togetherWith slideOutHorizontally(
-      targetOffsetX = { it })
+    slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) togetherWith slideOutOfContainer(
+      AnimatedContentTransitionScope.SlideDirection.Left
+    )
   },
   {
-    slideInHorizontally(initialOffsetX = { -it }) togetherWith slideOutHorizontally(
-      targetOffsetX = { it })
+    slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) togetherWith slideOutOfContainer(
+      AnimatedContentTransitionScope.SlideDirection.Right
+    )
+  },
+  {
+    slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) togetherWith slideOutOfContainer(
+      AnimatedContentTransitionScope.SlideDirection.Right
+    )
   })
