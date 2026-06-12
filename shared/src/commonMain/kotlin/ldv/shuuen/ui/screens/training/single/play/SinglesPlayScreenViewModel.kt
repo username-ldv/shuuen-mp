@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -60,6 +61,7 @@ class SinglesPlayScreenViewModel(
   private var degreeContextJob: Job? = null
   private var readyStatusJob: Job? = null
   private var setupMelodyNotesIndicationJob: Job? = null
+  private var playNoteJob: Job? = null
 
   private var quizzer: SinglesLevelQuizzer? = null
   var lastHandledQuestion = 0
@@ -150,17 +152,27 @@ class SinglesPlayScreenViewModel(
   }
 
   fun repeatNote() {
-    viewModelScope.launch {
-      quizzer?.let { quizzer ->
-        quizzer.quizState.value.currentNote.let { playNote(it) }
-      }
-    }
+    val note = quizzer?.quizState?.value?.currentNote ?: return
+    playNote(note)
   }
 
-  private suspend fun playNote(note: Note) {
-    midiEngine.playNote(note)
-    delay(playNoteDuration)
-    midiEngine.stopNote(note)
+  /**
+   * Plays [note] for [playNoteDuration], then stops it. Exclusive: a new call cancels the previous
+   * playback and waits for its note-off to finish before the new note-on. Without the join, a rapid
+   * repeat could let an earlier coroutine's stopNote land after a later note-on and cut it off —
+   * both target the same MIDI note.
+   */
+  private fun playNote(note: Note) {
+    val previous = playNoteJob
+    playNoteJob = viewModelScope.launch {
+      previous?.cancelAndJoin()
+      try {
+        midiEngine.playNote(note)
+        delay(playNoteDuration)
+      } finally {
+        midiEngine.stopNote(note)
+      }
+    }
   }
 
   private fun startContext(context: DegreeContext, root: Pitch): DegreeContextPlayer {
@@ -184,7 +196,12 @@ class SinglesPlayScreenViewModel(
         Napier.v { "got setup melody note $note" }
         if (note != null) {
           val offset = root.asRoot(note.pitch).ordinal
-          _setupMelodyFlashes.emit(KeyFlashRequest(note.pitch.ordinal, Palette.entries[offset].color))
+          _setupMelodyFlashes.emit(
+            KeyFlashRequest(
+              note.pitch.ordinal,
+              Palette.entries[offset].color
+            )
+          )
         }
       }
     }
