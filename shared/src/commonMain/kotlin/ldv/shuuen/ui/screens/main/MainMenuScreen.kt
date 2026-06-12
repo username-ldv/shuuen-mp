@@ -74,7 +74,7 @@ fun MainMenuScreen(
           contentScale = ContentScale.Fit,
         )
         Text(
-          text = "Last ear trainer you need.",
+          text = "The last ear trainer app you need.",
           color = ShuuenUi.Muted,
           style = MaterialTheme.typography.titleSmall,
           textAlign = TextAlign.Center,
