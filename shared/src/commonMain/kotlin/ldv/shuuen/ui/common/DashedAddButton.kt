@@ -1,7 +1,10 @@
 package ldv.shuuen.ui.common
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,9 +27,12 @@ import androidx.compose.ui.unit.sp
 fun DashedAddButton(
   text: String,
   modifier: Modifier = Modifier.Companion,
+  onClick: (() -> Unit)? = null,
 ) {
   Box(
-    modifier = modifier.fillMaxWidth().height(52.dp),
+    modifier = modifier.fillMaxWidth().height(52.dp)
+      .clip(RoundedCornerShape(14.dp))
+      .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     contentAlignment = Alignment.Center,
   ) {
     Canvas(Modifier.fillMaxSize()) {

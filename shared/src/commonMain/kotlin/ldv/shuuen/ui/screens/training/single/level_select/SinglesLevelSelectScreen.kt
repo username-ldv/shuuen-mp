@@ -1,5 +1,7 @@
 package ldv.shuuen.ui.screens.training.single.level_select
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,22 +12,33 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Create
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Keyboard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ldv.shuuen.common.ResponseState
+import ldv.shuuen.domain.audio.music.DegreeContext
+import ldv.shuuen.domain.audio.music.Sustain
 import ldv.shuuen.domain.training.level.LevelConfig
+import ldv.shuuen.domain.training.level.LevelSource
 import ldv.shuuen.domain.training.singles.SinglesLevel
+import ldv.shuuen.ui.common.Hairline
 import ldv.shuuen.ui.common.PrimaryCta
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
@@ -33,6 +46,7 @@ import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.StaticScreenFrame
 import ldv.shuuen.ui.common.SurfaceCard
 import ldv.shuuen.ui.common.music.BoxedItemRow
+import ldv.shuuen.ui.common.music.DegreeSequenceChips
 import ldv.shuuen.ui.screens.training.common.toBoxedItems
 
 @Composable
@@ -72,7 +86,7 @@ fun SinglesLevelSelectScreen(
         }
 
         is ResponseState.Success -> l.result.forEach { level ->
-          item {
+          item(key = level.id) {
             LevelCard(level, onLevelChosen = { onStartLevel(it.id) })
           }
         }
@@ -91,20 +105,37 @@ fun SinglesLevelSelectScreen(
 
 @Composable
 private fun LevelCard(level: SinglesLevel, onLevelChosen: (SinglesLevel) -> Unit) {
+  var expanded by rememberSaveable(level.id) { mutableStateOf(false) }
+
   SurfaceCard(
     onClick = { onLevelChosen(level) },
     verticalSpacing = Arrangement.spacedBy(12.dp),
   ) {
-    Text(
-      text = level.name,
-      color = ShuuenUi.Text,
-      style = MaterialTheme.typography.titleMedium.copy(
-        letterSpacing = ShuuenUi.titlesSpacing,
-        fontWeight = FontWeight.SemiBold,
-      ),
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      Text(
+        text = level.name,
+        color = ShuuenUi.Text,
+        style = MaterialTheme.typography.titleMedium.copy(
+          letterSpacing = ShuuenUi.titlesSpacing,
+          fontWeight = FontWeight.SemiBold,
+        ),
+        modifier = Modifier.weight(1f),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
+      Icon(
+        imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+        contentDescription = if (expanded) "Collapse details" else "Expand details",
+        tint = ShuuenUi.Dim,
+        modifier = Modifier.size(26.dp)
+          .clip(ShuuenUi.ControlShape)
+          .clickable { expanded = !expanded },
+      )
+    }
     LevelParameterRow(level = level)
     when (val levelConfig = level.levelConfig) {
       is LevelConfig.Singles.Absolute -> {
@@ -114,6 +145,9 @@ private fun LevelCard(level: SinglesLevel, onLevelChosen: (SinglesLevel) -> Unit
       is LevelConfig.Singles.Relative -> {
         BoxedItemRow(levelConfig.scaleConfig.degreeStates.toBoxedItems(), itemSize = 32.dp)
       }
+    }
+    AnimatedVisibility(visible = expanded) {
+      LevelDetails(level)
     }
   }
 }
@@ -163,4 +197,108 @@ private fun LevelParameter(
       overflow = TextOverflow.Ellipsis,
     )
   }
+}
+
+@Composable
+private fun LevelDetails(level: SinglesLevel) {
+  Column(
+    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+    verticalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
+    Hairline()
+
+    DetailRow("SOURCE", sourceLabel(level.source))
+
+    level.levelConfig.rotateEveryQuestions?.let {
+      DetailRow("SCALE ROTATION", "Every $it questions")
+    }
+
+    DetailLabel("CONTEXT")
+    val context = level.context
+    if (context == null) {
+      Text(
+        text = "Default context",
+        color = ShuuenUi.Muted,
+        style = MaterialTheme.typography.bodyMedium,
+      )
+    } else {
+      ContextDetails(context)
+    }
+  }
+}
+
+@Composable
+private fun ContextDetails(context: DegreeContext) {
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    context.name?.let {
+      Text(
+        text = it,
+        color = ShuuenUi.Muted,
+        style = MaterialTheme.typography.bodyMedium,
+      )
+    }
+    context.nodes.forEachIndexed { index, node ->
+      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+          text = "Node ${index + 1} · ${sustainLabel(node.sustain)}" +
+            (node.durationInQuestions?.let { " · $it questions" } ?: ""),
+          color = ShuuenUi.Dim,
+          style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.2.sp),
+        )
+        DegreeSequenceChips(
+          labels = node.degrees.mapIndexed { i, d ->
+            if (i == 0) "${d.degree.label} · ${d.octave}" else d.degree.label
+          },
+        )
+      }
+    }
+    context.setupMelody?.let { melody ->
+      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        DetailLabel("SETUP MELODY")
+        DegreeSequenceChips(labels = melody.map { it.label })
+      }
+    }
+  }
+}
+
+@Composable
+private fun DetailRow(label: String, value: String) {
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(10.dp),
+  ) {
+    DetailLabel(label, modifier = Modifier.weight(1f))
+    Text(
+      text = value,
+      color = ShuuenUi.Muted,
+      style = MaterialTheme.typography.bodyMedium,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+  }
+}
+
+@Composable
+private fun DetailLabel(text: String, modifier: Modifier = Modifier) {
+  Text(
+    text = text,
+    color = ShuuenUi.Dim,
+    style = MaterialTheme.typography.labelSmall.copy(
+      letterSpacing = ShuuenUi.labelSpacing,
+      fontWeight = FontWeight.SemiBold,
+    ),
+    modifier = modifier,
+  )
+}
+
+private fun sourceLabel(source: LevelSource): String = when (source) {
+  LevelSource.BuiltIn -> "Built-in"
+  LevelSource.User -> "Custom"
+  LevelSource.Imported -> "Imported"
+}
+
+private fun sustainLabel(sustain: Sustain): String = when (sustain) {
+  is Sustain.Endless -> "Sustained"
+  is Sustain.Finite -> "Timed"
 }

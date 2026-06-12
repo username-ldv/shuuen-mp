@@ -1,15 +1,14 @@
 package ldv.shuuen.ui.screens.context
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,8 +20,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Keyboard
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,27 +39,75 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import ldv.shuuen.domain.audio.music.Degree
+import ldv.shuuen.domain.audio.music.DegreeWithOctave
 import ldv.shuuen.ui.common.DashedAddButton
 import ldv.shuuen.ui.common.FlatSection
 import ldv.shuuen.ui.common.Hairline
 import ldv.shuuen.ui.common.PrimaryCta
+import ldv.shuuen.ui.common.ShuuenSwitch
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
 import ldv.shuuen.ui.common.SurfaceCard
-import ldv.shuuen.ui.common.music.inputs.PianoKeyboard
-import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
+import ldv.shuuen.ui.common.TextDropdownMenu
+import ldv.shuuen.ui.common.music.DegreePalette
+import ldv.shuuen.ui.common.music.DegreeSequenceChips
+import ldv.shuuen.ui.common.music.DegreeSequenceEditor
+import ldv.shuuen.ui.common.music.OctaveStepper
+
+/**
+ * UI state for one sequence node. Mirrors [ldv.shuuen.domain.audio.music.DegreeContextNode]:
+ * the first degree carries an octave, the rest are stacked above it in ascending order.
+ * Local-only for now — persistence comes with the context functionality.
+ */
+private data class SequenceNodeState(
+  val firstDegree: DegreeWithOctave = DegreeWithOctave(Degree.D1, 3),
+  val extraDegrees: List<Degree> = listOf(Degree.D3, Degree.D5),
+  val sustain: Boolean = true,
+  val questionsBeforeNext: Int = 4,
+  val setupMelody: List<Degree> = listOf(Degree.D1, Degree.D3, Degree.D5, Degree.D1),
+)
+
+private data class SequencePreset(val label: String, val nodes: List<SequenceNodeState>)
+
+private val sequencePresets = listOf(
+  SequencePreset(
+    label = "Drone",
+    nodes = listOf(
+      SequenceNodeState(
+        firstDegree = DegreeWithOctave(Degree.D1, 2),
+        extraDegrees = emptyList(),
+        sustain = true,
+      ),
+    ),
+  ),
+  SequencePreset(
+    label = "I-IV-V-I",
+    nodes = listOf(
+      SequenceNodeState(DegreeWithOctave(Degree.D1, 3), listOf(Degree.D3, Degree.D5), false),
+      SequenceNodeState(DegreeWithOctave(Degree.D4, 3), listOf(Degree.D6, Degree.D1), false),
+      SequenceNodeState(DegreeWithOctave(Degree.D5, 3), listOf(Degree.D7, Degree.D2), false),
+    ),
+  ),
+  SequencePreset(
+    label = "ii-V-I",
+    nodes = listOf(
+      SequenceNodeState(DegreeWithOctave(Degree.D2, 3), listOf(Degree.D4, Degree.D6), false),
+      SequenceNodeState(DegreeWithOctave(Degree.D5, 3), listOf(Degree.D7, Degree.D2), false),
+      SequenceNodeState(DegreeWithOctave(Degree.D1, 3), listOf(Degree.D3, Degree.D5), false),
+    ),
+  ),
+)
 
 @Composable
 fun ContextScreen(onNavigateBack: () -> Unit) {
-  var selectedTab by rememberSaveable { mutableStateOf(ContextTab.Drone) }
+  var nodes by remember { mutableStateOf(sequencePresets[1].nodes) }
 
   StaticScreenFrame(
     verticalSpacing = 18.dp,
@@ -71,15 +120,39 @@ fun ContextScreen(onNavigateBack: () -> Unit) {
       )
     },
   ) {
-    ContextTabs(
-      selectedTab = selectedTab,
-      onSelectTab = { selectedTab = it },
-    )
-
-    when (selectedTab) {
-      ContextTab.Drone -> DroneContextTab()
-      ContextTab.Cadence -> CadenceContextTab()
+    FlatSection(
+      label = "SEQUENCE",
+      supporting = "Build the progression played during training. After the last node, the sequence returns to the first node.",
+      trailing = {
+        Text(
+          text = "${nodes.size} ${if (nodes.size == 1) "node" else "nodes"}",
+          color = ShuuenUi.Muted,
+          style = MaterialTheme.typography.labelLarge,
+        )
+      },
+    ) {
+      PresetRow(onApply = { nodes = it })
+      PreviewFullSequence()
+      nodes.forEachIndexed { index, node ->
+        SequenceNodeCard(
+          number = index + 1,
+          isLast = index == nodes.lastIndex,
+          node = node,
+          onNodeChange = { updated ->
+            nodes = nodes.toMutableList().also { it[index] = updated }
+          },
+          onDelete = if (nodes.size > 1) {
+            { nodes = nodes.toMutableList().also { it.removeAt(index) } }
+          } else null,
+        )
+      }
+      DashedAddButton(
+        text = "ADD NODE",
+        onClick = { nodes = nodes + SequenceNodeState() },
+      )
     }
+
+    SequenceInfoBlock()
 
     PrimaryCta(
       text = "SAVE CONTEXT",
@@ -89,217 +162,28 @@ fun ContextScreen(onNavigateBack: () -> Unit) {
   }
 }
 
-private enum class ContextTab {
-  Drone,
-  Cadence,
-}
-
-private data class ContextNode(
-  val title: String,
-  val subtitle: String,
-  val function: String? = null,
-  val notes: List<String>,
-  val previewLabel: String,
-  val questionLabel: String,
-  val questionCount: String,
-)
-
 @Composable
-private fun ContextTabs(
-  selectedTab: ContextTab,
-  onSelectTab: (ContextTab) -> Unit,
-) {
-  Column(modifier = Modifier.fillMaxWidth()) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-      ContextTabButton(
-        text = "DRONE",
-        selected = selectedTab == ContextTab.Drone,
-        onClick = { onSelectTab(ContextTab.Drone) },
-        modifier = Modifier.weight(1f),
-      )
-      ContextTabButton(
-        text = "CADENCE",
-        selected = selectedTab == ContextTab.Cadence,
-        onClick = { onSelectTab(ContextTab.Cadence) },
-        modifier = Modifier.weight(1f),
-      )
-    }
-    Hairline()
-  }
-}
-
-@Composable
-private fun ContextTabButton(
-  text: String,
-  selected: Boolean,
-  onClick: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  Column(
-    modifier = modifier.clickable(onClick = onClick),
-    horizontalAlignment = Alignment.CenterHorizontally,
-  ) {
+private fun PresetRow(onApply: (List<SequenceNodeState>) -> Unit) {
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Text(
-      text = text,
-      color = if (selected) ShuuenUi.Text else ShuuenUi.Dim,
-      style = MaterialTheme.typography.titleSmall.copy(
-        letterSpacing = 3.sp,
-        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-      ),
-      modifier = Modifier.padding(vertical = 12.dp),
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
-    Box(
-      modifier = Modifier
-        .fillMaxWidth(0.6f)
-        .height(2.dp)
-        .background(if (selected) ShuuenUi.Text else Color.Transparent),
-    )
-  }
-}
-
-@Composable
-private fun DroneContextTab() {
-  FlatSection(
-    label = "DRONE SEQUENCE",
-    supporting = "Build the drone progression used during training.",
-    trailing = { NodeCountBadge("2 nodes") },
-  ) {
-    ContextNodeCard(
-      number = 1,
-      node = ContextNode(
-        title = "NODE 1",
-        subtitle = "Plays before Node 2",
-        notes = listOf("C3", "G3", "C4"),
-        previewLabel = "Preview drone",
-        questionLabel = "QUESTIONS BEFORE NEXT",
-        questionCount = "5",
+      text = "PRESETS",
+      color = ShuuenUi.Dim,
+      style = MaterialTheme.typography.labelSmall.copy(
+        letterSpacing = ShuuenUi.labelSpacing,
+        fontWeight = FontWeight.SemiBold,
       ),
     )
-    ContextNodeCard(
-      number = 2,
-      node = ContextNode(
-        title = "NODE 2",
-        subtitle = "Plays before restart",
-        notes = listOf("F3", "C4"),
-        previewLabel = "Preview drone",
-        questionLabel = "QUESTIONS BEFORE RESTART",
-        questionCount = "8",
-      ),
-    )
-    DashedAddButton("ADD NODE")
-  }
-
-  ContextInfoBlock(
-    text = "Each node can contain multiple notes across octaves.\nAfter the last node, the sequence returns to the first node.",
-    detail = "Choose notes across octaves. Opens a scrollable keyboard picker.",
-    markerCount = 2,
-  )
-}
-
-@Composable
-private fun CadenceContextTab() {
-  FlatSection(
-    label = "CADENCE SEQUENCE",
-    supporting = "Build the cadence progression used during training.",
-    trailing = { NodeCountBadge("3 nodes") },
-  ) {
-    PresetProgressionControls()
-    PreviewFullSequence()
-    ContextNodeCard(
-      number = 1,
-      node = ContextNode(
-        title = "NODE 1",
-        subtitle = "Plays before Node 2",
-        function = "I",
-        notes = listOf("C3", "E3", "G3"),
-        previewLabel = "Preview cadence",
-        questionLabel = "QUESTIONS BEFORE NEXT",
-        questionCount = "4",
-      ),
-    )
-    ContextNodeCard(
-      number = 2,
-      node = ContextNode(
-        title = "NODE 2",
-        subtitle = "Plays before Node 3",
-        function = "IV",
-        notes = listOf("F3", "A3", "C4"),
-        previewLabel = "Preview cadence",
-        questionLabel = "QUESTIONS BEFORE NEXT",
-        questionCount = "4",
-      ),
-    )
-    ContextNodeCard(
-      number = 3,
-      node = ContextNode(
-        title = "NODE 3",
-        subtitle = "Plays before restart",
-        function = "V",
-        notes = listOf("G3", "B3", "D4"),
-        previewLabel = "Preview cadence",
-        questionLabel = "QUESTIONS BEFORE RESTART",
-        questionCount = "6",
-      ),
-    )
-    DashedAddButton("ADD NODE")
-  }
-
-  ContextInfoBlock(
-    text = "Presets create common cadence progressions to get you started.\nEach node can be edited individually to fit your training goals.\nAfter the last node, the sequence returns to the first node.",
-    markerCount = 4,
-  )
-}
-
-@Composable
-private fun NodeCountBadge(text: String) {
-  Text(
-    text = text,
-    color = ShuuenUi.Muted,
-    style = MaterialTheme.typography.labelLarge,
-  )
-}
-
-@Composable
-private fun PresetProgressionControls() {
-  SoftControl(modifier = Modifier.fillMaxWidth()) {
-    Icon(
-      imageVector = Icons.Rounded.Edit,
-      contentDescription = null,
-      tint = ShuuenUi.Muted,
-      modifier = Modifier.size(20.dp),
-    )
-    Text(
-      text = "Preset progression",
-      color = ShuuenUi.Text,
-      style = MaterialTheme.typography.titleSmall,
-      modifier = Modifier.weight(1f),
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
-    Text(
-      text = "I-IV-V-I",
-      color = ShuuenUi.Muted,
-      style = MaterialTheme.typography.titleSmall,
-    )
-    Icon(
-      Icons.Rounded.ChevronRight,
-      contentDescription = null,
-      tint = ShuuenUi.Dim,
-      modifier = Modifier.size(22.dp),
-    )
-  }
-  Row(
-    modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    listOf("I-IV-V-I", "ii-V-I", "I-vi-ii-V").forEachIndexed { index, text ->
-      SmallPill(
-        text = text,
-        selected = index == 0,
-        modifier = Modifier.weight(1f),
-      )
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      sequencePresets.forEach { preset ->
+        SmallPill(
+          text = preset.label,
+          onClick = { onApply(preset.nodes) },
+          modifier = Modifier.weight(1f),
+        )
+      }
     }
   }
 }
@@ -327,18 +211,25 @@ private fun PreviewFullSequence() {
 }
 
 @Composable
-private fun ContextNodeCard(
+private fun SequenceNodeCard(
   number: Int,
-  node: ContextNode,
+  isLast: Boolean,
+  node: SequenceNodeState,
+  onNodeChange: (SequenceNodeState) -> Unit,
+  onDelete: (() -> Unit)?,
 ) {
   SurfaceCard {
     Box(modifier = Modifier.fillMaxWidth()) {
-      Icon(
-        imageVector = Icons.Rounded.Delete,
-        contentDescription = null,
-        tint = ShuuenUi.Dim,
-        modifier = Modifier.align(Alignment.TopEnd).size(24.dp),
-      )
+      if (onDelete != null) {
+        Icon(
+          imageVector = Icons.Rounded.Delete,
+          contentDescription = "Delete node",
+          tint = ShuuenUi.Dim,
+          modifier = Modifier.align(Alignment.TopEnd).size(24.dp)
+            .clip(ShuuenUi.ControlShape)
+            .clickable(onClick = onDelete),
+        )
+      }
       Row(
         modifier = Modifier.fillMaxWidth().padding(end = 30.dp),
         verticalAlignment = Alignment.Top,
@@ -347,38 +238,190 @@ private fun ContextNodeCard(
         NodeNumber(number = number)
         Column(
           modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(12.dp),
+          verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
           Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-              text = node.title,
+              text = "NODE $number",
               color = ShuuenUi.Text,
               style = MaterialTheme.typography.titleMedium.copy(
                 letterSpacing = ShuuenUi.titlesSpacing,
                 fontWeight = FontWeight.SemiBold,
               ),
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
             )
             Text(
-              text = node.subtitle,
+              text = if (isLast) "Plays before restart" else "Plays before Node ${number + 1}",
               color = ShuuenUi.Muted,
               style = MaterialTheme.typography.bodyMedium,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
             )
           }
 
-          NodeChips(function = node.function, notes = node.notes)
-          NodeActionRow(label = "Choose notes", icon = Icons.Rounded.Keyboard, trailing = true)
-          NodeActionRow(label = node.previewLabel, play = true) {
-            MiniWaveform(Modifier.width(120.dp).height(28.dp), pieces = 3)
-          }
-          InlineCounter(label = node.questionLabel, value = node.questionCount)
+          NodeDegreesEditor(node = node, onNodeChange = onNodeChange)
+          SustainRow(
+            sustain = node.sustain,
+            onChange = { onNodeChange(node.copy(sustain = it)) },
+          )
+          SetupMelodyRow(
+            melody = node.setupMelody,
+            onChange = { onNodeChange(node.copy(setupMelody = it)) },
+          )
+          NodePreviewRow()
+          InlineCounter(
+            label = if (isLast) "QUESTIONS BEFORE RESTART" else "QUESTIONS BEFORE NEXT",
+            value = node.questionsBeforeNext,
+            onChange = { onNodeChange(node.copy(questionsBeforeNext = it)) },
+          )
         }
       }
     }
   }
+}
+
+/**
+ * Degree editor for a node: the first degree picks its own octave; further degrees
+ * are appended above it in ascending order (e.g. first 5·oct3 + 1 3 5 → G3 C4 E4 G4
+ * in C major).
+ */
+@Composable
+private fun NodeDegreesEditor(
+  node: SequenceNodeState,
+  onNodeChange: (SequenceNodeState) -> Unit,
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    GroupLabel("FIRST DEGREE")
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      TextDropdownMenu(
+        items = Degree.chromaticOrder.map { it.label },
+        selectedItem = node.firstDegree.degree.label,
+        onItemSelected = { name ->
+          onNodeChange(
+            node.copy(firstDegree = node.firstDegree.copy(degree = Degree.fromName(name)))
+          )
+        },
+        modifier = Modifier.weight(1f),
+      )
+      OctaveStepper(
+        value = node.firstDegree.octave,
+        onChange = { onNodeChange(node.copy(firstDegree = node.firstDegree.copy(octave = it))) },
+      )
+    }
+
+    GroupLabel("THEN, ASCENDING")
+    DegreeSequenceChips(
+      labels = listOf("${node.firstDegree.degree.label} · ${node.firstDegree.octave}") +
+        node.extraDegrees.map { it.label },
+      onBackspace = {
+        if (node.extraDegrees.isNotEmpty()) {
+          onNodeChange(node.copy(extraDegrees = node.extraDegrees.dropLast(1)))
+        }
+      },
+    )
+    DegreePalette(
+      onPick = { onNodeChange(node.copy(extraDegrees = node.extraDegrees + it)) },
+    )
+  }
+}
+
+@Composable
+private fun SustainRow(
+  sustain: Boolean,
+  onChange: (Boolean) -> Unit,
+) {
+  SoftControl(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = "Sustain",
+        color = ShuuenUi.Text,
+        style = MaterialTheme.typography.titleSmall,
+      )
+      Text(
+        text = "Hold continuously like a drone instead of a timed chord.",
+        color = ShuuenUi.Muted,
+        style = MaterialTheme.typography.bodySmall,
+      )
+    }
+    ShuuenSwitch(checked = sustain, onCheckedChange = onChange)
+  }
+}
+
+@Composable
+private fun SetupMelodyRow(
+  melody: List<Degree>,
+  onChange: (List<Degree>) -> Unit,
+) {
+  var editing by rememberSaveable { mutableStateOf(false) }
+
+  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    SoftControl(
+      modifier = Modifier.fillMaxWidth(),
+      onClick = { editing = !editing },
+    ) {
+      Icon(
+        imageVector = Icons.Rounded.Edit,
+        contentDescription = null,
+        tint = ShuuenUi.Muted,
+        modifier = Modifier.size(20.dp),
+      )
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = "Setup melody",
+          color = ShuuenUi.Text,
+          style = MaterialTheme.typography.titleSmall,
+        )
+        Text(
+          text = melody.joinToString(" ") { it.label }.ifEmpty { "None" },
+          color = ShuuenUi.Muted,
+          style = MaterialTheme.typography.bodySmall,
+        )
+      }
+      Icon(
+        imageVector = if (editing) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+        contentDescription = null,
+        tint = ShuuenUi.Dim,
+        modifier = Modifier.size(22.dp),
+      )
+    }
+    AnimatedVisibility(visible = editing) {
+      DegreeSequenceEditor(
+        degrees = melody,
+        onAppend = { onChange(melody + it) },
+        onBackspace = { if (melody.isNotEmpty()) onChange(melody.dropLast(1)) },
+        modifier = Modifier.padding(top = 2.dp),
+      )
+    }
+  }
+}
+
+@Composable
+private fun NodePreviewRow() {
+  SoftControl(modifier = Modifier.fillMaxWidth()) {
+    PlayBubble()
+    Text(
+      text = "Preview node",
+      color = ShuuenUi.Text,
+      style = MaterialTheme.typography.titleSmall,
+      modifier = Modifier.weight(1f),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+    MiniWaveform(Modifier.width(120.dp).height(28.dp), pieces = 3)
+  }
+}
+
+@Composable
+private fun GroupLabel(text: String) {
+  Text(
+    text = text,
+    color = ShuuenUi.Dim,
+    style = MaterialTheme.typography.labelSmall.copy(
+      letterSpacing = ShuuenUi.labelSpacing,
+      fontWeight = FontWeight.SemiBold,
+    ),
+  )
 }
 
 @Composable
@@ -399,95 +442,10 @@ private fun NodeNumber(number: Int) {
 }
 
 @Composable
-private fun NodeChips(
-  function: String?,
-  notes: List<String>,
-) {
-  BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-    val compact = maxWidth < 360.dp
-
-    if (function == null || compact) {
-      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        ChipGroup("NOTES", notes)
-      }
-    } else {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(22.dp),
-      ) {
-        ChipGroup("FUNCTION", listOf(function), Modifier.weight(0.7f))
-        ChipGroup("NOTES", notes, Modifier.weight(1.5f))
-      }
-    }
-  }
-}
-
-@Composable
-private fun ChipGroup(
-  label: String,
-  values: List<String>,
-  modifier: Modifier = Modifier,
-) {
-  Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text(
-      text = label,
-      color = ShuuenUi.Dim,
-      style = MaterialTheme.typography.labelSmall.copy(
-        letterSpacing = ShuuenUi.labelSpacing,
-        fontWeight = FontWeight.SemiBold,
-      ),
-    )
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      values.forEach { value ->
-        SmallPill(text = value, selected = true, modifier = Modifier.width(58.dp))
-      }
-    }
-  }
-}
-
-@Composable
-private fun NodeActionRow(
-  label: String,
-  icon: ImageVector? = null,
-  trailing: Boolean = false,
-  play: Boolean = false,
-  content: @Composable RowScope.() -> Unit = {},
-) {
-  SoftControl(modifier = Modifier.fillMaxWidth()) {
-    if (play) {
-      PlayBubble()
-    } else if (icon != null) {
-      Icon(
-        imageVector = icon,
-        contentDescription = null,
-        tint = ShuuenUi.Muted,
-        modifier = Modifier.size(22.dp),
-      )
-    }
-    Text(
-      text = label,
-      color = ShuuenUi.Text,
-      style = MaterialTheme.typography.titleSmall,
-      modifier = Modifier.weight(1f),
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
-    content()
-    if (trailing) {
-      Icon(
-        Icons.Rounded.ChevronRight,
-        contentDescription = null,
-        tint = ShuuenUi.Dim,
-        modifier = Modifier.size(22.dp),
-      )
-    }
-  }
-}
-
-@Composable
 private fun InlineCounter(
   label: String,
-  value: String,
+  value: Int,
+  onChange: (Int) -> Unit,
 ) {
   Row(
     modifier = Modifier.fillMaxWidth(),
@@ -502,13 +460,18 @@ private fun InlineCounter(
       overflow = TextOverflow.Ellipsis,
       modifier = Modifier.weight(1f),
     )
-    CompactCounter(value = value, modifier = Modifier.weight(1.15f))
+    CompactCounter(
+      value = value,
+      onChange = onChange,
+      modifier = Modifier.weight(1.15f),
+    )
   }
 }
 
 @Composable
 private fun CompactCounter(
-  value: String,
+  value: Int,
+  onChange: (Int) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Row(
@@ -518,9 +481,9 @@ private fun CompactCounter(
       .background(Color.White.copy(alpha = 0.05f)),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    CounterPiece("-")
-    CounterPiece(value, Modifier.weight(1.35f))
-    CounterPiece("+")
+    CounterPiece("-", onClick = { if (value > 1) onChange(value - 1) })
+    CounterPiece(value.toString(), modifier = Modifier.weight(1.35f))
+    CounterPiece("+", onClick = { onChange(value + 1) })
   }
 }
 
@@ -528,9 +491,11 @@ private fun CompactCounter(
 private fun RowScope.CounterPiece(
   text: String,
   modifier: Modifier = Modifier.weight(1f),
+  onClick: (() -> Unit)? = null,
 ) {
   Box(
-    modifier = modifier.fillMaxHeight(),
+    modifier = modifier.fillMaxHeight()
+      .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     contentAlignment = Alignment.Center,
   ) {
     Text(text = text, color = ShuuenUi.Text, style = MaterialTheme.typography.titleMedium)
@@ -538,11 +503,7 @@ private fun RowScope.CounterPiece(
 }
 
 @Composable
-private fun ContextInfoBlock(
-  text: String,
-  detail: String? = null,
-  markerCount: Int,
-) {
+private fun SequenceInfoBlock() {
   Column(
     modifier = Modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -559,79 +520,31 @@ private fun ContextInfoBlock(
         tint = ShuuenUi.Dim,
         modifier = Modifier.size(22.dp)
       )
-      Column(
+      Text(
+        text = "A node's first degree sets the starting octave; added degrees stack above it in " +
+          "ascending order. Example: first degree 5 · oct 3 plus 1 3 5 plays G3 C4 E4 G4 in C major. " +
+          "Sustained nodes hold like a drone; others play as timed chords.",
+        color = ShuuenUi.Muted,
+        style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.weight(1f),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        Text(
-          text = text,
-          color = ShuuenUi.Muted,
-          style = MaterialTheme.typography.bodyMedium,
-        )
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          MiniRangeKeyboard(
-            markerCount = markerCount,
-            modifier = Modifier.weight(if (detail == null) 1f else 1.5f),
-          )
-          if (detail != null) {
-            Text(
-              text = detail,
-              color = ShuuenUi.Dim,
-              style = MaterialTheme.typography.bodyMedium,
-              modifier = Modifier.weight(1f),
-            )
-          }
-        }
-      }
+      )
     }
   }
 }
 
 @Composable
-private fun MiniRangeKeyboard(
-  markerCount: Int,
-  modifier: Modifier = Modifier,
-) {
-  val keyCount = 24
-  val selectedStart = 4
-  val selected = selectedStart until (selectedStart + markerCount * 4).coerceAtMost(keyCount - 2)
-  PianoKeyboard(
-    modifier = modifier.aspectRatio(PianoKeyboardDefaults.aspectRatio(keyCount)),
-    keyCount = keyCount,
-    idleKeyColors = List(keyCount) { index ->
-      when {
-        index !in selected -> if (PianoKeyboardDefaults.isBlackKey(index)) {
-          Color(0xFF151515)
-        } else {
-          Color(0xFF2A2A2A)
-        }
-
-        PianoKeyboardDefaults.isBlackKey(index) -> Color(0xFF4D4D4D)
-        else -> Color(0xFFE8E8E8)
-      }
-    },
-    borderWidth = 1.dp,
-    separatorWidth = 1.dp,
-    whiteKeyCornerRadius = 3.dp,
-    blackKeyCornerRadius = 2.dp,
-  )
-}
-
-@Composable
 private fun SmallPill(
   text: String,
-  selected: Boolean,
   modifier: Modifier = Modifier,
+  selected: Boolean = false,
+  onClick: (() -> Unit)? = null,
 ) {
   Box(
     modifier = modifier
       .height(30.dp)
       .clip(ShuuenUi.PillShape)
-      .background(if (selected) ShuuenUi.Inverse else Color.White.copy(alpha = 0.05f)),
+      .background(if (selected) ShuuenUi.Inverse else Color.White.copy(alpha = 0.05f))
+      .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     contentAlignment = Alignment.Center,
   ) {
     Text(
