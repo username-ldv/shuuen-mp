@@ -75,7 +75,8 @@ class SinglesLevelQuizzer(val level: SinglesLevel) {
   fun check(pitch: Pitch) {
     return if (quizState.value.currentNote.pitch == pitch) {
       _quizState.update { quizState ->
-        val count = if (quizState.incorrectAnswers.any { it.questionNumber == quizState.currentQuestionNumber }) 0 else 1
+        val count =
+          if (quizState.incorrectAnswers.any { it.questionNumber == quizState.currentQuestionNumber }) 0 else 1
         quizState.copy(
           correctAnswers = quizState.correctAnswers + count,
           currentQuestionNumber = quizState.currentQuestionNumber + 1,
@@ -86,12 +87,12 @@ class SinglesLevelQuizzer(val level: SinglesLevel) {
     } else {
       _quizState.update {
         val isDupe =
-          it.incorrectAnswers.any { answer -> answer.correctPitch == it.currentNote.pitch }
+          it.incorrectAnswers.any { answer -> answer.questionNumber == it.currentQuestionNumber }
+        Napier.v { "isDupe: $isDupe, incorrectAnswers: ${it.incorrectAnswers}" }
         if (!isDupe) {
           it.copy(
             incorrectAnswers = it.incorrectAnswers + IncorrectSinglesAnswer(
-              it.currentQuestionNumber,
-              it.currentNote.pitch
+              it.currentQuestionNumber, it.currentNote.pitch
             )
           )
         } else it
