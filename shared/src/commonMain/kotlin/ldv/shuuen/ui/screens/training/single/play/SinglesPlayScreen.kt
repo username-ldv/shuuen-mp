@@ -44,6 +44,7 @@ import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
 import ldv.shuuen.ui.common.music.inputs.PianoKeyboard
 import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
+import ldv.shuuen.ui.common.music.inputs.rememberPianoKeyboardState
 
 @Composable
 fun SinglesPlayScreen(
@@ -94,17 +95,22 @@ fun SinglesPlayScreen(
 //        centerButtonSize = 64.dp,
 //      )
 //    } else {
-    val indications by viewModel.answerIndications.collectAsStateWithLifecycle()
+    val indications by viewModel.programmaticIndications.collectAsStateWithLifecycle()
+    val keyboardState = rememberPianoKeyboardState()
     // pressedKeyColors stays at its neutral default (plain touch feedback). The setup-melody
-    // highlight and answer flashes arrive via programmaticIndications, each carrying its own color.
+    // highlight comes through programmaticIndications; answer feedback is a transient flash.
     PianoKeyboard(
       modifier = Modifier.fillMaxWidth().aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
       keyCount = 12,
       programmaticIndications = indications,
+      state = keyboardState,
       onKeyPressedChange = { offset, pressed ->
         if (!pressed) {
           val pitch = Pitch.fromOrdinal(offset)
-          viewModel.userGuessed(pitch)
+          viewModel.userGuessed(pitch)?.let { correct ->
+            val color = if (correct) AnswerColors.Correct.color else AnswerColors.Incorrect.color
+            keyboardState.flash(offset, color)
+          }
         }
       })
 //    }

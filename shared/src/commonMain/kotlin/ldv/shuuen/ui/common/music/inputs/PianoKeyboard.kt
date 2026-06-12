@@ -1,5 +1,7 @@
 package ldv.shuuen.ui.common.music.inputs
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
@@ -14,9 +16,12 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -31,6 +36,7 @@ import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ldv.shuuen.domain.audio.music.Pitch
@@ -98,6 +104,61 @@ object PianoKeyboardDefaults {
   }
 }
 
+/**
+ * A single transient "flash" on a key: a colored highlight that animates in quickly, holds briefly,
+ * then fades out. Each flash carries its own identity and [Animatable] progress, so overlapping
+ * flashes — even on the same key — are fully independent.
+ */
+@Stable
+class KeyFlash internal constructor(
+  val id: Long,
+  val index: Int,
+  val color: Color,
+) {
+  val progress = Animatable(0f)
+}
+
+/**
+ * Hoisted state for [PianoKeyboard]. Owns transient tap-feedback flashes so callers don't manage
+ * indication ids or removal timers themselves. Obtain one via [rememberPianoKeyboardState] and call
+ * [flash] on key release. Independent of touch presses and of any persistent [PianoKeyIndication]s.
+ */
+@Stable
+class PianoKeyboardState(private val scope: CoroutineScope) {
+  internal val flashes = mutableStateListOf<KeyFlash>()
+  private var nextId = 0L
+
+  /**
+   * Fire a one-shot colored flash on [index]: a fast attack, a brief hold, then a smooth fade-out.
+   * Safe to call rapidly and repeatedly; each call is animated on its own coroutine and cleaned up.
+   */
+  fun flash(
+    index: Int,
+    color: Color,
+    holdMillis: Long = 200L,
+    attackMillis: Int = 90,
+    releaseMillis: Int = 300,
+  ) {
+    val flash = KeyFlash(nextId++, index, color)
+    flashes.add(flash)
+    scope.launch {
+      try {
+        flash.progress.animateTo(1f, tween(attackMillis, easing = FastOutSlowInEasing))
+        delay(holdMillis)
+        flash.progress.animateTo(0f, tween(releaseMillis, easing = FastOutSlowInEasing))
+      } finally {
+        flashes.remove(flash)
+      }
+    }
+  }
+}
+
+@Composable
+fun rememberPianoKeyboardState(): PianoKeyboardState {
+  val scope = rememberCoroutineScope()
+  return remember { PianoKeyboardState(scope) }
+}
+
 @Composable
 fun PianoKeyboard(
   modifier: Modifier = Modifier,
@@ -116,6 +177,11 @@ fun PianoKeyboard(
    * PianoKeyIndication(index = 0, durationMillis = 450) pulses for 450ms.
    */
   programmaticIndications: List<PianoKeyIndication> = emptyList(),
+
+  /**
+   * Optional hoisted state for transient tap-feedback flashes. See [rememberPianoKeyboardState].
+   */
+  state: PianoKeyboardState? = null,
 
   onKeyClick: (index: Int) -> Unit = {},
   onKeyPressedChange: (index: Int, pressed: Boolean) -> Unit = { _, _ -> },
@@ -407,6 +473,10 @@ fun PianoKeyboard(
     val separatorWidthPx = separatorWidth.toPx()
     val borderWidthPx = borderWidth.toPx()
 
+    // Transient tap-feedback flashes, drawn per-key inside each loop so they layer correctly with
+    // the black keys. Reading flashes + each progress here keeps the animation in the draw phase.
+    val flashesByIndex = state?.flashes?.groupBy { it.index } ?: emptyMap()
+
     // White keys first.
     geometry.filter { !it.isBlack }.forEach { key ->
       val index = key.index
@@ -457,6 +527,18 @@ fun PianoKeyboard(
 //            cornerRadius = whiteCorner,
 //            style = Stroke(width = 2.dp.toPx()),
 //          )
+      }
+
+      flashesByIndex[index]?.forEach { flash ->
+        val p = flash.progress.value
+        if (p > 0.001f) {
+          drawRoundRect(
+            color = flash.color.copy(alpha = 0.85f * p),
+            topLeft = rect.topLeft,
+            size = rect.size,
+            cornerRadius = whiteCorner,
+          )
+        }
       }
 
       if (!enabled) {
@@ -547,6 +629,18 @@ fun PianoKeyboard(
           cornerRadius = blackCorner,
           style = Stroke(width = 2.dp.toPx()),
         )
+      }
+
+      flashesByIndex[index]?.forEach { flash ->
+        val p = flash.progress.value
+        if (p > 0.001f) {
+          drawRoundRect(
+            color = flash.color.copy(alpha = 0.85f * p),
+            topLeft = rect.topLeft,
+            size = rect.size,
+            cornerRadius = blackCorner,
+          )
+        }
       }
 
       if (!enabled) {

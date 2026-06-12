@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -46,7 +46,6 @@ data class SinglesPlayScreenState(
 )
 
 val playNoteDuration = 1500.milliseconds
-val answerFeedbackDuration = 500.milliseconds
 
 class SinglesPlayScreenViewModel(
   levelId: String, levelRepository: SinglesLocalLevelRepository, val midiEngine: MidiEngine
@@ -67,15 +66,10 @@ class SinglesPlayScreenViewModel(
   // Setup-melody highlight: a single timed indication that follows the currently playing note.
   private val _setupMelodyIndication = MutableStateFlow<PianoKeyIndication?>(null)
 
-  // Answer feedback: independent persistent flashes, each removed by its own timer in userGuessed.
-  // Keyed by a unique id so concurrent flashes (even on the same key) can be removed individually.
-  private val _feedbackIndications = MutableStateFlow<Map<Long, PianoKeyIndication>>(emptyMap())
-  private var feedbackIdCounter = 0L
-
-  val answerIndications: StateFlow<List<PianoKeyIndication>> =
-    combine(_setupMelodyIndication, _feedbackIndications) { setup, feedback ->
-      feedback.values.toList() + listOfNotNull(setup)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
+  val programmaticIndications: StateFlow<List<PianoKeyIndication>> =
+    _setupMelodyIndication
+      .map { listOfNotNull(it) }
+      .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
 
   init {
@@ -139,21 +133,14 @@ class SinglesPlayScreenViewModel(
     }
   }
 
-  fun userGuessed(pitch: Pitch) {
-    val quizzer = quizzer ?: return
+  /** Returns whether the guess was correct, or null if no quiz is active (caller should not flash). */
+  fun userGuessed(pitch: Pitch): Boolean? {
+    val quizzer = quizzer ?: return null
 
+    // Correctness must be read before check() advances the question.
     val isCorrect = quizzer.quizState.value.currentNote.pitch == pitch
-    val color = if (isCorrect) AnswerColors.Correct.color else AnswerColors.Incorrect.color
-
-    // Each press spawns its own independent, non-blocking flash on the pressed key.
-    val id = feedbackIdCounter++
-    _feedbackIndications.update { it + (id to PianoKeyIndication(pitch.ordinal, color = color)) }
-    viewModelScope.launch {
-      delay(answerFeedbackDuration)
-      _feedbackIndications.update { it - id }
-    }
-
     quizzer.check(pitch)
+    return isCorrect
   }
 
   fun userGuessed(degree: Degree) {
