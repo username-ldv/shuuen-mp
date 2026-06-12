@@ -95,14 +95,20 @@ fun SinglesPlayScreen(
 //        centerButtonSize = 64.dp,
 //      )
 //    } else {
-    val indications by viewModel.programmaticIndications.collectAsStateWithLifecycle()
     val keyboardState = rememberPianoKeyboardState()
-    // pressedKeyColors stays at its neutral default (plain touch feedback). The setup-melody
-    // highlight comes through programmaticIndications; answer feedback is a transient flash.
+
+    LaunchedEffect(keyboardState) {
+      viewModel.setupMelodyFlashes.collect { req ->
+        keyboardState.flash(
+          req.index, req.color, holdMillis = 520, attackMillis = 80, releaseMillis = 300,
+        )
+      }
+    }
+
+    // pressedKeyColors stays at its neutral default (plain touch feedback); all color comes from flashes.
     PianoKeyboard(
       modifier = Modifier.fillMaxWidth().aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
       keyCount = 12,
-      programmaticIndications = indications,
       state = keyboardState,
       onKeyPressedChange = { offset, pressed ->
         if (!pressed) {

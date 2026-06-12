@@ -5,14 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ldv.shuuen.common.ResponseState
@@ -26,12 +26,14 @@ import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.repository.local.SinglesLocalLevelRepository
 import ldv.shuuen.domain.training.singles.SinglesLevel
 import ldv.shuuen.ui.common.music.Palette
-import ldv.shuuen.ui.common.music.inputs.PianoKeyIndication
 import kotlin.time.Duration.Companion.milliseconds
 
 enum class AnswerColors(val color: Color) {
   Correct(Color(0xff32cc73)), Incorrect(Color(0xffe74d3c))
 }
+
+/** A request from the VM for the screen to flash a key (used for setup-melody highlights). */
+data class KeyFlashRequest(val index: Int, val color: Color)
 
 sealed interface QuizPhase {
   object LoadingContext : QuizPhase
@@ -63,13 +65,13 @@ class SinglesPlayScreenViewModel(
   var lastHandledQuestion = 0
   var lastHandledRoot: Pitch? = null
 
-  // Setup-melody highlight: a single timed indication that follows the currently playing note.
-  private val _setupMelodyIndication = MutableStateFlow<PianoKeyIndication?>(null)
-
-  val programmaticIndications: StateFlow<List<PianoKeyIndication>> =
-    _setupMelodyIndication
-      .map { listOfNotNull(it) }
-      .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
+  // Setup-melody highlights and answer feedback are both transient flashes driven by the screen
+  // through PianoKeyboardState. The VM only emits which key/color to flash as the melody plays.
+  private val _setupMelodyFlashes = MutableSharedFlow<KeyFlashRequest>(
+    extraBufferCapacity = 8,
+    onBufferOverflow = BufferOverflow.DROP_OLDEST,
+  )
+  val setupMelodyFlashes: SharedFlow<KeyFlashRequest> = _setupMelodyFlashes.asSharedFlow()
 
 
   init {
@@ -178,16 +180,11 @@ class SinglesPlayScreenViewModel(
       player.start()
     }
     setupMelodyNotesIndicationJob = viewModelScope.launch {
-      _setupMelodyIndication.value = null
       player.setupMelodyNotes.collect { note ->
         Napier.v { "got setup melody note $note" }
-        _setupMelodyIndication.value = note?.let {
-          val offset = ((it.pitch.ordinal - root.ordinal) % 12 + 12) % 12
-          PianoKeyIndication(
-            index = it.pitch.ordinal,
-            durationMillis = 500,
-            color = Palette.entries[offset].color,
-          )
+        if (note != null) {
+          val offset = root.asRoot(note.pitch).ordinal
+          _setupMelodyFlashes.emit(KeyFlashRequest(note.pitch.ordinal, Palette.entries[offset].color))
         }
       }
     }
