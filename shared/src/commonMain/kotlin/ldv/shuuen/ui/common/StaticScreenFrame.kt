@@ -17,7 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -25,24 +24,17 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun StaticScreenFrame(
   modifier: Modifier = Modifier.Companion,
-  horizontalPadding: Dp = 16.dp,
+  horizontalPadding: Dp = 20.dp,
   topPadding: Dp = 0.dp,
   bottomPadding: Dp = 16.dp,
   maxWidth: Dp = 560.dp,
+  verticalSpacing: Dp = 14.dp,
   scrollable: Boolean = true,
   topBar: @Composable () -> Unit = {},
   content: @Composable ColumnScope.() -> Unit,
 ) {
   Box(
-    modifier = modifier.fillMaxSize().background(
-      Brush.verticalGradient(
-        colors = listOf(
-          Color.Black,
-          Color(0xFF050505),
-          Color.Black,
-        ),
-      ),
-    ),
+    modifier = modifier.fillMaxSize().background(Color.Black),
     contentAlignment = Alignment.TopCenter,
   ) {
     Scaffold(
@@ -70,7 +62,7 @@ fun StaticScreenFrame(
             horizontalPadding,
             bottomPadding
           ),
-          verticalArrangement = Arrangement.spacedBy(14.dp),
+          verticalArrangement = Arrangement.spacedBy(verticalSpacing),
           content = content,
         )
       }

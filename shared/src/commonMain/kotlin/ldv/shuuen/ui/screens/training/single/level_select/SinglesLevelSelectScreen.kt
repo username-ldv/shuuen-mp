@@ -1,13 +1,9 @@
 package ldv.shuuen.ui.screens.training.single.level_select
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,7 +13,6 @@ import androidx.compose.material.icons.rounded.Create
 import androidx.compose.material.icons.rounded.Keyboard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,8 +30,8 @@ import ldv.shuuen.ui.common.PrimaryCta
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
-import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
+import ldv.shuuen.ui.common.SurfaceCard
 import ldv.shuuen.ui.common.music.BoxedItemRow
 import ldv.shuuen.ui.screens.training.common.toBoxedItems
 
@@ -68,14 +63,27 @@ fun SinglesLevelSelectScreen(
         )
       }
       when (val l = levels) {
-        is ResponseState.Loading -> item { Text(text = "Loading...") }
+        is ResponseState.Loading -> item {
+          Text(
+            text = "Loading...",
+            color = ShuuenUi.Muted,
+            style = MaterialTheme.typography.bodyLarge,
+          )
+        }
+
         is ResponseState.Success -> l.result.forEach { level ->
           item {
             LevelCard(level, onLevelChosen = { onStartLevel(it.id) })
           }
         }
 
-        is ResponseState.Error -> item { Text(text = "Error loading levels: ${l.throwable.message}") }
+        is ResponseState.Error -> item {
+          Text(
+            text = "Error loading levels: ${l.throwable.message}",
+            color = ShuuenUi.Incorrect,
+            style = MaterialTheme.typography.bodyLarge,
+          )
+        }
       }
     }
   }
@@ -83,78 +91,49 @@ fun SinglesLevelSelectScreen(
 
 @Composable
 private fun LevelCard(level: SinglesLevel, onLevelChosen: (SinglesLevel) -> Unit) {
-  Surface(
-    modifier = Modifier.fillMaxWidth().clickable { onLevelChosen(level) },
-    color = ShuuenUi.Panel,
-    contentColor = ShuuenUi.Text,
-    shape = MaterialTheme.shapes.medium,
-    border = BorderStroke(1.dp, ShuuenUi.Border),
-    tonalElevation = 0.dp,
-    shadowElevation = 0.dp,
+  SurfaceCard(
+    onClick = { onLevelChosen(level) },
+    verticalSpacing = Arrangement.spacedBy(12.dp),
   ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-      val compact = maxWidth < 430.dp
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-      ) {
-        Column(
-          modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-          LevelText(level.name)
-          LevelParameterGrid(level = level)
-          when (val levelConfig = level.levelConfig) {
-            is LevelConfig.Singles.Absolute -> {
-              BoxedItemRow(levelConfig.scales.first().pitchStates.toBoxedItems(), itemSize = 32.dp)
-            }
+    Text(
+      text = level.name,
+      color = ShuuenUi.Text,
+      style = MaterialTheme.typography.titleMedium.copy(
+        letterSpacing = ShuuenUi.titlesSpacing,
+        fontWeight = FontWeight.SemiBold,
+      ),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+    LevelParameterRow(level = level)
+    when (val levelConfig = level.levelConfig) {
+      is LevelConfig.Singles.Absolute -> {
+        BoxedItemRow(levelConfig.scales.first().pitchStates.toBoxedItems(), itemSize = 32.dp)
+      }
 
-            is LevelConfig.Singles.Relative -> {
-              BoxedItemRow(levelConfig.scaleConfig.degreeStates.toBoxedItems(), itemSize = 32.dp)
-            }
-          }
-        }
+      is LevelConfig.Singles.Relative -> {
+        BoxedItemRow(levelConfig.scaleConfig.degreeStates.toBoxedItems(), itemSize = 32.dp)
       }
     }
   }
 }
 
 @Composable
-private fun LevelText(title: String, modifier: Modifier = Modifier) {
-  Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-    Text(
-      text = title,
-      style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
-  }
-}
-
-@Composable
-private fun LevelParameterGrid(
+private fun LevelParameterRow(
   level: SinglesLevel, modifier: Modifier = Modifier
 ) {
   val items = listOf(
-    Triple(
-      level.questionsNumber?.toString() ?: "Unlimited",
+    (level.questionsNumber?.let { "$it questions" } ?: "Unlimited") to
       Icons.AutoMirrored.Rounded.HelpOutline,
-      1.25f
-    ),
-    Triple(level.range.toPair().toList().joinToString(" - "), Icons.Rounded.Keyboard, 1f),
+    level.range.toPair().toList().joinToString(" - ") to Icons.Rounded.Keyboard,
   )
 
-  Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier) {
-    items.chunked(2).forEach { row ->
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        row.forEach { (text, icon, _) ->
-          LevelParameter(text, icon, Modifier.weight(1f))
-        }
-      }
+  Row(
+    modifier = modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.spacedBy(20.dp),
+  ) {
+    items.forEach { (text, icon) ->
+      LevelParameter(text, icon)
     }
   }
 }
@@ -165,19 +144,21 @@ private fun LevelParameter(
   icon: ImageVector,
   modifier: Modifier = Modifier,
 ) {
-  SoftControl(
-    modifier = modifier.height(42.dp), selected = false
+  Row(
+    modifier = modifier,
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(6.dp),
   ) {
     Icon(
       imageVector = icon,
       contentDescription = null,
-      tint = ShuuenUi.Lavender,
-      modifier = Modifier.size(18.dp),
+      tint = ShuuenUi.Dim,
+      modifier = Modifier.size(16.dp),
     )
     Text(
       text = text,
       color = ShuuenUi.Muted,
-      style = MaterialTheme.typography.bodyLarge,
+      style = MaterialTheme.typography.bodyMedium,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )

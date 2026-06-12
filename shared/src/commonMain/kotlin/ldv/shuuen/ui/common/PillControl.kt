@@ -1,9 +1,11 @@
 package ldv.shuuen.ui.common
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
@@ -18,6 +20,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+/**
+ * Selectable chip. Selected state inverts to a white pill with black content;
+ * unselected stays a quiet translucent fill.
+ */
 @Composable
 fun PillControl(
   text: String,
@@ -27,39 +33,39 @@ fun PillControl(
   trailingCheck: Boolean = false,
   onClick: (() -> Unit)? = null,
 ) {
-  SoftControl(
-    modifier = modifier,
-    selected = selected,
-    onClick = onClick,
+  val shape = ShuuenUi.ControlShape
+  val contentColor = if (selected) ShuuenUi.OnInverse else ShuuenUi.Muted
+  Row(
+    modifier = modifier.clip(shape)
+      .background(if (selected) ShuuenUi.Inverse else Color.White.copy(alpha = 0.05f))
+      .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier.Companion)
+      .padding(horizontal = 12.dp, vertical = 9.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     if (leadingIcon != null) {
       Icon(
         imageVector = leadingIcon,
         contentDescription = null,
-        tint = if (selected) ShuuenUi.Mint else ShuuenUi.Lavender,
-        modifier = Modifier.size(22.dp),
+        tint = contentColor,
+        modifier = Modifier.size(20.dp),
       )
     }
     Text(
       text = text,
-      color = if (selected) ShuuenUi.Text else ShuuenUi.Muted,
+      color = contentColor,
       style = MaterialTheme.typography.titleSmall,
       modifier = Modifier.weight(1f),
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
-    if (trailingCheck) {
-      Box(
-        modifier = Modifier.size(24.dp).clip(CircleShape).background(ShuuenUi.Mint),
-        contentAlignment = Alignment.Center,
-      ) {
-        Icon(
-          imageVector = Icons.Rounded.Check,
-          contentDescription = null,
-          tint = Color.Black,
-          modifier = Modifier.size(16.dp),
-        )
-      }
+    if (trailingCheck && selected) {
+      Icon(
+        imageVector = Icons.Rounded.Check,
+        contentDescription = null,
+        tint = contentColor,
+        modifier = Modifier.size(18.dp),
+      )
     }
   }
 }

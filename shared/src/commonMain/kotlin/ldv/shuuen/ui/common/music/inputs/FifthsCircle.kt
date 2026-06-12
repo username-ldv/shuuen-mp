@@ -70,7 +70,11 @@ object FifthsCircleDefalts {
   )
 
 
-  fun colors(count: Int): List<Color> =
+  /** Monotone active-item color — the app default. */
+  fun colors(count: Int): List<Color> = List(count) { Color(0xFFE8E8E8) }
+
+  /** Opt-in per-item colors for a future settings choice. */
+  fun colorfulColors(count: Int): List<Color> =
     List(count) { Palette.entries[it % Palette.entries.size].color }
 
   /**

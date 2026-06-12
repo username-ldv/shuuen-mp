@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ldv.shuuen.domain.audio.music.Degree
 import ldv.shuuen.ui.common.ShuuenTopAppBar
+import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.StaticScreenFrame
 import ldv.shuuen.ui.common.music.inputs.FifthsCircle
 import ldv.shuuen.ui.common.music.inputs.FifthsCircleIndication
@@ -47,7 +48,8 @@ fun FreePlayScreen(
   ) {
     Text(
       text = state.tonic.toString(),
-      style = MaterialTheme.typography.headlineLarge,
+      color = ShuuenUi.Text,
+      style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = ShuuenUi.titlesSpacing),
       modifier = Modifier.align(Alignment.CenterHorizontally),
     )
 
@@ -55,7 +57,7 @@ fun FreePlayScreen(
       Text(
         text = "Preparing audio...",
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = ShuuenUi.Muted,
         modifier = Modifier.align(Alignment.CenterHorizontally),
       )
     }
@@ -114,7 +116,7 @@ fun FreePlayScreen(
           programmaticIndications = state.activeKeyboardKeys.map {
             PianoKeyIndication(it, durationMillis = null)
           },
-          pressedKeyColors = PianoKeyboardDefaults.colorfulPressedColors(12, state.tonic),
+          pressedKeyColors = PianoKeyboardDefaults.pressedColors(12),
         )
       }
     }

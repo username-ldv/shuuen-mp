@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
@@ -25,27 +26,27 @@ fun DashedAddButton(
   modifier: Modifier = Modifier.Companion,
 ) {
   Box(
-    modifier = modifier.fillMaxWidth().height(54.dp),
+    modifier = modifier.fillMaxWidth().height(52.dp),
     contentAlignment = Alignment.Center,
   ) {
     Canvas(Modifier.fillMaxSize()) {
       drawRoundRect(
-        color = ShuuenUi.Mint.copy(alpha = 0.9f),
+        color = Color.White.copy(alpha = 0.28f),
         topLeft = Offset(1.dp.toPx(), 1.dp.toPx()),
         size = Size(size.width - 2.dp.toPx(), size.height - 2.dp.toPx()),
-        cornerRadius = CornerRadius(16.dp.toPx()),
+        cornerRadius = CornerRadius(14.dp.toPx()),
         style = Stroke(
-          width = 1.4.dp.toPx(),
+          width = 1.2.dp.toPx(),
           pathEffect = PathEffect.dashPathEffect(floatArrayOf(9.dp.toPx(), 8.dp.toPx())),
         ),
       )
     }
     Text(
       text = "+  $text",
-      color = ShuuenUi.Mint,
+      color = ShuuenUi.Muted,
       style = MaterialTheme.typography.titleSmall.copy(
         letterSpacing = 3.sp,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.SemiBold,
       ),
     )
   }

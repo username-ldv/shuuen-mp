@@ -1,9 +1,7 @@
 package ldv.shuuen.ui.screens.context
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,13 +21,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Keyboard
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,20 +40,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ldv.shuuen.ui.common.DashedAddButton
-import ldv.shuuen.ui.common.GlassPanel
-import ldv.shuuen.ui.common.IconBubble
+import ldv.shuuen.ui.common.FlatSection
+import ldv.shuuen.ui.common.Hairline
 import ldv.shuuen.ui.common.PrimaryCta
-import ldv.shuuen.ui.common.SectionTitle
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
+import ldv.shuuen.ui.common.SurfaceCard
 import ldv.shuuen.ui.common.music.inputs.PianoKeyboard
 import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
 
@@ -66,6 +61,7 @@ fun ContextScreen(onNavigateBack: () -> Unit) {
   var selectedTab by rememberSaveable { mutableStateOf(ContextTab.Drone) }
 
   StaticScreenFrame(
+    verticalSpacing = 18.dp,
     topBar = {
       ShuuenTopAppBar(
         title = "CONTEXT",
@@ -113,27 +109,22 @@ private fun ContextTabs(
   selectedTab: ContextTab,
   onSelectTab: (ContextTab) -> Unit,
 ) {
-  Row(
-    modifier = Modifier
-      .fillMaxWidth()
-      .height(58.dp)
-      .clip(ShuuenUi.PillShape)
-      .border(1.dp, ShuuenUi.BorderStrong, ShuuenUi.PillShape)
-      .padding(4.dp),
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
-  ) {
-    ContextTabButton(
-      text = "DRONE",
-      selected = selectedTab == ContextTab.Drone,
-      onClick = { onSelectTab(ContextTab.Drone) },
-      modifier = Modifier.weight(1f),
-    )
-    ContextTabButton(
-      text = "CADENCE",
-      selected = selectedTab == ContextTab.Cadence,
-      onClick = { onSelectTab(ContextTab.Cadence) },
-      modifier = Modifier.weight(1f),
-    )
+  Column(modifier = Modifier.fillMaxWidth()) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+      ContextTabButton(
+        text = "DRONE",
+        selected = selectedTab == ContextTab.Drone,
+        onClick = { onSelectTab(ContextTab.Drone) },
+        modifier = Modifier.weight(1f),
+      )
+      ContextTabButton(
+        text = "CADENCE",
+        selected = selectedTab == ContextTab.Cadence,
+        onClick = { onSelectTab(ContextTab.Cadence) },
+        modifier = Modifier.weight(1f),
+      )
+    }
+    Hairline()
   }
 }
 
@@ -144,33 +135,36 @@ private fun ContextTabButton(
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  Box(
-    modifier = modifier
-      .fillMaxHeight()
-      .clip(ShuuenUi.PillShape)
-      .background(if (selected) ShuuenUi.Mint else Color.Transparent)
-      .clickable(onClick = onClick),
-    contentAlignment = Alignment.Center,
+  Column(
+    modifier = modifier.clickable(onClick = onClick),
+    horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Text(
       text = text,
-      color = if (selected) Color.Black else ShuuenUi.Muted,
-      style = MaterialTheme.typography.titleMedium.copy(
-        letterSpacing = 4.sp,
-        fontWeight = FontWeight.Bold,
+      color = if (selected) ShuuenUi.Text else ShuuenUi.Dim,
+      style = MaterialTheme.typography.titleSmall.copy(
+        letterSpacing = 3.sp,
+        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
       ),
+      modifier = Modifier.padding(vertical = 12.dp),
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
+    )
+    Box(
+      modifier = Modifier
+        .fillMaxWidth(0.6f)
+        .height(2.dp)
+        .background(if (selected) ShuuenUi.Text else Color.Transparent),
     )
   }
 }
 
 @Composable
 private fun DroneContextTab() {
-  ContextSequencePanel(
-    title = "DRONE SEQUENCE",
-    subtitle = "Build the drone progression used during training.",
-    countLabel = "2 nodes",
+  FlatSection(
+    label = "DRONE SEQUENCE",
+    supporting = "Build the drone progression used during training.",
+    trailing = { NodeCountBadge("2 nodes") },
   ) {
     ContextNodeCard(
       number = 1,
@@ -197,7 +191,7 @@ private fun DroneContextTab() {
     DashedAddButton("ADD NODE")
   }
 
-  ContextInfoPanel(
+  ContextInfoBlock(
     text = "Each node can contain multiple notes across octaves.\nAfter the last node, the sequence returns to the first node.",
     detail = "Choose notes across octaves. Opens a scrollable keyboard picker.",
     markerCount = 2,
@@ -206,10 +200,10 @@ private fun DroneContextTab() {
 
 @Composable
 private fun CadenceContextTab() {
-  ContextSequencePanel(
-    title = "CADENCE SEQUENCE",
-    subtitle = "Build the cadence progression used during training.",
-    countLabel = "3 nodes",
+  FlatSection(
+    label = "CADENCE SEQUENCE",
+    supporting = "Build the cadence progression used during training.",
+    trailing = { NodeCountBadge("3 nodes") },
   ) {
     PresetProgressionControls()
     PreviewFullSequence()
@@ -252,38 +246,19 @@ private fun CadenceContextTab() {
     DashedAddButton("ADD NODE")
   }
 
-  ContextInfoPanel(
+  ContextInfoBlock(
     text = "Presets create common cadence progressions to get you started.\nEach node can be edited individually to fit your training goals.\nAfter the last node, the sequence returns to the first node.",
     markerCount = 4,
   )
 }
 
 @Composable
-private fun ContextSequencePanel(
-  title: String,
-  subtitle: String,
-  countLabel: String,
-  content: @Composable () -> Unit,
-) {
-  GlassPanel(borderColor = ShuuenUi.BorderStrong) {
-    SectionTitle(
-      icon = Icons.Rounded.GraphicEq,
-      title = title,
-      subtitle = subtitle,
-      trailing = {
-        SoftControl(modifier = Modifier.width(92.dp)) {
-          Text(
-            text = countLabel,
-            color = ShuuenUi.Mint,
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Center,
-          )
-        }
-      },
-    )
-    content()
-  }
+private fun NodeCountBadge(text: String) {
+  Text(
+    text = text,
+    color = ShuuenUi.Muted,
+    style = MaterialTheme.typography.labelLarge,
+  )
 }
 
 @Composable
@@ -292,8 +267,8 @@ private fun PresetProgressionControls() {
     Icon(
       imageVector = Icons.Rounded.Edit,
       contentDescription = null,
-      tint = ShuuenUi.Lavender,
-      modifier = Modifier.size(22.dp),
+      tint = ShuuenUi.Muted,
+      modifier = Modifier.size(20.dp),
     )
     Text(
       text = "Preset progression",
@@ -305,14 +280,14 @@ private fun PresetProgressionControls() {
     )
     Text(
       text = "I-IV-V-I",
-      color = ShuuenUi.Text,
+      color = ShuuenUi.Muted,
       style = MaterialTheme.typography.titleSmall,
     )
     Icon(
       Icons.Rounded.ChevronRight,
       contentDescription = null,
-      tint = ShuuenUi.Muted,
-      modifier = Modifier.size(24.dp),
+      tint = ShuuenUi.Dim,
+      modifier = Modifier.size(22.dp),
     )
   }
   Row(
@@ -345,8 +320,8 @@ private fun PreviewFullSequence() {
     Icon(
       Icons.Rounded.ChevronRight,
       contentDescription = null,
-      tint = ShuuenUi.Muted,
-      modifier = Modifier.size(24.dp),
+      tint = ShuuenUi.Dim,
+      modifier = Modifier.size(22.dp),
     )
   }
 }
@@ -356,39 +331,31 @@ private fun ContextNodeCard(
   number: Int,
   node: ContextNode,
 ) {
-  Surface(
-    modifier = Modifier.fillMaxWidth(),
-    color = ShuuenUi.PanelSoft,
-    contentColor = ShuuenUi.Text,
-    shape = MaterialTheme.shapes.medium,
-    border = BorderStroke(1.dp, ShuuenUi.Border),
-    tonalElevation = 0.dp,
-    shadowElevation = 0.dp,
-  ) {
-    Box(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+  SurfaceCard {
+    Box(modifier = Modifier.fillMaxWidth()) {
       Icon(
         imageVector = Icons.Rounded.Delete,
         contentDescription = null,
-        tint = ShuuenUi.Muted,
-        modifier = Modifier.align(Alignment.TopEnd).size(30.dp),
+        tint = ShuuenUi.Dim,
+        modifier = Modifier.align(Alignment.TopEnd).size(24.dp),
       )
       Row(
-        modifier = Modifier.fillMaxWidth().padding(end = 32.dp),
+        modifier = Modifier.fillMaxWidth().padding(end = 30.dp),
         verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
       ) {
-        NumberedWaveIcon(number = number)
+        NodeNumber(number = number)
         Column(
           modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(10.dp),
+          verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
               text = node.title,
               color = ShuuenUi.Text,
-              style = MaterialTheme.typography.titleLarge.copy(
-                letterSpacing = 3.sp,
-                fontWeight = FontWeight.Bold,
+              style = MaterialTheme.typography.titleMedium.copy(
+                letterSpacing = ShuuenUi.titlesSpacing,
+                fontWeight = FontWeight.SemiBold,
               ),
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
@@ -396,7 +363,7 @@ private fun ContextNodeCard(
             Text(
               text = node.subtitle,
               color = ShuuenUi.Muted,
-              style = MaterialTheme.typography.bodyLarge,
+              style = MaterialTheme.typography.bodyMedium,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
             )
@@ -415,23 +382,19 @@ private fun ContextNodeCard(
 }
 
 @Composable
-private fun NumberedWaveIcon(number: Int) {
-  Box(contentAlignment = Alignment.TopStart) {
-    IconBubble(Icons.Rounded.GraphicEq, tint = ShuuenUi.Lavender, size = 56.dp)
-    Box(
-      modifier = Modifier
-        .size(24.dp)
-        .clip(CircleShape)
-        .background(Color(0xFF1A1A1A))
-        .border(1.dp, ShuuenUi.BorderStrong, CircleShape),
-      contentAlignment = Alignment.Center,
-    ) {
-      Text(
-        text = number.toString(),
-        color = ShuuenUi.Text,
-        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-      )
-    }
+private fun NodeNumber(number: Int) {
+  Box(
+    modifier = Modifier
+      .size(30.dp)
+      .clip(CircleShape)
+      .background(Color.White.copy(alpha = 0.07f)),
+    contentAlignment = Alignment.Center,
+  ) {
+    Text(
+      text = number.toString(),
+      color = ShuuenUi.Muted,
+      style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+    )
   }
 }
 
@@ -465,13 +428,13 @@ private fun ChipGroup(
   values: List<String>,
   modifier: Modifier = Modifier,
 ) {
-  Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
+  Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
     Text(
       text = label,
-      color = ShuuenUi.Text,
+      color = ShuuenUi.Dim,
       style = MaterialTheme.typography.labelSmall.copy(
-        letterSpacing = 2.sp,
-        fontWeight = FontWeight.Bold,
+        letterSpacing = ShuuenUi.labelSpacing,
+        fontWeight = FontWeight.SemiBold,
       ),
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -497,8 +460,8 @@ private fun NodeActionRow(
       Icon(
         imageVector = icon,
         contentDescription = null,
-        tint = ShuuenUi.Text,
-        modifier = Modifier.size(24.dp),
+        tint = ShuuenUi.Muted,
+        modifier = Modifier.size(22.dp),
       )
     }
     Text(
@@ -514,8 +477,8 @@ private fun NodeActionRow(
       Icon(
         Icons.Rounded.ChevronRight,
         contentDescription = null,
-        tint = ShuuenUi.Muted,
-        modifier = Modifier.size(24.dp),
+        tint = ShuuenUi.Dim,
+        modifier = Modifier.size(22.dp),
       )
     }
   }
@@ -533,8 +496,8 @@ private fun InlineCounter(
   ) {
     Text(
       text = label,
-      color = ShuuenUi.Muted,
-      style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.8.sp),
+      color = ShuuenUi.Dim,
+      style = MaterialTheme.typography.labelMedium.copy(letterSpacing = ShuuenUi.labelSpacing),
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
       modifier = Modifier.weight(1f),
@@ -552,7 +515,7 @@ private fun CompactCounter(
     modifier = modifier
       .height(38.dp)
       .clip(ShuuenUi.PillShape)
-      .border(1.dp, ShuuenUi.Border, ShuuenUi.PillShape),
+      .background(Color.White.copy(alpha = 0.05f)),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     CounterPiece("-")
@@ -570,17 +533,21 @@ private fun RowScope.CounterPiece(
     modifier = modifier.fillMaxHeight(),
     contentAlignment = Alignment.Center,
   ) {
-    Text(text = text, color = ShuuenUi.Text, style = MaterialTheme.typography.titleLarge)
+    Text(text = text, color = ShuuenUi.Text, style = MaterialTheme.typography.titleMedium)
   }
 }
 
 @Composable
-private fun ContextInfoPanel(
+private fun ContextInfoBlock(
   text: String,
   detail: String? = null,
   markerCount: Int,
 ) {
-  GlassPanel {
+  Column(
+    modifier = Modifier.fillMaxWidth(),
+    verticalArrangement = Arrangement.spacedBy(14.dp),
+  ) {
+    Hairline()
     Row(
       modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.Top,
@@ -589,8 +556,8 @@ private fun ContextInfoPanel(
       Icon(
         Icons.Rounded.Info,
         contentDescription = null,
-        tint = ShuuenUi.Muted,
-        modifier = Modifier.size(30.dp)
+        tint = ShuuenUi.Dim,
+        modifier = Modifier.size(22.dp)
       )
       Column(
         modifier = Modifier.weight(1f),
@@ -599,7 +566,7 @@ private fun ContextInfoPanel(
         Text(
           text = text,
           color = ShuuenUi.Muted,
-          style = MaterialTheme.typography.bodyLarge,
+          style = MaterialTheme.typography.bodyMedium,
         )
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -613,7 +580,7 @@ private fun ContextInfoPanel(
           if (detail != null) {
             Text(
               text = detail,
-              color = ShuuenUi.Muted,
+              color = ShuuenUi.Dim,
               style = MaterialTheme.typography.bodyMedium,
               modifier = Modifier.weight(1f),
             )
@@ -643,8 +610,8 @@ private fun MiniRangeKeyboard(
           Color(0xFF2A2A2A)
         }
 
-        PianoKeyboardDefaults.isBlackKey(index) -> Color(0xFF4A435E)
-        else -> Color(0xFFE0D6FF)
+        PianoKeyboardDefaults.isBlackKey(index) -> Color(0xFF4D4D4D)
+        else -> Color(0xFFE8E8E8)
       }
     },
     borderWidth = 1.dp,
@@ -664,14 +631,13 @@ private fun SmallPill(
     modifier = modifier
       .height(30.dp)
       .clip(ShuuenUi.PillShape)
-      .background(if (selected) Color(0xFFE0D6FF) else Color.Transparent)
-      .border(1.dp, if (selected) Color.Transparent else ShuuenUi.Border, ShuuenUi.PillShape),
+      .background(if (selected) ShuuenUi.Inverse else Color.White.copy(alpha = 0.05f)),
     contentAlignment = Alignment.Center,
   ) {
     Text(
       text = text,
-      color = if (selected) Color.Black else ShuuenUi.Text,
-      style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+      color = if (selected) ShuuenUi.OnInverse else ShuuenUi.Muted,
+      style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
@@ -682,16 +648,16 @@ private fun SmallPill(
 private fun PlayBubble() {
   Box(
     modifier = Modifier
-      .size(36.dp)
+      .size(34.dp)
       .clip(CircleShape)
-      .background(ShuuenUi.Mint),
+      .background(ShuuenUi.Inverse),
     contentAlignment = Alignment.Center,
   ) {
     Icon(
       imageVector = Icons.Rounded.PlayArrow,
       contentDescription = null,
-      tint = Color.Black,
-      modifier = Modifier.size(24.dp),
+      tint = ShuuenUi.OnInverse,
+      modifier = Modifier.size(22.dp),
     )
   }
 }
@@ -710,7 +676,7 @@ private fun MiniWaveform(
       listOf(0.35f, 0.7f, 1f, 0.55f).forEach { heightFraction ->
         val lineHeight = size.height * heightFraction
         drawLine(
-          color = ShuuenUi.Lavender,
+          color = Color.White.copy(alpha = 0.55f),
           start = Offset(x, centerY - lineHeight / 2f),
           end = Offset(x, centerY + lineHeight / 2f),
           strokeWidth = 2.dp.toPx(),
@@ -720,7 +686,7 @@ private fun MiniWaveform(
       }
       if (it < pieces - 1) {
         drawLine(
-          color = ShuuenUi.Muted,
+          color = Color.White.copy(alpha = 0.22f),
           start = Offset(x, centerY),
           end = Offset(x + segmentWidth * 0.8f, centerY),
           strokeWidth = 1.dp.toPx(),

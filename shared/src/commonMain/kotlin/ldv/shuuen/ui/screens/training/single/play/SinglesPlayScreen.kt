@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.rounded.Flag
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Replay
@@ -87,14 +85,6 @@ fun SinglesPlayScreen(
 
     Spacer(Modifier.weight(1f))
 
-//    if (useCircleInput) {
-//      FifthsCircle(
-//        modifier = Modifier.fillMaxWidth(),
-////      .border(BorderStroke(1.dp, Color.Red)),
-//        dotEdgePadding = 0.dp,
-//        centerButtonSize = 64.dp,
-//      )
-//    } else {
     val keyboardState = rememberPianoKeyboardState()
 
     LaunchedEffect(keyboardState) {
@@ -119,7 +109,6 @@ fun SinglesPlayScreen(
           }
         }
       })
-//    }
 
     Spacer(Modifier.weight(0.34f))
 
@@ -148,34 +137,26 @@ private fun TrainingStatus(
 
       Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
       ) {
-        ScorePill("$correct", Icons.Outlined.CheckCircle, ShuuenUi.Green)
-        Text("|", style = MaterialTheme.typography.titleMedium)
-        ScorePill("$incorrect", Icons.Outlined.Cancel, ShuuenUi.Red)
+        ScoreCount("$correct", ShuuenUi.Correct)
+        Text("|", color = ShuuenUi.Dim, style = MaterialTheme.typography.titleMedium)
+        ScoreCount("$incorrect", ShuuenUi.Incorrect)
       }
     }
 
     LinearTrainingProgress(
       progress = (questionNumber.toFloat() - 1) / (questionsAmount ?: questionNumber),
-      color = ShuuenUi.Lavender,
     )
   }
 }
 
 @Composable
-private fun ScorePill(
+private fun ScoreCount(
   value: String,
-  icon: ImageVector,
   tint: Color,
 ) {
-  Row(
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
-  ) {
-    Text(value, color = tint, style = MaterialTheme.typography.titleLarge)
-//    Icon(icon, contentDescription = null, tint = tint)
-  }
+  Text(value, color = tint, style = MaterialTheme.typography.titleLarge)
 }
 
 @Composable
@@ -188,13 +169,11 @@ private fun BottomActionBar(on1: () -> Unit) {
     BottomRepeatButton(Modifier.weight(1.8f).clickable { on1() })
     BottomIconButton(
       icon = Icons.Rounded.MusicNote,
-      tint = ShuuenUi.Lavender,
       modifier = Modifier.width(80.dp),
     )
     Spacer(Modifier.weight(0.34f))
     BottomIconButton(
       icon = Icons.Rounded.Flag,
-      tint = ShuuenUi.Muted,
       modifier = Modifier.width(64.dp),
     )
   }
@@ -202,16 +181,16 @@ private fun BottomActionBar(on1: () -> Unit) {
 
 @Composable
 private fun BottomRepeatButton(modifier: Modifier = Modifier) {
-  SoftControl(modifier = modifier.height(68.dp)) {
+  SoftControl(modifier = modifier.height(60.dp)) {
     Icon(
       imageVector = Icons.Rounded.Replay,
       contentDescription = null,
-      tint = ShuuenUi.Mint,
-      modifier = Modifier.size(26.dp),
+      tint = ShuuenUi.Text,
+      modifier = Modifier.size(24.dp),
     )
     Text(
       text = "Repeat",
-      color = ShuuenUi.Mint,
+      color = ShuuenUi.Text,
       style = MaterialTheme.typography.titleSmall,
       textAlign = TextAlign.Center,
       maxLines = 1,
@@ -223,10 +202,9 @@ private fun BottomRepeatButton(modifier: Modifier = Modifier) {
 @Composable
 private fun BottomIconButton(
   icon: ImageVector,
-  tint: Color,
   modifier: Modifier = Modifier,
 ) {
-  SoftControl(modifier = modifier.height(68.dp)) {
-    Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(26.dp))
+  SoftControl(modifier = modifier.height(60.dp)) {
+    Icon(icon, contentDescription = null, tint = ShuuenUi.Muted, modifier = Modifier.size(24.dp))
   }
 }
