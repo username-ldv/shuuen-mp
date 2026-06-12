@@ -34,7 +34,7 @@ fun NavigationRoot() {
     NavDisplay(
       entryProvider = entryProvider,
       backStack = backStack,
-      onBack = { navigator.navigateBack() },
+      onBack = { navigator.goBack() },
       entryDecorators = listOf(
         rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()
       ),
