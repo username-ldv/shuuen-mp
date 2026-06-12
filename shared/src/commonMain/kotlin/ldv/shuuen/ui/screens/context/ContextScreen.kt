@@ -58,8 +58,10 @@ import ldv.shuuen.ui.common.SurfaceCard
 import ldv.shuuen.ui.common.TextDropdownMenu
 import ldv.shuuen.ui.common.music.DegreePalette
 import ldv.shuuen.ui.common.music.DegreeSequenceChips
-import ldv.shuuen.ui.common.music.DegreeSequenceEditor
+import ldv.shuuen.ui.common.music.DirectedDegree
+import ldv.shuuen.ui.common.music.DirectedDegreeSequenceEditor
 import ldv.shuuen.ui.common.music.OctaveStepper
+import ldv.shuuen.ui.common.music.stepLabels
 
 /**
  * UI state for one sequence node. Mirrors [ldv.shuuen.domain.audio.music.DegreeContextNode]:
@@ -71,7 +73,12 @@ private data class SequenceNodeState(
   val extraDegrees: List<Degree> = listOf(Degree.D3, Degree.D5),
   val sustain: Boolean = true,
   val questionsBeforeNext: Int = 4,
-  val setupMelody: List<Degree> = listOf(Degree.D1, Degree.D3, Degree.D5, Degree.D1),
+  val setupMelody: List<DirectedDegree> = listOf(
+    DirectedDegree(Degree.D1),
+    DirectedDegree(Degree.D3),
+    DirectedDegree(Degree.D5),
+    DirectedDegree(Degree.D1),
+  ),
 )
 
 private data class SequencePreset(val label: String, val nodes: List<SequenceNodeState>)
@@ -350,8 +357,8 @@ private fun SustainRow(
 
 @Composable
 private fun SetupMelodyRow(
-  melody: List<Degree>,
-  onChange: (List<Degree>) -> Unit,
+  melody: List<DirectedDegree>,
+  onChange: (List<DirectedDegree>) -> Unit,
 ) {
   var editing by rememberSaveable { mutableStateOf(false) }
 
@@ -373,7 +380,7 @@ private fun SetupMelodyRow(
           style = MaterialTheme.typography.titleSmall,
         )
         Text(
-          text = melody.joinToString(" ") { it.label }.ifEmpty { "None" },
+          text = melody.stepLabels().joinToString(" ").ifEmpty { "None" },
           color = ShuuenUi.Muted,
           style = MaterialTheme.typography.bodySmall,
         )
@@ -386,10 +393,9 @@ private fun SetupMelodyRow(
       )
     }
     AnimatedVisibility(visible = editing) {
-      DegreeSequenceEditor(
-        degrees = melody,
-        onAppend = { onChange(melody + it) },
-        onBackspace = { if (melody.isNotEmpty()) onChange(melody.dropLast(1)) },
+      DirectedDegreeSequenceEditor(
+        steps = melody,
+        onChange = onChange,
         modifier = Modifier.padding(top = 2.dp),
       )
     }

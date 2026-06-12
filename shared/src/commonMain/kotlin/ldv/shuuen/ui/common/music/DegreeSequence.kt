@@ -18,6 +18,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +35,30 @@ import ldv.shuuen.ui.common.ShuuenUi
  * Building blocks for editing degree sequences (context nodes, setup melodies).
  * Pure UI: callers own the sequence state.
  */
+
+/**
+ * Direction of a melody step relative to the previous note: the nearest occurrence
+ * of the degree above ([Up]) or below ([Down]) it. Mirrors how the player resolves
+ * setup melodies (currently ascending-only via Note.next; Down is the planned extension).
+ */
+enum class DegreeDirection(val arrow: String) {
+  Up("↑"),
+  Down("↓");
+
+  fun flipped(): DegreeDirection = if (this == Up) Down else Up
+}
+
+/** One setup-melody step: a degree plus the direction it is reached from the previous note. */
+data class DirectedDegree(
+  val degree: Degree,
+  val direction: DegreeDirection = DegreeDirection.Up,
+)
+
+/** First step is the anchor and has no direction; later steps show their arrow. */
+fun List<DirectedDegree>.stepLabels(): List<String> =
+  mapIndexed { index, step ->
+    if (index == 0) step.degree.label else "${step.degree.label}${step.direction.arrow}"
+  }
 
 @Composable
 fun DegreeChip(
@@ -78,13 +106,17 @@ fun DegreePalette(
   }
 }
 
-/** The built sequence rendered as inverted chips, with an optional backspace control. */
+/**
+ * The built sequence rendered as inverted chips, with an optional backspace control.
+ * When [onChipClick] is set, individual chips become tappable (e.g. to flip direction).
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DegreeSequenceChips(
   labels: List<String>,
   modifier: Modifier = Modifier,
   emptyPlaceholder: String = "—",
+  onChipClick: ((index: Int) -> Unit)? = null,
   onBackspace: (() -> Unit)? = null,
 ) {
   Row(
@@ -100,8 +132,12 @@ fun DegreeSequenceChips(
       if (labels.isEmpty()) {
         DegreeChip(label = emptyPlaceholder)
       } else {
-        labels.forEach { label ->
-          DegreeChip(label = label, inverted = true)
+        labels.forEachIndexed { index, label ->
+          DegreeChip(
+            label = label,
+            inverted = true,
+            onClick = onChipClick?.let { { it(index) } },
+          )
         }
       }
     }
@@ -145,6 +181,61 @@ fun DegreeSequenceEditor(
       onBackspace = onBackspace,
     )
     DegreePalette(onPick = onAppend)
+  }
+}
+
+/**
+ * Inline editor for a directed degree sequence (setup melodies that can move up and down).
+ * The ↑/↓ toggle picks the direction applied to newly added degrees; tapping a placed
+ * chip flips that step's direction. The first step is the anchor and has no direction.
+ */
+@Composable
+fun DirectedDegreeSequenceEditor(
+  steps: List<DirectedDegree>,
+  onChange: (List<DirectedDegree>) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  var inputDirection by remember { mutableStateOf(DegreeDirection.Up) }
+
+  Column(
+    modifier = modifier.fillMaxWidth(),
+    verticalArrangement = Arrangement.spacedBy(10.dp),
+  ) {
+    DegreeSequenceChips(
+      labels = steps.stepLabels(),
+      onChipClick = { index ->
+        if (index > 0) {
+          onChange(
+            steps.toMutableList().also {
+              it[index] = it[index].copy(direction = it[index].direction.flipped())
+            }
+          )
+        }
+      },
+      onBackspace = { if (steps.isNotEmpty()) onChange(steps.dropLast(1)) },
+    )
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      DegreeDirection.entries.forEach { direction ->
+        DegreeChip(
+          label = direction.arrow,
+          inverted = direction == inputDirection,
+          onClick = { inputDirection = direction },
+        )
+      }
+      Text(
+        text = "Direction for added degrees. Tap a placed degree to flip it.",
+        color = ShuuenUi.Dim,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.weight(1f),
+      )
+    }
+    DegreePalette(
+      onPick = { onChange(steps + DirectedDegree(it, inputDirection)) },
+    )
   }
 }
 
