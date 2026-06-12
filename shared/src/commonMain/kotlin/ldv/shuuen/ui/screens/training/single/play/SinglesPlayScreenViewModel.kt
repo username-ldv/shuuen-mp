@@ -195,7 +195,7 @@ class SinglesPlayScreenViewModel(
       player.setupMelodyNotes.collect { note ->
         Napier.v { "got setup melody note $note" }
         if (note != null) {
-          val offset = root.asRoot(note.pitch).ordinal
+          val offset = root.asRoot(note.pitch).offset
           _setupMelodyFlashes.emit(
             KeyFlashRequest(
               note.pitch.ordinal,
