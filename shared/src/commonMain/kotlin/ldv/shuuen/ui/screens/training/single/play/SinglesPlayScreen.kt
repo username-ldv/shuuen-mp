@@ -34,7 +34,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.aakira.napier.Napier
 import ldv.shuuen.common.ResponseState
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.ui.common.LinearTrainingProgress
@@ -95,38 +94,13 @@ fun SinglesPlayScreen(
 //        centerButtonSize = 64.dp,
 //      )
 //    } else {
-    val indication by viewModel.answerIndications.collectAsStateWithLifecycle()
-//    val keyColors by viewModel.keyColors.collectAsStateWithLifecycle()
-//    val keyColors = screenState.quizState?.root?.let {
-//      PianoKeyboardDefaults.colorfulPressedColors(12, it)
-//    } ?: PianoKeyboardDefaults.pressedColors(12)
-    val keyColors: List<Color> = when (screenState.phase) {
-      is QuizPhase.LoadingContext -> {
-        val root = screenState.quizState?.root
-        if (root == null) PianoKeyboardDefaults.pressedColors(12)
-        else {
-          PianoKeyboardDefaults.colorfulPressedColors(
-            12, root
-          )
-        }
-      }
-
-      else -> {
-        val currentNote = screenState.quizState?.currentNote
-        if (currentNote == null) PianoKeyboardDefaults.pressedColors(12)
-        else {
-          Pitch.entries.map {
-            if (it.ordinal == currentNote.pitch.ordinal) AnswerColors.Correct.color else AnswerColors.Incorrect.color
-          }
-        }
-      }
-    }
-    Napier.v { "screen state phase: ${screenState.phase}" }
+    val indications by viewModel.answerIndications.collectAsStateWithLifecycle()
+    // pressedKeyColors stays at its neutral default (plain touch feedback). The setup-melody
+    // highlight and answer flashes arrive via programmaticIndications, each carrying its own color.
     PianoKeyboard(
       modifier = Modifier.fillMaxWidth().aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
       keyCount = 12,
-      pressedKeyColors = keyColors,
-      programmaticIndications = indication,
+      programmaticIndications = indications,
       onKeyPressedChange = { offset, pressed ->
         if (!pressed) {
           val pitch = Pitch.fromOrdinal(offset)

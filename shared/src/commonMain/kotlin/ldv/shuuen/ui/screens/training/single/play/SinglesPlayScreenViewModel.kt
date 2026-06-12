@@ -7,9 +7,12 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ldv.shuuen.common.ResponseState
@@ -22,8 +25,8 @@ import ldv.shuuen.domain.audio.music.Note
 import ldv.shuuen.domain.audio.music.Pitch
 import ldv.shuuen.domain.repository.local.SinglesLocalLevelRepository
 import ldv.shuuen.domain.training.singles.SinglesLevel
+import ldv.shuuen.ui.common.music.Palette
 import ldv.shuuen.ui.common.music.inputs.PianoKeyIndication
-import ldv.shuuen.ui.common.music.inputs.PianoKeyboardDefaults
 import kotlin.time.Duration.Companion.milliseconds
 
 enum class AnswerColors(val color: Color) {
@@ -43,6 +46,7 @@ data class SinglesPlayScreenState(
 )
 
 val playNoteDuration = 1500.milliseconds
+val answerFeedbackDuration = 500.milliseconds
 
 class SinglesPlayScreenViewModel(
   levelId: String, levelRepository: SinglesLocalLevelRepository, val midiEngine: MidiEngine
@@ -60,12 +64,18 @@ class SinglesPlayScreenViewModel(
   var lastHandledQuestion = 0
   var lastHandledRoot: Pitch? = null
 
-  private val _answerIndications = MutableStateFlow<List<PianoKeyIndication>>(listOf())
-  val answerIndications = _answerIndications.asStateFlow()
-//  private val _keyColors = MutableStateFlow(PianoKeyboardDefaults.pressedColors(12))
-//  val keyColors = _keyColors.asStateFlow()
-//  private val _pressedFeedback = MutableStateFlow<Map<Int, Color>>(emptyMap())
-//  val pressedFeedback = _pressedFeedback.asStateFlow()
+  // Setup-melody highlight: a single timed indication that follows the currently playing note.
+  private val _setupMelodyIndication = MutableStateFlow<PianoKeyIndication?>(null)
+
+  // Answer feedback: independent persistent flashes, each removed by its own timer in userGuessed.
+  // Keyed by a unique id so concurrent flashes (even on the same key) can be removed individually.
+  private val _feedbackIndications = MutableStateFlow<Map<Long, PianoKeyIndication>>(emptyMap())
+  private var feedbackIdCounter = 0L
+
+  val answerIndications: StateFlow<List<PianoKeyIndication>> =
+    combine(_setupMelodyIndication, _feedbackIndications) { setup, feedback ->
+      feedback.values.toList() + listOfNotNull(setup)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
 
   init {
@@ -123,12 +133,6 @@ class SinglesPlayScreenViewModel(
           degreeContextPlayer.ready.first { it }
         }
 
-//        launch {
-//          delay(500.milliseconds)
-//          _keyColors.value =
-//            Pitch.entries.map { if (it == quizState.currentNote.pitch) AnswerColors.Correct.color else AnswerColors.Incorrect.color }
-//        }
-
         Napier.v { "Playing ${quizState.currentNote}" }
         playNote(quizState.currentNote)
       }
@@ -136,7 +140,20 @@ class SinglesPlayScreenViewModel(
   }
 
   fun userGuessed(pitch: Pitch) {
-    quizzer?.check(pitch)
+    val quizzer = quizzer ?: return
+
+    val isCorrect = quizzer.quizState.value.currentNote.pitch == pitch
+    val color = if (isCorrect) AnswerColors.Correct.color else AnswerColors.Incorrect.color
+
+    // Each press spawns its own independent, non-blocking flash on the pressed key.
+    val id = feedbackIdCounter++
+    _feedbackIndications.update { it + (id to PianoKeyIndication(pitch.ordinal, color = color)) }
+    viewModelScope.launch {
+      delay(answerFeedbackDuration)
+      _feedbackIndications.update { it - id }
+    }
+
+    quizzer.check(pitch)
   }
 
   fun userGuessed(degree: Degree) {
@@ -174,12 +191,17 @@ class SinglesPlayScreenViewModel(
       player.start()
     }
     setupMelodyNotesIndicationJob = viewModelScope.launch {
-//      _keyColors.value = PianoKeyboardDefaults.colorfulPressedColors(12, root)
+      _setupMelodyIndication.value = null
       player.setupMelodyNotes.collect { note ->
         Napier.v { "got setup melody note $note" }
-        _answerIndications.value = note?.let {
-          listOf(PianoKeyIndication(it.pitch.ordinal, 500))
-        } ?: listOf()
+        _setupMelodyIndication.value = note?.let {
+          val offset = ((it.pitch.ordinal - root.ordinal) % 12 + 12) % 12
+          PianoKeyIndication(
+            index = it.pitch.ordinal,
+            durationMillis = 500,
+            color = Palette.entries[offset].color,
+          )
+        }
       }
     }
     return player

@@ -45,7 +45,20 @@ data class PianoKeyIndication(
    * non-null = animate for this many milliseconds.
    */
   val durationMillis: Long? = null,
+  /**
+   * Color to render on the key while this indication is active. Overrides [pressedKeyColors]
+   * for the affected key. null = fall back to [pressedKeyColors].
+   */
+  val color: Color? = null,
 )
+
+/**
+ * Internal bookkeeping for timed indications: how many overlapping timers are active for a key,
+ * plus the color to render while they are. The color is captured here when the timer starts so the
+ * flash survives its full [PianoKeyIndication.durationMillis] even after the indication has already
+ * left programmaticIndications.
+ */
+private data class TimedIndication(val count: Int, val color: Color?)
 
 object PianoKeyboardDefaults {
   private val BlackPitchClasses = setOf(1, 3, 6, 8, 10)
@@ -146,7 +159,7 @@ fun PianoKeyboard(
   val latestOnKeyPressedChange by rememberUpdatedState(onKeyPressedChange)
 
   val touchPointers = remember { mutableStateMapOf<PointerId, Int>() }
-  val timedProgrammaticCounts = remember { mutableStateMapOf<Int, Int>() }
+  val timedProgrammatic = remember { mutableStateMapOf<Int, TimedIndication>() }
 
   val timedIndications = remember(programmaticIndications) {
     programmaticIndications.filter { it.durationMillis != null }
@@ -161,17 +174,22 @@ fun PianoKeyboard(
       if (!enabledKeys[index]) return@forEach
 
       launch {
-        timedProgrammaticCounts[index] = (timedProgrammaticCounts[index] ?: 0) + 1
+        val existing = timedProgrammatic[index]
+        timedProgrammatic[index] = TimedIndication(
+          count = (existing?.count ?: 0) + 1,
+          color = indication.color ?: existing?.color,
+        )
 
         try {
           delay(duration.coerceAtLeast(1L))
         } finally {
-          val next = (timedProgrammaticCounts[index] ?: 1) - 1
+          val current = timedProgrammatic[index]
+          val next = (current?.count ?: 1) - 1
 
           if (next <= 0) {
-            timedProgrammaticCounts.remove(index)
+            timedProgrammatic.remove(index)
           } else {
-            timedProgrammaticCounts[index] = next
+            timedProgrammatic[index] = current?.copy(count = next) ?: TimedIndication(next, null)
           }
         }
       }
@@ -182,9 +200,19 @@ fun PianoKeyboard(
     programmaticIndications.asSequence().filter { it.durationMillis == null }.map { it.index }
       .filter { it in 0 until keyCount && enabledKeys[it] }.toSet()
 
+  val persistentIndicationColors =
+    programmaticIndications.asSequence()
+      .filter { it.durationMillis == null && it.color != null }
+      .filter { it.index in 0 until keyCount && enabledKeys[it.index] }
+      .associate { it.index to it.color!! }
+
   val activeKeys =
-    (touchPointers.values.toSet() + persistentProgrammaticKeys + timedProgrammaticCounts.keys).filter { it in 0 until keyCount && enabledKeys[it] }
+    (touchPointers.values.toSet() + persistentProgrammaticKeys + timedProgrammatic.keys).filter { it in 0 until keyCount && enabledKeys[it] }
       .toSet()
+
+  // Effective press-target color for a key: an active indication's color wins over pressedKeyColors.
+  fun targetPressColor(index: Int): Color =
+    persistentIndicationColors[index] ?: timedProgrammatic[index]?.color ?: pressedKeyColors[index]
 
   val pressProgress = List(keyCount) { index ->
     animateFloatAsState(
@@ -385,12 +413,13 @@ fun PianoKeyboard(
       val progress = pressProgress[index]
       val enabled = enabledKeys[index]
       val rect = key.rect
+      val targetColor = targetPressColor(index)
 
       val baseColor = when {
         !enabled -> disabledKeyColors[index]
         else -> lerp(
           idleKeyColors[index],
-          pressedKeyColors[index],
+          targetColor,
           progress,
         )
       }
@@ -403,7 +432,7 @@ fun PianoKeyboard(
       )
 
       if (enabled && progress > 0.01f) {
-        val activeColor = pressedKeyColors[index]
+        val activeColor = targetColor
         val pulseAlpha = 0.10f + 0.10f * pulse
 
         drawRoundRect(
@@ -474,12 +503,13 @@ fun PianoKeyboard(
       val progress = pressProgress[index]
       val enabled = enabledKeys[index]
       val rect = key.rect
+      val targetColor = targetPressColor(index)
 
       val baseColor = when {
         !enabled -> disabledKeyColors[index]
         else -> lerp(
           idleKeyColors[index],
-          pressedKeyColors[index],
+          targetColor,
           progress,
         )
       }
@@ -492,7 +522,7 @@ fun PianoKeyboard(
       )
 
       if (enabled && progress > 0.01f) {
-        val activeColor = pressedKeyColors[index]
+        val activeColor = targetColor
         val pulseAlpha = 0.16f + 0.14f * pulse
 
         drawRoundRect(
