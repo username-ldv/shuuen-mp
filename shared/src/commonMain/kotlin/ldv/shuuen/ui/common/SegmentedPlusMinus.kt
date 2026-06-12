@@ -1,6 +1,6 @@
 package ldv.shuuen.ui.common
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -35,9 +36,8 @@ fun SegmentedPlusMinus(
   minimalNumber: Int = 0
 ) {
   Row(
-    modifier = Modifier.fillMaxWidth().height(58.dp).clip(MaterialTheme.shapes.extraLarge)
-      .border(1.dp, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.extraLarge)
-      .then(modifier),
+    modifier = Modifier.fillMaxWidth().height(54.dp).clip(ShuuenUi.PillShape)
+      .background(Color.White.copy(alpha = 0.05f)).then(modifier),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     SegmentedPart("—", onClick = {
@@ -46,7 +46,7 @@ fun SegmentedPlusMinus(
         if (v < minimalNumber) minimalNumber else v
       })
     })
-    VerticalDivider(color = MaterialTheme.colorScheme.primaryContainer)
+    VerticalDivider(color = ShuuenUi.Hairline)
     Box(
       modifier = Modifier.fillMaxHeight().weight(1f), contentAlignment = Alignment.Center
     ) {
@@ -56,7 +56,7 @@ fun SegmentedPlusMinus(
           val newValue = v.toUIntOrNull() ?: return@BasicTextField onChange(null)
           onChange(newValue.toInt())
         },
-        textStyle = MaterialTheme.typography.headlineLarge.copy(
+        textStyle = MaterialTheme.typography.headlineMedium.copy(
           color = LocalContentColor.current, textAlign = TextAlign.Center
         ),
         singleLine = true,
@@ -64,7 +64,7 @@ fun SegmentedPlusMinus(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
       )
     }
-    VerticalDivider(color = MaterialTheme.colorScheme.primaryContainer)
+    VerticalDivider(color = ShuuenUi.Hairline)
     SegmentedPart("+", onClick = {
       onChange(value?.let { it + delta })
     })
@@ -79,7 +79,8 @@ private fun RowScope.SegmentedPart(text: String, onClick: () -> Unit) {
   ) {
     Text(
       text = text,
-      style = MaterialTheme.typography.headlineLarge.copy(fontSize = 32.sp),
+      color = ShuuenUi.Muted,
+      style = MaterialTheme.typography.headlineMedium.copy(fontSize = 26.sp),
     )
   }
 }

@@ -78,11 +78,15 @@ object PianoKeyboardDefaults {
     if (isBlackKey(index)) Color.Black else Color(0xFFF2F2F2)
   }
 
+  /** Neutral gray press feedback — visible on both white and black keys. */
+  val MonochromePressedColor = Color(0xFFA9A9B2)
+
   fun pressedColors(
     keyCount: Int,
-    color: Color = Color.White,
+    color: Color = MonochromePressedColor,
   ): List<Color> = List(keyCount) { color }
 
+  /** Opt-in per-degree colors; the app default is monochrome ([pressedColors]). */
   fun colorfulPressedColors(
     keyCount: Int, tonic: Pitch = Pitch.C
   ): List<Color> {

@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,30 +21,25 @@ import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Waves
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import ldv.shuuen.ui.common.GlassPanel
+import ldv.shuuen.ui.common.FlatSection
+import ldv.shuuen.ui.common.Hairline
 import ldv.shuuen.ui.common.IconBubble
 import ldv.shuuen.ui.common.PillControl
-import ldv.shuuen.ui.common.SectionTitle
+import ldv.shuuen.ui.common.ShuuenSwitch
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
 import ldv.shuuen.ui.common.ShuuenUi
@@ -54,6 +49,7 @@ import ldv.shuuen.ui.common.StaticScreenFrame
 @Composable
 fun SettingsScreen(onNavigateBack: () -> Unit) {
   StaticScreenFrame(
+    maxWidth = 920.dp,
     topBar = {
       ShuuenTopAppBar(
         title = "SETTINGS",
@@ -63,175 +59,40 @@ fun SettingsScreen(onNavigateBack: () -> Unit) {
       )
     },
   ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+      val twoColumn = maxWidth > 760.dp
 
-    GlassPanel {
-      SectionTitle(
-        icon = Icons.Rounded.Keyboard,
-        title = "INPUT METHOD",
-        subtitle = "Choose how answers are entered and interpreted.",
-      )
-      BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = maxWidth < 390.dp
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-          Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth()
+      if (twoColumn) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(44.dp),
+        ) {
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(26.dp),
           ) {
-            InputMethodCard(
-              "Piano",
-              "Absolute",
-              Icons.Rounded.Keyboard,
-              true,
-              compact,
-              Modifier.weight(1f)
-            )
-            InputMethodCard(
-              "Piano",
-              "Relative",
-              Icons.Rounded.Keyboard,
-              false,
-              compact,
-              Modifier.weight(1f)
-            )
+            InputMethodSection()
+            Hairline()
+            GeneralSection()
           }
-          Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth()
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(26.dp),
           ) {
-            InputMethodCard(
-              "Circle",
-              "Absolute",
-              Icons.Rounded.GraphicEq,
-              false,
-              compact,
-              Modifier.weight(1f)
-            )
-            InputMethodCard(
-              "Circle",
-              "Relative",
-              Icons.Rounded.GraphicEq,
-              false,
-              compact,
-              Modifier.weight(1f)
-            )
+            SoundfontSection()
           }
         }
-      }
-    }
-
-    GlassPanel {
-      SectionTitle(
-        icon = Icons.Rounded.MusicNote,
-        title = "SOUNDFONT",
-        subtitle = "Use one MIDI soundfont for all playback categories.",
-      )
-      BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = maxWidth < 440.dp
-        if (compact) {
-          Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            SoftControl(modifier = Modifier.fillMaxWidth()) {
-              Icon(
-                Icons.AutoMirrored.Rounded.Article,
-                contentDescription = null,
-                tint = ShuuenUi.Lavender,
-                modifier = Modifier.size(26.dp)
-              )
-              Text(
-                "Arachno.sf2",
-                color = ShuuenUi.Text,
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.weight(1f),
-                maxLines = 1
-              )
-            }
-            Row(
-              horizontalArrangement = Arrangement.spacedBy(10.dp),
-              modifier = Modifier.fillMaxWidth()
-            ) {
-              PillControl(
-                "Load",
-                leadingIcon = Icons.Rounded.FolderOpen,
-                selected = true,
-                modifier = Modifier.weight(1f)
-              )
-              PillControl("Default", modifier = Modifier.weight(1f))
-            }
-          }
-        } else {
-          SoftControl(modifier = Modifier.fillMaxWidth()) {
-            Icon(
-              Icons.AutoMirrored.Rounded.Article,
-              contentDescription = null,
-              tint = ShuuenUi.Lavender,
-              modifier = Modifier.size(30.dp)
-            )
-            Text(
-              "Arachno.sf2",
-              color = ShuuenUi.Text,
-              style = MaterialTheme.typography.titleMedium,
-              modifier = Modifier.weight(1f),
-              maxLines = 1
-            )
-            PillControl(
-              "Load from storage",
-              leadingIcon = Icons.Rounded.FolderOpen,
-              selected = true
-            )
-            PillControl("Default")
-          }
+      } else {
+        Column(
+          modifier = Modifier.fillMaxWidth(),
+          verticalArrangement = Arrangement.spacedBy(26.dp),
+        ) {
+          InputMethodSection()
+          Hairline()
+          SoundfontSection()
+          Hairline()
+          GeneralSection()
         }
-      }
-      SoundCategoryRow(
-        "Notes",
-        Icons.Rounded.MusicNote,
-        "000 - General MIDI",
-        "001 - Acoustic Grand"
-      )
-      HorizontalDivider(color = ShuuenUi.Border)
-      SoundCategoryRow("Drone", Icons.Rounded.Waves, "048 - Ethnic", "045 - Shakuhachi")
-      HorizontalDivider(color = ShuuenUi.Border)
-      SoundCategoryRow(
-        "Cadence",
-        Icons.Rounded.GraphicEq,
-        "000 - General MIDI",
-        "024 - Nylon Guitar"
-      )
-    }
-
-    GlassPanel {
-      SectionTitle(
-        icon = Icons.Rounded.Settings,
-        title = "GENERAL",
-        subtitle = "",
-      )
-      SettingsRow(Icons.Rounded.Language, "Language", trailing = "English")
-      HorizontalDivider(color = ShuuenUi.Border)
-      SettingsRow(Icons.Rounded.TextFields, "Note names", subtitle = "C, D, E...")
-      HorizontalDivider(color = ShuuenUi.Border)
-      SettingsRow(Icons.Rounded.TextFields, "Degree names", subtitle = "1, 2, 3...")
-      HorizontalDivider(color = ShuuenUi.Border)
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-      ) {
-        IconBubble(Icons.Rounded.PlayArrow, tint = ShuuenUi.Lavender, size = 44.dp)
-        Text(
-          text = "Play next question automatically",
-          color = ShuuenUi.Text,
-          style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier.weight(1f),
-        )
-        Switch(
-          checked = true,
-          onCheckedChange = {},
-          colors = SwitchDefaults.colors(
-            checkedThumbColor = ShuuenUi.Mint,
-            checkedTrackColor = Color(0xFF244D3E),
-          ),
-        )
       }
     }
 
@@ -241,9 +102,178 @@ fun SettingsScreen(onNavigateBack: () -> Unit) {
       style = MaterialTheme.typography.bodyMedium,
       modifier = Modifier
         .fillMaxWidth()
-        .padding(top = 8.dp, bottom = 18.dp),
+        .padding(top = 10.dp, bottom = 18.dp),
       textAlign = TextAlign.Center,
     )
+  }
+}
+
+@Composable
+private fun InputMethodSection() {
+  FlatSection(
+    label = "INPUT METHOD",
+    supporting = "Choose how answers are entered and interpreted.",
+  ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+      val compact = maxWidth < 390.dp
+      Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          InputMethodCard(
+            "Piano",
+            "Absolute",
+            Icons.Rounded.Keyboard,
+            true,
+            compact,
+            Modifier.weight(1f)
+          )
+          InputMethodCard(
+            "Piano",
+            "Relative",
+            Icons.Rounded.Keyboard,
+            false,
+            compact,
+            Modifier.weight(1f)
+          )
+        }
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          InputMethodCard(
+            "Circle",
+            "Absolute",
+            Icons.Rounded.GraphicEq,
+            false,
+            compact,
+            Modifier.weight(1f)
+          )
+          InputMethodCard(
+            "Circle",
+            "Relative",
+            Icons.Rounded.GraphicEq,
+            false,
+            compact,
+            Modifier.weight(1f)
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun SoundfontSection() {
+  FlatSection(
+    label = "SOUNDFONT",
+    supporting = "Use one MIDI soundfont for all playback categories.",
+  ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+      val compact = maxWidth < 440.dp
+      if (compact) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+          SoftControl(modifier = Modifier.fillMaxWidth()) {
+            Icon(
+              Icons.AutoMirrored.Rounded.Article,
+              contentDescription = null,
+              tint = ShuuenUi.Muted,
+              modifier = Modifier.size(22.dp)
+            )
+            Text(
+              "Arachno.sf2",
+              color = ShuuenUi.Text,
+              style = MaterialTheme.typography.titleSmall,
+              modifier = Modifier.weight(1f),
+              maxLines = 1
+            )
+          }
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+          ) {
+            PillControl(
+              "Load",
+              leadingIcon = Icons.Rounded.FolderOpen,
+              selected = true,
+              modifier = Modifier.weight(1f)
+            )
+            PillControl("Default", modifier = Modifier.weight(1f))
+          }
+        }
+      } else {
+        SoftControl(modifier = Modifier.fillMaxWidth()) {
+          Icon(
+            Icons.AutoMirrored.Rounded.Article,
+            contentDescription = null,
+            tint = ShuuenUi.Muted,
+            modifier = Modifier.size(24.dp)
+          )
+          Text(
+            "Arachno.sf2",
+            color = ShuuenUi.Text,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f),
+            maxLines = 1
+          )
+          PillControl(
+            "Load from storage",
+            leadingIcon = Icons.Rounded.FolderOpen,
+            selected = true
+          )
+          PillControl("Default")
+        }
+      }
+    }
+    SoundCategoryRow(
+      "Notes",
+      Icons.Rounded.MusicNote,
+      "000 - General MIDI",
+      "001 - Acoustic Grand"
+    )
+    Hairline()
+    SoundCategoryRow("Drone", Icons.Rounded.Waves, "048 - Ethnic", "045 - Shakuhachi")
+    Hairline()
+    SoundCategoryRow(
+      "Cadence",
+      Icons.Rounded.GraphicEq,
+      "000 - General MIDI",
+      "024 - Nylon Guitar"
+    )
+  }
+}
+
+@Composable
+private fun GeneralSection() {
+  FlatSection(label = "GENERAL") {
+    SettingsRow(Icons.Rounded.Language, "Language", trailing = "English")
+    Hairline()
+    SettingsRow(Icons.Rounded.TextFields, "Note names", subtitle = "C, D, E...")
+    Hairline()
+    SettingsRow(Icons.Rounded.TextFields, "Degree names", subtitle = "1, 2, 3...")
+    Hairline()
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 6.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+      Icon(
+        Icons.Rounded.PlayArrow,
+        contentDescription = null,
+        tint = ShuuenUi.Muted,
+        modifier = Modifier.size(22.dp)
+      )
+      Text(
+        text = "Play next question automatically",
+        color = ShuuenUi.Text,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.weight(1f),
+      )
+      ShuuenSwitch(checked = true)
+    }
   }
 }
 
@@ -257,7 +287,7 @@ private fun InputMethodCard(
   modifier: Modifier = Modifier,
 ) {
   SoftControl(
-    modifier = modifier.height(if (compact) 92.dp else 86.dp),
+    modifier = modifier.heightIn(min = if (compact) 92.dp else 86.dp),
     selected = selected,
   ) {
     Column(
@@ -271,28 +301,28 @@ private fun InputMethodCard(
         Icon(
           icon,
           contentDescription = null,
-          tint = if (selected) ShuuenUi.Mint else ShuuenUi.Lavender,
-          modifier = Modifier.size(if (compact) 24.dp else 28.dp)
+          tint = if (selected) ShuuenUi.Text else ShuuenUi.Muted,
+          modifier = Modifier.size(if (compact) 22.dp else 24.dp)
         )
         Spacer(Modifier.weight(1f))
         Icon(
           imageVector = if (selected) Icons.Rounded.Check else Icons.Rounded.RadioButtonUnchecked,
           contentDescription = null,
-          tint = if (selected) ShuuenUi.Mint else ShuuenUi.Muted,
-          modifier = Modifier.size(if (compact) 25.dp else 28.dp),
+          tint = if (selected) ShuuenUi.Text else ShuuenUi.Dim,
+          modifier = Modifier.size(if (compact) 20.dp else 22.dp),
         )
       }
       Text(
         text = title,
-        color = ShuuenUi.Text,
-        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+        color = if (selected) ShuuenUi.Text else ShuuenUi.Muted,
+        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
       Text(
         text = mode,
-        color = ShuuenUi.Text,
-        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+        color = if (selected) ShuuenUi.Muted else ShuuenUi.Dim,
+        style = MaterialTheme.typography.bodyMedium,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
@@ -320,14 +350,19 @@ private fun SoundCategoryRow(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-          IconBubble(icon, tint = ShuuenUi.Lavender, size = 42.dp)
+          Icon(
+            icon,
+            contentDescription = null,
+            tint = ShuuenUi.Muted,
+            modifier = Modifier.size(22.dp)
+          )
           Text(
             text = label,
             color = ShuuenUi.Text,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             modifier = Modifier.weight(1f),
           )
-          IconBubble(Icons.Rounded.PlayArrow, tint = ShuuenUi.Mint, size = 38.dp)
+          IconBubble(Icons.Rounded.PlayArrow, tint = ShuuenUi.Text, size = 36.dp)
         }
         Row(
           horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -343,26 +378,21 @@ private fun SoundCategoryRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
       ) {
-        IconBubble(icon, tint = ShuuenUi.Lavender, size = 48.dp)
+        Icon(
+          icon,
+          contentDescription = null,
+          tint = ShuuenUi.Muted,
+          modifier = Modifier.size(22.dp)
+        )
         Text(
           text = label,
           color = ShuuenUi.Text,
-          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
           modifier = Modifier.width(74.dp),
         )
         SoundPickerColumn("SOUNDBANK", soundbank, Modifier.weight(1f))
         SoundPickerColumn("PRESET", preset, Modifier.weight(1f))
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-          Text(
-            "TEST",
-            color = ShuuenUi.Muted,
-            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp)
-          )
-          IconBubble(Icons.Rounded.PlayArrow, tint = ShuuenUi.Mint, size = 42.dp)
-        }
+        IconBubble(Icons.Rounded.PlayArrow, tint = ShuuenUi.Text, size = 40.dp)
       }
     }
   }
@@ -377,8 +407,8 @@ private fun SoundPickerColumn(
   Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
     Text(
       label,
-      color = ShuuenUi.Muted,
-      style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp),
+      color = ShuuenUi.Dim,
+      style = MaterialTheme.typography.labelSmall.copy(letterSpacing = ShuuenUi.labelSpacing),
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
@@ -400,25 +430,25 @@ private fun SettingsRow(
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    Icon(icon, contentDescription = null, tint = ShuuenUi.Lavender, modifier = Modifier.size(30.dp))
+    Icon(icon, contentDescription = null, tint = ShuuenUi.Muted, modifier = Modifier.size(22.dp))
     Column(modifier = Modifier.weight(1f)) {
       Text(
         text = title,
         color = ShuuenUi.Text,
-        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+        style = MaterialTheme.typography.titleMedium,
       )
       if (subtitle != null) {
-        Text(text = subtitle, color = ShuuenUi.Muted, style = MaterialTheme.typography.bodySmall)
+        Text(text = subtitle, color = ShuuenUi.Dim, style = MaterialTheme.typography.bodySmall)
       }
     }
     if (trailing != null) {
-      PillControl(trailing, modifier = Modifier.width(190.dp))
+      PillControl(trailing, modifier = Modifier.width(170.dp))
     } else {
       Icon(
         Icons.Rounded.ChevronRight,
         contentDescription = null,
-        tint = ShuuenUi.Muted,
-        modifier = Modifier.size(30.dp)
+        tint = ShuuenUi.Dim,
+        modifier = Modifier.size(24.dp)
       )
     }
   }

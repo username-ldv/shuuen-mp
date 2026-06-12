@@ -8,11 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Save
-import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,18 +18,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import ldv.shuuen.domain.training.level.LevelConfig
-import ldv.shuuen.ui.common.GlassPanel
-import ldv.shuuen.ui.common.IconBubble
+import ldv.shuuen.ui.common.FlatSection
+import ldv.shuuen.ui.common.Hairline
 import ldv.shuuen.ui.common.PrimaryCta
-import ldv.shuuen.ui.common.SectionTitle
 import ldv.shuuen.ui.common.SegmentedPlusMinus
 import ldv.shuuen.ui.common.ShuuenTopAppBar
 import ldv.shuuen.ui.common.ShuuenTopAppBarType
@@ -50,6 +44,7 @@ fun SinglesSetupScreen(
 ) {
   val saveableScreenState by viewModel.screenState.collectAsStateWithLifecycle()
   StaticScreenFrame(
+    verticalSpacing = 22.dp,
     topBar = {
       ShuuenTopAppBar(
         title = "SINGLES SETUP",
@@ -70,22 +65,20 @@ fun SinglesSetupScreen(
       onScaleChosen = viewModel::changeScale
     )
 
-    CompactSetupRow(
-      icon = Icons.Rounded.Tune,
-      tint = ShuuenUi.Lavender,
-      title = "2. CONTEXT",
-      subtitle = "Open context screen to configure.",
-      trailing = true,
+    Hairline()
+
+    NavigationSectionRow(
+      label = "2 · CONTEXT",
+      supporting = "Open context screen to configure.",
       onClick = onOpenContext,
     )
 
-    GlassPanel {
-      SectionTitle(
-        icon = Icons.Rounded.BarChart,
-        tint = ShuuenUi.Gold,
-        title = "3. NUMBER OF QUESTIONS",
-        subtitle = "Set how many questions to include.",
-      )
+    Hairline()
+
+    FlatSection(
+      label = "3 · NUMBER OF QUESTIONS",
+      supporting = "Set how many questions to include.",
+    ) {
       SegmentedPlusMinus(
         value = saveableScreenState.questionsNumber,
         onChange = viewModel::changeQuestionsNumber,
@@ -93,15 +86,15 @@ fun SinglesSetupScreen(
       )
     }
 
-    GlassPanel {
-      SectionTitle(
-        icon = Icons.Rounded.GraphicEq,
-        title = "4. RANGE",
-        subtitle = "Select the note range.",
-      )
+    Hairline()
+
+    FlatSection(
+      label = "4 · RANGE",
+      supporting = "Select the note range.",
+    ) {
       Text(
         text = "${saveableScreenState.range.from} - ${saveableScreenState.range.to}",
-        style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 3.sp),
+        style = MaterialTheme.typography.headlineMedium.copy(letterSpacing = 3.sp),
         modifier = Modifier.align(Alignment.CenterHorizontally),
       )
       NoteRow(value = saveableScreenState.range.from) { viewModel.changeRangeStart(it) }
@@ -125,45 +118,39 @@ fun SinglesSetupScreen(
 }
 
 @Composable
-private fun CompactSetupRow(
-  icon: ImageVector,
-  tint: Color,
-  title: String,
-  subtitle: String,
-  trailing: Boolean = false,
-  onClick: (() -> Unit)? = null,
+private fun NavigationSectionRow(
+  label: String,
+  supporting: String,
+  onClick: () -> Unit,
 ) {
-  GlassPanel(
-    modifier = Modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+  Row(
+    modifier = Modifier.fillMaxWidth()
+      .clickable(onClick = onClick)
+      .padding(vertical = 8.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
+    Column(
+      modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)
     ) {
-      IconBubble(icon, tint = tint, size = 58.dp)
-      Column(
-        modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
-      ) {
-        Text(
-          text = title,
-          color = ShuuenUi.Text,
-          style = MaterialTheme.typography.titleLarge.copy(
-            letterSpacing = 3.sp, fontWeight = FontWeight.Bold
-          ),
-        )
-        Text(
-          subtitle, color = ShuuenUi.Muted, style = MaterialTheme.typography.bodyMedium
-        )
-      }
-      if (trailing) {
-        Icon(
-          Icons.Rounded.ChevronRight,
-          contentDescription = null,
-          tint = ShuuenUi.Muted,
-          modifier = Modifier.size(34.dp)
-        )
-      }
+      Text(
+        text = label,
+        color = ShuuenUi.Muted,
+        style = MaterialTheme.typography.labelLarge.copy(
+          letterSpacing = ShuuenUi.labelSpacing, fontWeight = FontWeight.SemiBold
+        ),
+      )
+      Text(
+        text = supporting,
+        color = ShuuenUi.Dim,
+        style = MaterialTheme.typography.bodyMedium,
+      )
     }
+    Icon(
+      Icons.Rounded.ChevronRight,
+      contentDescription = null,
+      tint = ShuuenUi.Dim,
+      modifier = Modifier.size(26.dp)
+    )
   }
 }

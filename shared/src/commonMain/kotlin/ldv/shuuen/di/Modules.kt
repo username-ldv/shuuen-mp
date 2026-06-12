@@ -84,6 +84,13 @@ val commonModule = module {
 
   navigation<AppRoute.MelodiesLevelSelect> {
     val navigator = LocalAppNavigator.current
+    // for now
+    SinglesLevelSelectScreen(
+      onNavigateBack = { navigator.goBack() },
+      onStartLevel = { navigator.add(AppRoute.MelodiesPlay) },
+      onCreateNewLevel = { navigator.add(AppRoute.MelodiesSetup) },
+      viewModel = koinViewModel()
+    )
 //    LevelSelectScreen(
 //      flow = TrainingFlow.Melodies,
 //      onNavigateBack = { navigator.navigateBack() },

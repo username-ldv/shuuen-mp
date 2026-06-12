@@ -1,8 +1,10 @@
 package ldv.shuuen.ui.screens.training.melodies.play
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,11 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Backspace
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material.icons.rounded.Flag
 import androidx.compose.material.icons.rounded.MusicNote
@@ -23,7 +22,6 @@ import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
@@ -102,34 +101,24 @@ private fun MelodiesTrainingStatus() {
 
       Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
       ) {
-        ScorePill("0", Icons.Outlined.CheckCircle, ShuuenUi.Green)
-        Text("|", style = MaterialTheme.typography.titleMedium)
-        ScorePill("0", Icons.Outlined.Cancel, ShuuenUi.Red)
+        ScoreCount("0", ShuuenUi.Correct)
+        Text("|", color = ShuuenUi.Dim, style = MaterialTheme.typography.titleMedium)
+        ScoreCount("0", ShuuenUi.Incorrect)
       }
     }
 
-    LinearTrainingProgress(
-      progress = 0.045f,
-      color = ShuuenUi.Lavender,
-    )
+    LinearTrainingProgress(progress = 0.045f)
   }
 }
 
 @Composable
-private fun ScorePill(
+private fun ScoreCount(
   value: String,
-  icon: ImageVector,
   tint: Color,
 ) {
-  Row(
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
-  ) {
-    Text(value, color = tint, style = MaterialTheme.typography.titleLarge)
-//    Icon(icon, contentDescription = null, tint = tint)
-  }
+  Text(value, color = tint, style = MaterialTheme.typography.titleLarge)
 }
 
 @Composable
@@ -158,32 +147,27 @@ private fun MelodyInputCell(
   selected: Boolean = false,
   empty: Boolean = false,
 ) {
-  Surface(
-    modifier = modifier.height(52.dp),
-    color = if (selected) Color(0x332A2242) else ShuuenUi.PanelSoft,
-    contentColor = ShuuenUi.Text,
-    shape = RoundedCornerShape(10.dp),
-    border = BorderStroke(
-      width = 1.dp,
-      color = when {
-        selected -> ShuuenUi.Lavender
-        empty -> ShuuenUi.Border
-        else -> ShuuenUi.BorderStrong
-      },
-    ),
+  val shape = ShuuenUi.ControlShape
+  Box(
+    modifier = modifier.height(52.dp).clip(shape)
+      .background(if (empty) Color.Transparent else Color.White.copy(alpha = 0.05f))
+      .border(
+        width = 1.dp,
+        color = when {
+          selected -> ShuuenUi.HairlineStrong
+          else -> ShuuenUi.Hairline
+        },
+        shape = shape,
+      ),
+    contentAlignment = Alignment.Center,
   ) {
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.Center,
-    ) {
-      Text(
-        text = text,
-        color = if (empty) ShuuenUi.Dim else ShuuenUi.Lavender,
-        style = MaterialTheme.typography.titleLarge,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-      )
-    }
+    Text(
+      text = text,
+      color = if (empty) ShuuenUi.Dim else ShuuenUi.Text,
+      style = MaterialTheme.typography.titleLarge,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
   }
 }
 
@@ -192,7 +176,6 @@ private fun KeyboardAnswerArea() {
   PianoKeyboard(
     modifier = Modifier.fillMaxWidth().aspectRatio(PianoKeyboardDefaults.aspectRatio(12)),
     keyCount = 12,
-    pressedKeyColors = PianoKeyboardDefaults.pressedColors(12, ShuuenUi.Lavender),
   )
 }
 
@@ -206,17 +189,14 @@ private fun BottomActionBar(on1: () -> Unit) {
     BottomRepeatButton(Modifier.weight(1.8f).clickable { on1() })
     BottomIconButton(
       icon = Icons.Rounded.MusicNote,
-      tint = ShuuenUi.Lavender,
       modifier = Modifier.width(72.dp),
     )
     BottomIconButton(
       icon = Icons.AutoMirrored.Rounded.Backspace,
-      tint = ShuuenUi.Mint,
       modifier = Modifier.width(72.dp),
     )
     BottomIconButton(
       icon = Icons.Rounded.Flag,
-      tint = ShuuenUi.Muted,
       modifier = Modifier.width(64.dp),
     )
   }
@@ -224,16 +204,16 @@ private fun BottomActionBar(on1: () -> Unit) {
 
 @Composable
 private fun BottomRepeatButton(modifier: Modifier = Modifier) {
-  SoftControl(modifier = modifier.height(68.dp)) {
+  SoftControl(modifier = modifier.height(60.dp)) {
     Icon(
       imageVector = Icons.Rounded.Replay,
       contentDescription = null,
-      tint = ShuuenUi.Mint,
-      modifier = Modifier.size(26.dp),
+      tint = ShuuenUi.Text,
+      modifier = Modifier.size(24.dp),
     )
     Text(
       text = "Repeat",
-      color = ShuuenUi.Mint,
+      color = ShuuenUi.Text,
       style = MaterialTheme.typography.titleSmall,
       textAlign = TextAlign.Center,
       maxLines = 1,
@@ -245,11 +225,10 @@ private fun BottomRepeatButton(modifier: Modifier = Modifier) {
 @Composable
 private fun BottomIconButton(
   icon: ImageVector,
-  tint: Color,
   modifier: Modifier = Modifier,
 ) {
-  SoftControl(modifier = modifier.height(68.dp)) {
-    Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(26.dp))
+  SoftControl(modifier = modifier.height(60.dp)) {
+    Icon(icon, contentDescription = null, tint = ShuuenUi.Muted, modifier = Modifier.size(24.dp))
   }
 }
 

@@ -2,26 +2,39 @@ package ldv.shuuen.ui.common
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// todo: can it be moved somewhere better? like the MaterialTheme?
+/**
+ * Design tokens for the monotone look: neutrals carry the whole UI and
+ * selection/primary states are rendered by inversion (white fill, black content).
+ * [Correct]/[Incorrect] answer feedback is the only colored exception.
+ */
 object ShuuenUi {
-  val Panel = Color(0xE6121212)
-  val PanelHigh = Color(0xF21A1A1A)
-  val PanelSoft = Color(0x661F1F1F)
-  val Border = Color.White.copy(alpha = 0.18f)
-  val BorderStrong = Color.White.copy(alpha = 0.32f)
-  val Text = Color(0xFFF4F4F4)
-  val Muted = Color(0xFF9C9CA4)
-  val Dim = Color(0xFF686870)
-  val Mint = Color(0xFFBFE8D8)
-  val MintBright = Color(0xFF79F1C9)
-  val Lavender = Color(0xFFC7B1FF)
-  val Gold = Color(0xFFE9CC83)
-  val Red = Color(0xFFFF5B57)
-  val Green = Color(0xFF52E58A)
+  // Typography / iconography
+  val Text = Color(0xFFF2F2F2)
+  val Muted = Color(0xFF9A9AA0)
+  val Dim = Color(0xFF606066)
+
+  // Borderless surfaces over the pure black background
+  val Surface = Color(0xFF111113)
+  val SurfaceHigh = Color(0xFF1A1A1C)
+
+  // Hairlines instead of borders
+  val Hairline = Color.White.copy(alpha = 0.08f)
+  val HairlineStrong = Color.White.copy(alpha = 0.16f)
+
+  // Inverted selection (white chip, black content)
+  val Inverse = Color(0xFFEDEDED)
+  val OnInverse = Color(0xFF0A0A0A)
+
+  // Answer feedback — the only colored exception to the monotone rule
+  val Correct = Color(0xFF52E58A)
+  val Incorrect = Color(0xFFFF5B57)
 
   val PillShape = RoundedCornerShape(50)
+  val ControlShape = RoundedCornerShape(10.dp)
 
   val titlesSpacing = 2.sp
+  val labelSpacing = 2.5.sp
 }
