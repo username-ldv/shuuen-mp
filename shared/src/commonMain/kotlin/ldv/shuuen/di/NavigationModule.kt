@@ -4,7 +4,7 @@ import androidx.compose.runtime.LaunchedEffect
 import ldv.shuuen.ui.navigation.result.AppNavResult
 import ldv.shuuen.ui.navigation.AppRoute
 import ldv.shuuen.ui.navigation.LocalAppNavigator
-import ldv.shuuen.ui.navigation.LocalNavResultStore
+import ldv.shuuen.ui.navigation.result.LocalNavResultStore
 import ldv.shuuen.ui.navigation.result.ContextRecipient
 import ldv.shuuen.ui.navigation.result.NavResultKeys.MelodiesContextResult
 import ldv.shuuen.ui.navigation.result.NavResultKeys.SinglesContextResult

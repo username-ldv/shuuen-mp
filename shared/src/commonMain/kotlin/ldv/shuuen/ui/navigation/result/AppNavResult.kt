@@ -2,7 +2,6 @@ package ldv.shuuen.ui.navigation.result
 
 import kotlinx.serialization.Serializable
 import ldv.shuuen.domain.audio.music.DegreeContext
-import ldv.shuuen.ui.navigation.NavResultKey
 
 @Serializable
 sealed interface AppNavResult {

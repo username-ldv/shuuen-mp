@@ -1,4 +1,4 @@
-package ldv.shuuen.ui.navigation
+package ldv.shuuen.ui.navigation.result
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -10,7 +10,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import ldv.shuuen.ui.navigation.NavResultStore.Companion.SavedNavResultsStateSaver
+import ldv.shuuen.ui.navigation.result.NavResultStore.Companion.SavedNavResultsStateSaver
 
 class NavResultStore(private val state: MutableState<SavedNavResults>) {
   fun <T : Any> send(key: NavResultKey<T>, result: T) {
