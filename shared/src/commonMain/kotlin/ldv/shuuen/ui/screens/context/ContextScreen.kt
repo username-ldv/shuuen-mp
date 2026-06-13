@@ -406,8 +406,8 @@ private fun SetupMelodyRow(
     }
     AnimatedVisibility(visible = editing) {
       Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        GroupLabel("FIRST DEGREE OCTAVE")
         melody?.let { melody ->
+          GroupLabel("FIRST DEGREE OCTAVE")
           OctaveStepper(
             melody.firstDegree.octave,
             { onChange(melody.copy(firstDegree = melody.firstDegree.copy(octave = it))) })
