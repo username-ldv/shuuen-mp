@@ -40,4 +40,8 @@ data class DegreeWithOctave(val degree: Degree, val octave: Int) {
     // todo: better check
     require(octave in 0..8) { "out of bounds" }
   }
+
+  override fun toString(): String {
+      return "${degree.label} · $octave"
+  }
 }

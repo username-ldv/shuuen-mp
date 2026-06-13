@@ -9,12 +9,14 @@ data class DegreeContext(
   val id: String,
   val nodes: List<DegreeContextNode>,
   val name: String? = null,
-  val setupMelody: List<Degree>?
 )
 
 @Serializable
 data class DegreeContextNode(
-  val degrees: List<DegreeWithOctave>, val durationInQuestions: Int?, val sustain: Sustain
+  val degrees: List<DegreeWithOctave>,
+  val durationInQuestions: Int?,
+  val sustain: Sustain,
+  val setupMelody: RelativeMelody?
 )
 
 @Serializable
@@ -27,12 +29,17 @@ sealed interface Sustain {
 }
 
 val defaultContext = DegreeContext(
-  id = "default",
-  listOf(DegreeContextNode(listOf(DegreeWithOctave(Degree.D1, 2)), null, Sustain.Endless)),
-  setupMelody = listOf(
-    Degree.D1,
-    Degree.D3,
-    Degree.D5,
-    Degree.D1,
+  id = "default", listOf(
+    DegreeContextNode(
+      listOf(DegreeWithOctave(Degree.D1, 2)), null, Sustain.Endless, setupMelody = RelativeMelody(
+        firstDegree = DegreeWithOctave(Degree.D1, 2), extraDegrees = listOf(
+          DirectedDegree(Degree.D3, DegreeDirection.Up),
+          DirectedDegree(Degree.D5, DegreeDirection.Up),
+          DirectedDegree(
+            Degree.D1, DegreeDirection.Up
+          )
+        )
+      )
+    )
   )
 )

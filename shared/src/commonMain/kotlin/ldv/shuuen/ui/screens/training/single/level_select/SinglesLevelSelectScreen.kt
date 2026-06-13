@@ -247,15 +247,20 @@ private fun ContextDetails(context: DegreeContext) {
         )
         DegreeSequenceChips(
           labels = node.degrees.mapIndexed { i, d ->
-            if (i == 0) "${d.degree.label} · ${d.octave}" else d.degree.label
+            if (i == 0) d.toString() else d.degree.label
           },
         )
       }
-    }
-    context.setupMelody?.let { melody ->
-      Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        DetailLabel("SETUP MELODY")
-        DegreeSequenceChips(labels = melody.map { it.label })
+      node.setupMelody?.let { melody ->
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+          Text(
+            text = "Node ${index + 1} · Setup melody" +
+                (node.durationInQuestions?.let { " · $it questions" } ?: ""),
+            color = ShuuenUi.Dim,
+            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.2.sp),
+          )
+          DegreeSequenceChips(labels = listOf(melody.firstDegree.toString()) + melody.extraDegrees.map { it.toString() })
+        }
       }
     }
   }

@@ -99,9 +99,13 @@ class DegreeContextPlayer(
       when (val sustain = node.sustain) {
         is Sustain.Endless -> {
           delay(endlessPreMelody)
-          if (c.setupMelody != null) {
+          if (node.setupMelody != null) {
             var currentlyPlaying: Note? = null
-            constructAscSetupMelodyFlow(root, c.setupMelody).onEach { note ->
+            // todo: actually handle
+            constructAscSetupMelodyFlow(
+              root,
+              node.setupMelody.let { melody -> listOf(melody.firstDegree.degree) + melody.extraDegrees.map { it.degree } }
+            ).onEach { note ->
               currentlyPlaying?.let { midiEngine.stopNote(it) }
             }.onCompletion {
               currentlyPlaying?.let { midiEngine.stopNote(it) }

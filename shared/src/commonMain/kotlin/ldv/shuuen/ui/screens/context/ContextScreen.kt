@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
@@ -56,12 +55,15 @@ import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
 import ldv.shuuen.ui.common.SurfaceCard
 import ldv.shuuen.ui.common.TextDropdownMenu
+import ldv.shuuen.domain.audio.music.DegreeDirection
 import ldv.shuuen.ui.common.music.DegreePalette
 import ldv.shuuen.ui.common.music.DegreeSequenceChips
-import ldv.shuuen.ui.common.music.DirectedDegree
+import ldv.shuuen.domain.audio.music.DirectedDegree
 import ldv.shuuen.ui.common.music.DirectedDegreeSequenceEditor
 import ldv.shuuen.ui.common.music.OctaveStepper
-import ldv.shuuen.ui.common.music.stepLabels
+import ldv.shuuen.domain.audio.music.RelativeMelody
+import ldv.shuuen.domain.audio.music.stepLabels
+
 
 /**
  * UI state for one sequence node. Mirrors [ldv.shuuen.domain.audio.music.DegreeContextNode]:
@@ -73,11 +75,12 @@ private data class SequenceNodeState(
   val extraDegrees: List<Degree> = listOf(Degree.D3, Degree.D5),
   val sustain: Boolean = true,
   val questionsBeforeNext: Int = 4,
-  val setupMelody: List<DirectedDegree> = listOf(
-    DirectedDegree(Degree.D1),
-    DirectedDegree(Degree.D3),
-    DirectedDegree(Degree.D5),
-    DirectedDegree(Degree.D1),
+  val setupMelody: RelativeMelody? = RelativeMelody(
+    firstDegree = DegreeWithOctave(Degree.D1, 3), extraDegrees = listOf(
+      DirectedDegree(Degree.D3, DegreeDirection.Up),
+      DirectedDegree(Degree.D5, DegreeDirection.Up),
+      DirectedDegree(Degree.D1, DegreeDirection.Up)
+    )
   ),
 )
 
@@ -207,7 +210,7 @@ private fun PreviewFullSequence() {
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
-    MiniWaveform(Modifier.width(126.dp).height(30.dp), pieces = 4)
+//    MiniWaveform(Modifier.width(126.dp).height(30.dp), pieces = 4)
     Icon(
       Icons.Rounded.ChevronRight,
       contentDescription = null,
@@ -232,8 +235,7 @@ private fun SequenceNodeCard(
           imageVector = Icons.Rounded.Delete,
           contentDescription = "Delete node",
           tint = ShuuenUi.Dim,
-          modifier = Modifier.align(Alignment.TopEnd).size(24.dp)
-            .clip(ShuuenUi.ControlShape)
+          modifier = Modifier.align(Alignment.TopEnd).size(24.dp).clip(ShuuenUi.ControlShape)
             .clickable(onClick = onDelete),
         )
       }
@@ -273,6 +275,7 @@ private fun SequenceNodeCard(
             onChange = { onNodeChange(node.copy(setupMelody = it)) },
           )
           NodePreviewRow()
+          SetupMelodyPreviewRow()
           InlineCounter(
             label = if (isLast) "QUESTIONS BEFORE RESTART" else "QUESTIONS BEFORE NEXT",
             value = node.questionsBeforeNext,
@@ -301,26 +304,19 @@ private fun NodeDegreesEditor(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      TextDropdownMenu(
-        items = Degree.chromaticOrder.map { it.label },
-        selectedItem = node.firstDegree.degree.label,
-        onItemSelected = { name ->
-          onNodeChange(
-            node.copy(firstDegree = node.firstDegree.copy(degree = Degree.fromName(name)))
-          )
-        },
-        modifier = Modifier.weight(1f),
+      DegreeChooser(
+        node.firstDegree.degree,
+        { onNodeChange(node.copy(firstDegree = node.firstDegree.copy(degree = it))) },
+        modifier = Modifier.weight(1f)
       )
       OctaveStepper(
-        value = node.firstDegree.octave,
-        onChange = { onNodeChange(node.copy(firstDegree = node.firstDegree.copy(octave = it))) },
-      )
+        node.firstDegree.octave,
+        { onNodeChange(node.copy(firstDegree = node.firstDegree.copy(octave = it))) })
     }
 
     GroupLabel("THEN, ASCENDING")
     DegreeSequenceChips(
-      labels = listOf("${node.firstDegree.degree.label} · ${node.firstDegree.octave}") +
-        node.extraDegrees.map { it.label },
+      labels = listOf("${node.firstDegree.degree.label} · ${node.firstDegree.octave}") + node.extraDegrees.map { it.label },
       onBackspace = {
         if (node.extraDegrees.isNotEmpty()) {
           onNodeChange(node.copy(extraDegrees = node.extraDegrees.dropLast(1)))
@@ -331,6 +327,22 @@ private fun NodeDegreesEditor(
       onPick = { onNodeChange(node.copy(extraDegrees = node.extraDegrees + it)) },
     )
   }
+}
+
+@Composable
+fun DegreeChooser(
+  degree: Degree,
+  onSelectedDegree: (Degree) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  TextDropdownMenu(
+    items = Degree.chromaticOrder.map { it.label },
+    selectedItem = degree.label,
+    onItemSelected = { name ->
+      onSelectedDegree(Degree.fromName(name))
+    },
+    modifier = modifier,
+  )
 }
 
 @Composable
@@ -357,8 +369,8 @@ private fun SustainRow(
 
 @Composable
 private fun SetupMelodyRow(
-  melody: List<DirectedDegree>,
-  onChange: (List<DirectedDegree>) -> Unit,
+  melody: RelativeMelody?,
+  onChange: (RelativeMelody?) -> Unit,
 ) {
   var editing by rememberSaveable { mutableStateOf(false) }
 
@@ -380,7 +392,7 @@ private fun SetupMelodyRow(
           style = MaterialTheme.typography.titleSmall,
         )
         Text(
-          text = melody.stepLabels().joinToString(" ").ifEmpty { "None" },
+          text = melody?.stepLabels()?.joinToString(" ") ?: "None",
           color = ShuuenUi.Muted,
           style = MaterialTheme.typography.bodySmall,
         )
@@ -393,11 +405,20 @@ private fun SetupMelodyRow(
       )
     }
     AnimatedVisibility(visible = editing) {
-      DirectedDegreeSequenceEditor(
-        steps = melody,
-        onChange = onChange,
-        modifier = Modifier.padding(top = 2.dp),
-      )
+      Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        GroupLabel("FIRST DEGREE OCTAVE")
+        melody?.let { melody ->
+          OctaveStepper(
+            melody.firstDegree.octave,
+            { onChange(melody.copy(firstDegree = melody.firstDegree.copy(octave = it))) })
+        }
+
+        DirectedDegreeSequenceEditor(
+          steps = melody,
+          onChange = onChange,
+          modifier = Modifier.padding(top = 2.dp),
+        )
+      }
     }
   }
 }
@@ -414,7 +435,23 @@ private fun NodePreviewRow() {
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
-    MiniWaveform(Modifier.width(120.dp).height(28.dp), pieces = 3)
+//    MiniWaveform(Modifier.width(120.dp).height(28.dp), pieces = 3)
+  }
+}
+
+@Composable
+private fun SetupMelodyPreviewRow() {
+  SoftControl(modifier = Modifier.fillMaxWidth()) {
+    PlayBubble()
+    Text(
+      text = "Preview setup melody",
+      color = ShuuenUi.Text,
+      style = MaterialTheme.typography.titleSmall,
+      modifier = Modifier.weight(1f),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+    )
+//    MiniWaveform(Modifier.width(120.dp).height(28.dp), pieces = 3)
   }
 }
 
@@ -433,10 +470,7 @@ private fun GroupLabel(text: String) {
 @Composable
 private fun NodeNumber(number: Int) {
   Box(
-    modifier = Modifier
-      .size(30.dp)
-      .clip(CircleShape)
-      .background(Color.White.copy(alpha = 0.07f)),
+    modifier = Modifier.size(30.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.07f)),
     contentAlignment = Alignment.Center,
   ) {
     Text(
@@ -481,9 +515,7 @@ private fun CompactCounter(
   modifier: Modifier = Modifier,
 ) {
   Row(
-    modifier = modifier
-      .height(38.dp)
-      .clip(ShuuenUi.PillShape)
+    modifier = modifier.height(38.dp).clip(ShuuenUi.PillShape)
       .background(Color.White.copy(alpha = 0.05f)),
     verticalAlignment = Alignment.CenterVertically,
   ) {
@@ -527,9 +559,7 @@ private fun SequenceInfoBlock() {
         modifier = Modifier.size(22.dp)
       )
       Text(
-        text = "A node's first degree sets the starting octave; added degrees stack above it in " +
-          "ascending order. Example: first degree 5 · oct 3 plus 1 3 5 plays G3 C4 E4 G4 in C major. " +
-          "Sustained nodes hold like a drone; others play as timed chords.",
+        text = "A node's first degree sets the starting octave; added degrees stack above it in " + "ascending order. Example: first degree 5 · oct 3 plus 1 3 5 plays G3 C4 E4 G4 in C major. " + "Sustained nodes hold like a drone; others play as timed chords.",
         color = ShuuenUi.Muted,
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.weight(1f),
@@ -546,9 +576,7 @@ private fun SmallPill(
   onClick: (() -> Unit)? = null,
 ) {
   Box(
-    modifier = modifier
-      .height(30.dp)
-      .clip(ShuuenUi.PillShape)
+    modifier = modifier.height(30.dp).clip(ShuuenUi.PillShape)
       .background(if (selected) ShuuenUi.Inverse else Color.White.copy(alpha = 0.05f))
       .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     contentAlignment = Alignment.Center,
@@ -566,10 +594,7 @@ private fun SmallPill(
 @Composable
 private fun PlayBubble() {
   Box(
-    modifier = Modifier
-      .size(34.dp)
-      .clip(CircleShape)
-      .background(ShuuenUi.Inverse),
+    modifier = Modifier.size(34.dp).clip(CircleShape).background(ShuuenUi.Inverse),
     contentAlignment = Alignment.Center,
   ) {
     Icon(

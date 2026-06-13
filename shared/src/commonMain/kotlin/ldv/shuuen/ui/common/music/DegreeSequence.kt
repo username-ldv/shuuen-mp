@@ -29,6 +29,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ldv.shuuen.domain.audio.music.Degree
+import ldv.shuuen.domain.audio.music.DegreeDirection
+import ldv.shuuen.domain.audio.music.DegreeWithOctave
+import ldv.shuuen.domain.audio.music.DirectedDegree
+import ldv.shuuen.domain.audio.music.RelativeMelody
+import ldv.shuuen.domain.audio.music.stepLabels
 import ldv.shuuen.ui.common.ShuuenUi
 
 /**
@@ -36,29 +41,6 @@ import ldv.shuuen.ui.common.ShuuenUi
  * Pure UI: callers own the sequence state.
  */
 
-/**
- * Direction of a melody step relative to the previous note: the nearest occurrence
- * of the degree above ([Up]) or below ([Down]) it. Mirrors how the player resolves
- * setup melodies (currently ascending-only via Note.next; Down is the planned extension).
- */
-enum class DegreeDirection(val arrow: String) {
-  Up("↑"),
-  Down("↓");
-
-  fun flipped(): DegreeDirection = if (this == Up) Down else Up
-}
-
-/** One setup-melody step: a degree plus the direction it is reached from the previous note. */
-data class DirectedDegree(
-  val degree: Degree,
-  val direction: DegreeDirection = DegreeDirection.Up,
-)
-
-/** First step is the anchor and has no direction; later steps show their arrow. */
-fun List<DirectedDegree>.stepLabels(): List<String> =
-  mapIndexed { index, step ->
-    if (index == 0) step.degree.label else "${step.degree.label}${step.direction.arrow}"
-  }
 
 @Composable
 fun DegreeChip(
@@ -68,10 +50,7 @@ fun DegreeChip(
   onClick: (() -> Unit)? = null,
 ) {
   Box(
-    modifier = modifier
-      .height(34.dp)
-      .widthIn(min = 38.dp)
-      .clip(ShuuenUi.ControlShape)
+    modifier = modifier.height(34.dp).widthIn(min = 38.dp).clip(ShuuenUi.ControlShape)
       .background(if (inverted) ShuuenUi.Inverse else Color.White.copy(alpha = 0.05f))
       .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     contentAlignment = Alignment.Center,
@@ -143,11 +122,8 @@ fun DegreeSequenceChips(
     }
     if (onBackspace != null) {
       Box(
-        modifier = Modifier
-          .size(34.dp)
-          .clip(ShuuenUi.ControlShape)
-          .background(Color.White.copy(alpha = 0.05f))
-          .clickable(onClick = onBackspace),
+        modifier = Modifier.size(34.dp).clip(ShuuenUi.ControlShape)
+          .background(Color.White.copy(alpha = 0.05f)).clickable(onClick = onBackspace),
         contentAlignment = Alignment.Center,
       ) {
         Icon(
@@ -191,8 +167,8 @@ fun DegreeSequenceEditor(
  */
 @Composable
 fun DirectedDegreeSequenceEditor(
-  steps: List<DirectedDegree>,
-  onChange: (List<DirectedDegree>) -> Unit,
+  steps: RelativeMelody?,
+  onChange: (RelativeMelody?) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   var inputDirection by remember { mutableStateOf(DegreeDirection.Up) }
@@ -202,17 +178,30 @@ fun DirectedDegreeSequenceEditor(
     verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {
     DegreeSequenceChips(
-      labels = steps.stepLabels(),
-      onChipClick = { index ->
-        if (index > 0) {
+      labels = steps?.stepLabels() ?: listOf(),
+      onChipClick = {
+        if (it > 0) {
+          val index = it - 1
+          steps?.let { melody ->
+            onChange(
+              melody.copy(
+                extraDegrees = melody.extraDegrees.toMutableList()
+                  .also { it[index] = it[index].copy(direction = it[index].direction.flipped()) })
+            )
+          }
+        }
+      },
+      onBackspace = {
+        steps?.let { melody ->
           onChange(
-            steps.toMutableList().also {
-              it[index] = it[index].copy(direction = it[index].direction.flipped())
-            }
+            if (steps.extraDegrees.isEmpty()) null else melody.copy(
+              extraDegrees = melody.extraDegrees.dropLast(
+                1
+              )
+            )
           )
         }
       },
-      onBackspace = { if (steps.isNotEmpty()) onChange(steps.dropLast(1)) },
     )
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -234,7 +223,19 @@ fun DirectedDegreeSequenceEditor(
       )
     }
     DegreePalette(
-      onPick = { onChange(steps + DirectedDegree(it, inputDirection)) },
+      onPick = { degree ->
+        if (steps == null) {
+          onChange(RelativeMelody(firstDegree = DegreeWithOctave(degree, 3)))
+        } else {
+          onChange(
+            steps.copy(
+              extraDegrees = steps.extraDegrees + DirectedDegree(
+                degree, inputDirection
+              )
+            )
+          )
+        }
+      },
     )
   }
 }
@@ -248,9 +249,7 @@ fun OctaveStepper(
   range: IntRange = 0..8,
 ) {
   Row(
-    modifier = modifier
-      .height(34.dp)
-      .clip(ShuuenUi.PillShape)
+    modifier = modifier.height(34.dp).clip(ShuuenUi.PillShape)
       .background(Color.White.copy(alpha = 0.05f)),
     verticalAlignment = Alignment.CenterVertically,
   ) {
@@ -270,10 +269,7 @@ fun OctaveStepper(
 @Composable
 private fun StepperPiece(text: String, onClick: () -> Unit) {
   Box(
-    modifier = Modifier
-      .size(34.dp)
-      .clip(ShuuenUi.ControlShape)
-      .clickable(onClick = onClick),
+    modifier = Modifier.size(34.dp).clip(ShuuenUi.ControlShape).clickable(onClick = onClick),
     contentAlignment = Alignment.Center,
   ) {
     Text(text = text, color = ShuuenUi.Muted, style = MaterialTheme.typography.titleMedium)
