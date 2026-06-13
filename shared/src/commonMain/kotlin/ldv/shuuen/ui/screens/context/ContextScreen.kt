@@ -54,7 +54,7 @@ import ldv.shuuen.ui.common.ShuuenUi
 import ldv.shuuen.ui.common.SoftControl
 import ldv.shuuen.ui.common.StaticScreenFrame
 import ldv.shuuen.ui.common.SurfaceCard
-import ldv.shuuen.ui.common.TextDropdownMenu
+import ldv.shuuen.ui.common.CompactDropdownMenu
 import ldv.shuuen.domain.audio.music.DegreeDirection
 import ldv.shuuen.ui.common.music.DegreePalette
 import ldv.shuuen.ui.common.music.DegreeSequenceChips
@@ -335,7 +335,7 @@ fun DegreeChooser(
   onSelectedDegree: (Degree) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  TextDropdownMenu(
+  CompactDropdownMenu(
     items = Degree.chromaticOrder.map { it.label },
     selectedItem = degree.label,
     onItemSelected = { name ->
