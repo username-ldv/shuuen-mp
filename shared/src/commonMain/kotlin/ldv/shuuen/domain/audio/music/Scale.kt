@@ -89,7 +89,7 @@ data class Scale(
         ScaleType.Chromatic, ScaleType.Custom -> accidentalResolutionType == ScaleAccidentalType.Sharps
       }
       val appropriateName = if (useSharps) pitch.toString() else pitch.toFlatString()
-      if (pitch == Pitch.ASharp) Napier.v { "Appropriate pitch name root: $root, name: $appropriateName, type: $type, useSharps: $useSharps" }
+//      if (pitch == Pitch.ASharp) Napier.v { "Appropriate pitch name root: $root, name: $appropriateName, type: $type, useSharps: $useSharps" }
       return appropriateName
     }
 
