@@ -158,6 +158,7 @@ fun CompactDropdownMenu(
         expanded = false
         focusManager.clearFocus()
       },
+      shape = ShuuenUi.ControlShape,
       modifier = Modifier.exposedDropdownSize(matchAnchorWidth = true),
     ) {
       items.forEach { item ->
