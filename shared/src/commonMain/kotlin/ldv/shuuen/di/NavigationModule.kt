@@ -132,18 +132,18 @@ val navigationModule = module {
     SinglesPlayScreen(
         onNavigateBack = { navigator.goBack() },
         onLevelEnd = {
-          navigator.replaceLastWith(AppRoute.SinglesLevelComplete)
+          navigator.replaceLastWith(AppRoute.SinglesLevelComplete(route.levelId))
         },
         viewModel = koinViewModel { parametersOf(route.levelId) },
     )
   }
 
-  navigation<AppRoute.SinglesLevelComplete> {
+  navigation<AppRoute.SinglesLevelComplete> { route ->
     val navigator = LocalAppNavigator.current
     LevelCompleteScreen(
         flow = TrainingFlow.Singles,
         onNavigateBack = { navigator.goBack() },
-        onRetryLevel = { navigator.add(AppRoute.SinglesSetup) },
+        onRetryLevel = { navigator.replaceLastWith(AppRoute.SinglesPlay(route.levelId)) },
         onNextLevel = { navigator.add(AppRoute.SinglesLevelSelect) },
     )
   }
